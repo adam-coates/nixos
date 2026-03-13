@@ -106,8 +106,6 @@ mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
 
 # ── Install ───────────────────────────────────────────────────────────────────
-echo -e "${BLUE}Installing NixOS...${NC}"
-chmod 1777 /mnt/tmp
 echo -e "${BLUE}Installing NixOS (first pass, generating flake.lock)...${NC}"
 nixos-install --flake /mnt/etc/nixos#adam --no-root-passwd || true
 
@@ -121,9 +119,17 @@ nixos-enter --root /mnt -c 'passwd adam'
 
 # ── Post-install: clone neovim dotfiles ───────────────────────────────────────
 echo -e "${BLUE}Setting up neovim dotfiles...${NC}"
-mkdir -p /mnt/home/adam/.config
-git clone https://github.com/adam-coates/dotfiles.git /mnt/home/adam/.config/nvim ||
+git clone https://github.com/adam-coates/dotfiles.git /mnt/home/adam/dotfiles ||
     echo -e "${YELLOW}Warning: could not clone neovim dotfiles, do this manually after boot${NC}"
+
+# Copy just the nvim config to the correct location
+if [ -d "/mnt/home/adam/dotfiles/.config/nvim" ]; then
+    mkdir -p /mnt/home/adam/.config
+    cp -r /mnt/home/adam/dotfiles/.config/nvim /mnt/home/adam/.config/nvim
+    echo -e "${GREEN}Neovim config copied successfully${NC}"
+else
+    echo -e "${YELLOW}Warning: could not find .config/nvim in dotfiles repo${NC}"
+fi
 
 # Fix ownership
 chown -R 1000:1000 /mnt/home/adam/.config 2>/dev/null || true
