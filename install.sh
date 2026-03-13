@@ -87,12 +87,20 @@ nixos-generate-config --root /mnt
 # ── Copy nixos config ─────────────────────────────────────────────────────────
 echo -e "${BLUE}Copying NixOS config...${NC}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Save generated hardware config before copying repo over /mnt/etc/nixos
+HWCONFIG=$(cat /mnt/etc/nixos/hardware-configuration.nix)
+
+# Copy repo preserving structure
 mkdir -p /mnt/etc/nixos
 cp -r "$SCRIPT_DIR"/. /mnt/etc/nixos/
 
-# Keep the generated hardware config
+# Write hardware config into the correct location
 mkdir -p /mnt/etc/nixos/hosts/default
-cp /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos/hosts/default/hardware-configuration.nix
+echo "$HWCONFIG" >/mnt/etc/nixos/hosts/default/hardware-configuration.nix
+
+mkdir -p /mnt/tmp
+chmod 1777 /mnt/tmp
 
 # ── Install ───────────────────────────────────────────────────────────────────
 echo -e "${BLUE}Installing NixOS...${NC}"
