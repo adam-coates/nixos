@@ -73,6 +73,10 @@ mkfs.fat -F 32 -n boot "$BOOT"
 mkswap -L swap "$SWAP"
 mkfs.ext4 -L nixos "$ROOT"
 
+# Wait for labels to register
+sleep 3
+udevadm settle
+
 # ── Mounting ──────────────────────────────────────────────────────────────────
 echo -e "${BLUE}Mounting...${NC}"
 mount /dev/disk/by-label/nixos /mnt
@@ -88,16 +92,24 @@ nixos-generate-config --root /mnt
 echo -e "${BLUE}Copying NixOS config...${NC}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Save generated hardware config before copying repo over /mnt/etc/nixos
+# Save generated hardware config
 HWCONFIG=$(cat /mnt/etc/nixos/hardware-configuration.nix)
 
-# Copy repo preserving structure
-mkdir -p /mnt/etc/nixos
-cp -r "$SCRIPT_DIR"/. /mnt/etc/nixos/
-
-# Write hardware config into the correct location
+# Create directory structure explicitly
 mkdir -p /mnt/etc/nixos/hosts/default
+mkdir -p /mnt/etc/nixos/home
+
+# Copy top-level files
+cp "$SCRIPT_DIR/flake.nix" /mnt/etc/nixos/flake.nix
+
+# Copy hosts/default files
+cp "$SCRIPT_DIR/hosts/default/configuration.nix" /mnt/etc/nixos/hosts/default/configuration.nix
+
+# Write hardware config
 echo "$HWCONFIG" >/mnt/etc/nixos/hosts/default/hardware-configuration.nix
+
+# Copy home files
+cp "$SCRIPT_DIR/home/"*.nix /mnt/etc/nixos/home/
 
 mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
