@@ -14,7 +14,7 @@
 
   time.timeZone = "Europe/London"; # change to your timezone
 
-  i18n.defaultLocale = "en_GB.UTF-8";
+  i18n.defaultLocale = "en_US.UTF-8";
 
   # User
   users.users.adam = {
