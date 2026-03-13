@@ -58,7 +58,7 @@
   ];
 
   # Git
-  programs.git = {
+  programs.git.settings = {
     enable = true;
     userName = "adam-coates";
     userEmail = ""; # add your email
