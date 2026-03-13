@@ -1,0 +1,166 @@
+{ config, pkgs, ... }:
+
+{
+  wayland.windowManager.hyprland = {
+    enable = true;
+    settings = {
+      # Monitor - auto detect
+      monitor = ",preferred,auto,1";
+
+      # Autostart
+      exec-once = [
+        "hyprpaper"
+        "waybar"
+        "mako"
+        "nm-applet --indicator"
+        "wl-paste --type text --watch cliphist store"
+        "wl-paste --type image --watch cliphist store"
+      ];
+
+      # Environment variables
+      env = [
+        "XCURSOR_SIZE,24"
+        "HYPRCURSOR_SIZE,24"
+        "QT_QPA_PLATFORM,wayland"
+        "XDG_CURRENT_DESKTOP,Hyprland"
+        "XDG_SESSION_TYPE,wayland"
+        "XDG_SESSION_DESKTOP,Hyprland"
+      ];
+
+      # Input
+      input = {
+        kb_layout = "gb"; # change to your layout
+        follow_mouse = 1;
+        touchpad = {
+          natural_scroll = true;
+        };
+        sensitivity = 0;
+      };
+
+      # General
+      general = {
+        gaps_in = 5;
+        gaps_out = 10;
+        border_size = 2;
+        "col.active_border" = "rgba(cba6f7ff) rgba(89b4faff) 45deg";
+        "col.inactive_border" = "rgba(595959aa)";
+        layout = "dwindle";
+        allow_tearing = false;
+      };
+
+      # Decoration
+      decoration = {
+        rounding = 10;
+        blur = {
+          enabled = true;
+          size = 3;
+          passes = 1;
+        };
+        drop_shadow = true;
+        shadow_range = 4;
+        shadow_render_power = 3;
+        "col.shadow" = "rgba(1a1a1aee)";
+      };
+
+      # Animations
+      animations = {
+        enabled = true;
+        bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
+        animation = [
+          "windows, 1, 7, myBezier"
+          "windowsOut, 1, 7, default, popin 80%"
+          "border, 1, 10, default"
+          "borderangle, 1, 8, default"
+          "fade, 1, 7, default"
+          "workspaces, 1, 6, default"
+        ];
+      };
+
+      # Layouts
+      dwindle = {
+        pseudotile = true;
+        preserve_split = true;
+      };
+
+      # Misc
+      misc = {
+        force_default_wallpaper = 0;
+        disable_hyprland_logo = true;
+      };
+
+      # Keybindings
+      "$mod" = "SUPER";
+      "$terminal" = "ghostty";
+      "$fileManager" = "thunar";
+      "$menu" = "rofi -show drun";
+
+      bind = [
+        "$mod, Return, exec, $terminal"
+        "$mod, Q, killactive,"
+        "$mod, M, exit,"
+        "$mod, E, exec, $fileManager"
+        "$mod, V, togglefloating,"
+        "$mod, R, exec, $menu"
+        "$mod, P, pseudo,"
+        "$mod, J, togglesplit,"
+        "$mod, F, fullscreen,"
+
+        # Move focus
+        "$mod, left, movefocus, l"
+        "$mod, right, movefocus, r"
+        "$mod, up, movefocus, u"
+        "$mod, down, movefocus, d"
+
+        # Switch workspaces
+        "$mod, 1, workspace, 1"
+        "$mod, 2, workspace, 2"
+        "$mod, 3, workspace, 3"
+        "$mod, 4, workspace, 4"
+        "$mod, 5, workspace, 5"
+        "$mod, 6, workspace, 6"
+        "$mod, 7, workspace, 7"
+        "$mod, 8, workspace, 8"
+        "$mod, 9, workspace, 9"
+        "$mod, 0, workspace, 10"
+
+        # Move window to workspace
+        "$mod SHIFT, 1, movetoworkspace, 1"
+        "$mod SHIFT, 2, movetoworkspace, 2"
+        "$mod SHIFT, 3, movetoworkspace, 3"
+        "$mod SHIFT, 4, movetoworkspace, 4"
+        "$mod SHIFT, 5, movetoworkspace, 5"
+        "$mod SHIFT, 6, movetoworkspace, 6"
+        "$mod SHIFT, 7, movetoworkspace, 7"
+        "$mod SHIFT, 8, movetoworkspace, 8"
+        "$mod SHIFT, 9, movetoworkspace, 9"
+        "$mod SHIFT, 0, movetoworkspace, 10"
+
+        # Screenshot
+        ", Print, exec, grim -g \"$(slurp)\" - | swappy -f -"
+
+        # Clipboard
+        "$mod, C, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+      ];
+
+      bindm = [
+        "$mod, mouse:272, movewindow"
+        "$mod, mouse:273, resizewindow"
+      ];
+
+      # Media keys
+      bindel = [
+        ", XF86AudioRaiseVolume, exec, pamixer -i 5"
+        ", XF86AudioLowerVolume, exec, pamixer -d 5"
+        ", XF86MonBrightnessUp, exec, brightnessctl s 10%+"
+        ", XF86MonBrightnessDown, exec, brightnessctl s 10%-"
+      ];
+
+      bindl = [
+        ", XF86AudioMute, exec, pamixer -t"
+        ", XF86AudioPlay, exec, playerctl play-pause"
+        ", XF86AudioNext, exec, playerctl next"
+        ", XF86AudioPrev, exec, playerctl previous"
+      ];
+    };
+  };
+}
