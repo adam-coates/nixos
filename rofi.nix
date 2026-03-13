@@ -3,7 +3,7 @@
 {
   programs.rofi = {
     enable = true;
-    package = pkgs.rofi-wayland;
+    package = pkgs.rofi;
     theme = "catppuccin-mocha";
     font = "JetBrainsMono Nerd Font 12";
     extraConfig = {
