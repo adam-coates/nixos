@@ -108,7 +108,7 @@ chmod 1777 /mnt/tmp
 # ── Install ───────────────────────────────────────────────────────────────────
 echo -e "${BLUE}Installing NixOS...${NC}"
 chmod 1777 /mnt/tmp
-nixos-install --flake /mnt/etc/nixos#adam
+nixos-install --flake /mnt/etc/nixos#adam --no-root-passwd
 
 # ── Post-install: clone neovim dotfiles ───────────────────────────────────────
 echo -e "${BLUE}Setting up neovim dotfiles...${NC}"
