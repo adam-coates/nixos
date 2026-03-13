@@ -108,6 +108,10 @@ chmod 1777 /mnt/tmp
 # ── Install ───────────────────────────────────────────────────────────────────
 echo -e "${BLUE}Installing NixOS...${NC}"
 chmod 1777 /mnt/tmp
+echo -e "${BLUE}Installing NixOS (first pass, generating flake.lock)...${NC}"
+nixos-install --flake /mnt/etc/nixos#adam --no-root-passwd || true
+
+echo -e "${BLUE}Installing NixOS (second pass)...${NC}"
 nixos-install --flake /mnt/etc/nixos#adam --no-root-passwd
 
 # ── Set passwords ─────────────────────────────────────────────────────────────
