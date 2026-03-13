@@ -22,8 +22,8 @@ echo ""
 
 # Check we're running as root
 if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}Please run as root (sudo -i)${NC}"
-  exit 1
+    echo -e "${RED}Please run as root (sudo -i)${NC}"
+    exit 1
 fi
 
 # ── Disk selection ────────────────────────────────────────────────────────────
@@ -41,8 +41,8 @@ echo "  3 - root      rest"
 echo ""
 read -p "Proceed with wiping $DISK and repartitioning? (yes/no): " CONFIRM
 if [ "$CONFIRM" != "yes" ]; then
-  echo "Aborted."
-  exit 1
+    echo "Aborted."
+    exit 1
 fi
 
 # ── Partitioning ──────────────────────────────────────────────────────────────
@@ -58,13 +58,13 @@ sleep 2
 
 # Detect partition naming (nvme uses p1 p2, others use 1 2)
 if [[ "$DISK" == *"nvme"* ]]; then
-  BOOT="${DISK}p1"
-  SWAP="${DISK}p2"
-  ROOT="${DISK}p3"
+    BOOT="${DISK}p1"
+    SWAP="${DISK}p2"
+    ROOT="${DISK}p3"
 else
-  BOOT="${DISK}1"
-  SWAP="${DISK}2"
-  ROOT="${DISK}3"
+    BOOT="${DISK}1"
+    SWAP="${DISK}2"
+    ROOT="${DISK}3"
 fi
 
 # ── Formatting ────────────────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ cp "$SCRIPT_DIR"/*.nix /mnt/etc/nixos/
 cp "$SCRIPT_DIR/flake.nix" /mnt/etc/nixos/flake.nix
 
 # Restore hardware config (may have been overwritten)
-echo "$HWCONFIG" > /mnt/etc/nixos/hardware-configuration.nix
+echo "$HWCONFIG" >/mnt/etc/nixos/hardware-configuration.nix
 
 mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
@@ -108,13 +108,13 @@ chmod 1777 /mnt/tmp
 # ── Install ───────────────────────────────────────────────────────────────────
 echo -e "${BLUE}Installing NixOS...${NC}"
 chmod 1777 /mnt/tmp
-nixos-install --flake /mnt/etc/nixos#adam --no-root-passwd
+nixos-install --flake /mnt/etc/nixos#adam
 
 # ── Post-install: clone neovim dotfiles ───────────────────────────────────────
 echo -e "${BLUE}Setting up neovim dotfiles...${NC}"
 mkdir -p /mnt/home/adam/.config
-git clone https://github.com/adam-coates/dotfiles.git /mnt/home/adam/.config/nvim || \
-  echo -e "${YELLOW}Warning: could not clone neovim dotfiles, do this manually after boot${NC}"
+git clone https://github.com/adam-coates/dotfiles.git /mnt/home/adam/.config/nvim ||
+    echo -e "${YELLOW}Warning: could not clone neovim dotfiles, do this manually after boot${NC}"
 
 # Fix ownership
 chown -R 1000:1000 /mnt/home/adam/.config 2>/dev/null || true
@@ -131,5 +131,5 @@ echo "  6. Rebuild anytime with:    sudo nixos-rebuild switch --flake ~/.config/
 echo ""
 read -p "Reboot now? (yes/no): " REBOOT
 if [ "$REBOOT" == "yes" ]; then
-  reboot
+    reboot
 fi
