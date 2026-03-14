@@ -30,7 +30,7 @@
 
       # Input
       input = {
-        kb_layout = "gb"; # change to your layout
+        kb_layout = "us"; 
         follow_mouse = 1;
         touchpad = {
           natural_scroll = true;
