@@ -99,6 +99,10 @@ HWCONFIG=$(cat /mnt/etc/nixos/hardware-configuration.nix)
 cp "$SCRIPT_DIR"/*.nix /mnt/etc/nixos/
 cp "$SCRIPT_DIR/flake.nix" /mnt/etc/nixos/flake.nix
 
+# Copy themes and scripts directories
+cp -r "$SCRIPT_DIR/themes" /mnt/etc/nixos/
+cp -r "$SCRIPT_DIR/scripts" /mnt/etc/nixos/
+
 # Restore hardware config (may have been overwritten)
 echo "$HWCONFIG" >/mnt/etc/nixos/hardware-configuration.nix
 
@@ -114,7 +118,6 @@ nixos-install --flake /mnt/etc/nixos#adam --no-root-passwd
 
 # ── Set passwords ─────────────────────────────────────────────────────────────
 echo -e "${BLUE}Setting password for adam...${NC}"
-nixos-enter --root /mnt -c 'passwd root'
 nixos-enter --root /mnt -c 'passwd adam'
 
 # ── Post-install: clone neovim dotfiles ───────────────────────────────────────
