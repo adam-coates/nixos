@@ -76,8 +76,8 @@ cat > "$HOME/.config/rofi/colors.rasi" << EOF
 EOF
 
 # ── Ghostty ───────────────────────────────────────────────────────────────────
-echo "theme = $ghostty_theme" > "$HOME/.config/ghostty/theme"
-pkill -USR1 ghostty 2>/dev/null || true
+ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"
+pkill -USR2 ghostty 2>/dev/null || true
 
 # ── Neovim ────────────────────────────────────────────────────────────────────
 for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do

@@ -58,6 +58,8 @@
   # Theme source files
   home.file.".config/themes/gruvbox-dark.sh".source = ./themes/gruvbox-dark.sh;
   home.file.".config/themes/gruvbox-light.sh".source = ./themes/gruvbox-light.sh;
+  home.file.".config/ghostty/themes/gruvbox-dark".source = ./themes/ghostty-gruvbox-dark;
+  home.file.".config/ghostty/themes/gruvbox-light".source = ./themes/ghostty-gruvbox-light;
 
   # Theme switcher script
   home.file.".config/scripts/theme-switch.sh" = {
@@ -134,6 +136,11 @@ EOF
 
       # Write current theme name
       echo "$THEME" > "$CURRENT"
+
+      # Ghostty - create/update theme symlink and reload
+      mkdir -p "$HOME/.config/ghostty/themes"
+      ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"
+      pkill -USR2 ghostty 2>/dev/null || true
     '';
   };
 

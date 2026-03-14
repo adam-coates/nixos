@@ -5,7 +5,6 @@
     enable = true;
     enableBashIntegration = true;
     settings = {
-      theme = "catppuccin-mocha";
       font-family = "JetBrainsMono Nerd Font";
       font-size = 13;
       window-padding-x = 10;
@@ -15,6 +14,8 @@
       shell-integration-features = "no-cursor";
       window-decoration = false;
       background-opacity = 0.95;
+      # Include theme via symlink - theme switcher updates this symlink
+      config-file = "~/.config/ghostty/theme-link";
     };
   };
 }
