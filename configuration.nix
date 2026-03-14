@@ -77,16 +77,10 @@
     # GTK theming
     gruvbox-gtk-theme
     gruvbox-dark-icons-gtk
-    gsettings-desktop-schemas
-    glib
   ];
 
-  # GTK/gsettings support on Wayland
+  # GTK/dconf support on Wayland
   programs.dconf.enable = true;
-
-  environment.sessionVariables = {
-    GSETTINGS_SCHEMA_DIR = "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}/glib-2.0/schemas";
-  };
 
   # XDG portal for Wayland/Hyprland
   xdg.portal = {
