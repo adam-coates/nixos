@@ -175,6 +175,13 @@ EOF
     };
   };
 
+  # Direnv - auto-activate nix dev shells per project
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    enableBashIntegration = true;
+  };
+
   # Git
   programs.git = {
     enable = true;
