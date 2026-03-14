@@ -111,6 +111,7 @@ EOF
 background-color=$bg
 border-color=$active_border_solid
 text-color=$fg
+border-radius=0
 border-size=2
 default-timeout=5000
 font=JetBrainsMono Nerd Font 11
