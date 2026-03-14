@@ -17,16 +17,11 @@
   # Let home-manager manage itself
   programs.home-manager.enable = true;
 
-  # Neovim - managed via your own dotfiles (cloned by install.sh)
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
-  };
-
   # Packages managed by home-manager
   home.packages = with pkgs; [
+    # Editor
+    neovim
+
     # File manager
     thunar
     xfce.thunar-archive-plugin
@@ -55,10 +50,39 @@
     bat
     eza
     zoxide
+
+    # Node
+    nodejs
   ];
 
+  # Theme files
+  home.file.".config/themes/gruvbox-dark.conf".source = ./themes/gruvbox-dark.conf;
+  home.file.".config/themes/gruvbox-light.conf".source = ./themes/gruvbox-light.conf;
+  home.file.".config/themes/current".text = "gruvbox-dark";
+
+  # Theme switcher script
+  home.file.".config/scripts/theme-switch.sh" = {
+    source = ./scripts/theme-switch.sh;
+    executable = true;
+  };
+
+  # Initial waybar colors (gruvbox dark)
+  home.file.".config/waybar/colors.css".text = ''
+    @define-color bg rgba(40, 40, 40, 0.9);
+    @define-color fg #ebdbb2;
+    @define-color border rgba(215, 153, 33, 0.5);
+    @define-color accent #d79921;
+    @define-color red #cc241d;
+    @define-color green #98971a;
+    @define-color blue #458588;
+    @define-color purple #b16286;
+    @define-color aqua #689d6a;
+    @define-color orange #d65d0e;
+    @define-color gray #928374;
+  '';
+
   # Git
-  programs.git.settings = {
+  programs.git = {
     enable = true;
     userName = "adam-coates";
     userEmail = ""; # add your email
@@ -86,3 +110,4 @@
     createDirectories = true;
   };
 }
+

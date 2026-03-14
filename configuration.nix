@@ -12,7 +12,7 @@
   networking.hostName = "adam";
   networking.networkmanager.enable = true;
 
-  time.timeZone = "Europe/London"; # change to your timezone
+  time.timeZone = "Europe/Vienna"; # change to your timezone
 
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -73,6 +73,7 @@
     brightnessctl
     pamixer
     networkmanagerapplet
+    nodejs
   ];
 
   # XDG portal for Wayland/Hyprland
