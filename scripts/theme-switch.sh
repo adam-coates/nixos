@@ -4,9 +4,9 @@ THEMES_DIR="$HOME/.config/themes"
 HYPR_THEME="$HOME/.config/hypr/theme.conf"
 WAYBAR_COLORS="$HOME/.config/waybar/colors.css"
 
-# Ensure dbus and gsettings schemas are available
+# Ensure dbus and gsettings are available when run from Hyprland keybind
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
-export GSETTINGS_SCHEMA_DIR="/run/current-system/sw/share/gsettings-schemas/gsettings-desktop-schemas-$(gsettings-desktop-schemas --version 2>/dev/null || echo '*')/glib-2.0/schemas:${GSETTINGS_SCHEMA_DIR:-}"
+export PATH="/run/current-system/sw/bin:$HOME/.nix-profile/bin:$PATH"
 
 # Pick theme via rofi
 CHOICE=$(printf "Gruvbox Dark\nGruvbox Light" | rofi -dmenu -p " Theme" -i)
