@@ -94,7 +94,7 @@
       "$terminal" = "ghostty";
       "$fileManager" = "thunar";
       "$menu" = "rofi -show drun";
-      "$themeSwitcher" = "~/.config/scripts/theme-switch.sh";
+      "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
 
       source = [ "~/.config/hypr/theme.conf" ];
 
