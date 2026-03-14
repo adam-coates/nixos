@@ -74,7 +74,14 @@
     pamixer
     networkmanagerapplet
     nodejs
+    # GTK theming
+    gruvbox-gtk-theme
+    gruvbox-dark-icons-gtk
+    gsettings-desktop-schemas
   ];
+
+  # GTK/gsettings support on Wayland
+  programs.dconf.enable = true;
 
   # XDG portal for Wayland/Hyprland
   xdg.portal = {

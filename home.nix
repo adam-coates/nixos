@@ -141,7 +141,33 @@ EOF
       mkdir -p "$HOME/.config/ghostty/themes"
       ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"
       pkill -USR2 ghostty 2>/dev/null || true
+
+      # GTK
+      if [ "$THEME" = "gruvbox-dark" ]; then
+        gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark"
+        gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+      else
+        gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Light"
+        gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
+      fi
+      gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Dark"
     '';
+  };
+
+  # GTK theme - default gruvbox dark
+  gtk = {
+    enable = true;
+    theme = {
+      name = "Gruvbox-Dark";
+      package = pkgs.gruvbox-gtk-theme;
+    };
+    iconTheme = {
+      name = "Gruvbox-Dark";
+      package = pkgs.gruvbox-dark-icons-gtk;
+    };
+    cursorTheme = {
+      name = "Adwaita";
+    };
   };
 
   # Git

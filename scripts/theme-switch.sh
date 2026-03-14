@@ -75,6 +75,16 @@ cat > "$HOME/.config/rofi/colors.rasi" << EOF
 }
 EOF
 
+# ── GTK ───────────────────────────────────────────────────────────────────────
+if [ "$THEME" = "gruvbox-dark" ]; then
+  GTK_THEME="Gruvbox-Dark"
+else
+  GTK_THEME="Gruvbox-Light"
+fi
+gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME"
+gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Dark"
+gsettings set org.gnome.desktop.interface color-scheme "prefer-${nvim_background}"
+
 # ── Ghostty ───────────────────────────────────────────────────────────────────
 ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"
 pkill -USR2 ghostty 2>/dev/null || true
