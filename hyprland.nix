@@ -95,7 +95,7 @@
       "$menu" = "rofi -show drun";
       "$themeSwitcher" = "~/.config/scripts/theme-switch.sh";
 
-      source = [ "~/.config/themes/gruvbox-dark.conf" ];
+      source = [ "~/.config/hypr/theme.conf" ];
 
       bind = [
         "$mod, Return, exec, $terminal"
