@@ -9,6 +9,7 @@
 
       # Autostart
       exec-once = [
+        "~/.config/scripts/theme-apply.sh"
         "hyprpaper"
         "waybar"
         "mako"

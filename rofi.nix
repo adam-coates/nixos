@@ -3,8 +3,8 @@
 {
   programs.rofi = {
     enable = true;
-    package = pkgs.rofi;
-    theme = "catppuccin-mocha";
+    package = pkgs.rofi-wayland;
+    theme = "gruvbox";
     font = "JetBrainsMono Nerd Font 12";
     extraConfig = {
       modi = "drun,run,window";
@@ -16,18 +16,11 @@
     };
   };
 
-  # Catppuccin Mocha theme for rofi
-  xdg.configFile."rofi/catppuccin-mocha.rasi".text = ''
-    * {
-      bg-col:  #1e1e2e;
-      bg-col-light: #1e1e2e;
-      border-col: #1e1e2e;
-      selected-col: #1e1e2e;
-      blue: #89b4fa;
-      fg-col: #cdd6f4;
-      fg-col2: #f38ba8;
-      grey: #6c7086;
+  # Gruvbox rofi theme that imports colors.rasi written by theme switcher
+  xdg.configFile."rofi/gruvbox.rasi".text = ''
+    @import "colors.rasi"
 
+    * {
       width: 600;
       font: "JetBrainsMono Nerd Font 12";
     }
@@ -40,40 +33,35 @@
     window {
       height: 360px;
       border: 3px;
-      border-color: @border-col;
-      background-color: @bg-col;
+      border-color: @accent;
+      background-color: @bg;
       border-radius: 12px;
     }
 
     mainbox {
-      background-color: @bg-col;
+      background-color: @bg;
     }
 
     inputbar {
       children: [prompt,entry];
-      background-color: @bg-col;
+      background-color: @bg;
       border-radius: 5px;
       padding: 2px;
     }
 
     prompt {
-      background-color: @blue;
+      background-color: @accent;
       padding: 6px;
-      text-color: @bg-col;
+      text-color: @bg;
       border-radius: 3px;
       margin: 20px 0px 0px 20px;
-    }
-
-    textbox-prompt-colon {
-      expand: false;
-      str: ":";
     }
 
     entry {
       padding: 6px;
       margin: 20px 0px 0px 10px;
-      text-color: @fg-col;
-      background-color: @bg-col;
+      text-color: @fg;
+      background-color: @bg;
     }
 
     listview {
@@ -82,13 +70,13 @@
       margin: 10px 0px 0px 20px;
       columns: 2;
       lines: 5;
-      background-color: @bg-col;
+      background-color: @bg;
     }
 
     element {
       padding: 5px;
-      background-color: @bg-col;
-      text-color: @fg-col;
+      background-color: @bg;
+      text-color: @fg;
       border-radius: 6px;
     }
 
@@ -97,8 +85,8 @@
     }
 
     element selected {
-      background-color: @selected-col;
-      text-color: @blue;
+      background-color: @bg;
+      text-color: @accent;
     }
 
     mode-switcher {
@@ -107,15 +95,15 @@
 
     button {
       padding: 10px;
-      background-color: @bg-col-light;
-      text-color: @grey;
+      background-color: @bg;
+      text-color: @gray;
       vertical-align: 0.5;
       horizontal-align: 0.5;
     }
 
     button selected {
-      background-color: @bg-col;
-      text-color: @blue;
+      background-color: @bg;
+      text-color: @accent;
     }
   '';
 }

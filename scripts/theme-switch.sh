@@ -20,18 +20,7 @@ if [ ! -f "$THEME_FILE" ]; then
   exit 1
 fi
 
-# Source bash-compatible theme variables
 source "$THEME_FILE"
-
-# ── Hyprland ──────────────────────────────────────────────────────────────────
-cat > "$HYPR_THEME" << EOF
-\$active_border = $active_border
-\$inactive_border = $inactive_border
-\$bg = $bg
-\$fg = $fg
-EOF
-
-hyprctl reload
 
 # ── Waybar ────────────────────────────────────────────────────────────────────
 cat > "$WAYBAR_COLORS" << EOF
@@ -48,7 +37,15 @@ cat > "$WAYBAR_COLORS" << EOF
 @define-color gray $waybar_gray;
 EOF
 
-pkill waybar; waybar &
+# ── Hyprland ──────────────────────────────────────────────────────────────────
+cat > "$HYPR_THEME" << EOF
+\$active_border = $active_border
+\$inactive_border = $inactive_border
+\$bg = $bg
+\$fg = $fg
+EOF
+
+hyprctl reload
 
 # ── Mako ──────────────────────────────────────────────────────────────────────
 cat > "$HOME/.config/mako/config" << EOF
@@ -67,7 +64,16 @@ icons=1
 max-icon-size=32
 EOF
 
-pkill mako; mako &
+# ── Rofi ──────────────────────────────────────────────────────────────────────
+cat > "$HOME/.config/rofi/colors.rasi" << EOF
+* {
+    bg: $bg;
+    fg: $fg;
+    accent: $waybar_accent;
+    gray: $waybar_gray;
+    red: $waybar_red;
+}
+EOF
 
 # ── Ghostty ───────────────────────────────────────────────────────────────────
 echo "theme = $ghostty_theme" > "$HOME/.config/ghostty/theme"
@@ -78,6 +84,10 @@ for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
   [ -S "$socket" ] && nvim --server "$socket" --remote-send \
     ":set background=$nvim_background<CR>:colorscheme $nvim_colorscheme<CR>" 2>/dev/null || true
 done
+
+# ── Restart daemons ───────────────────────────────────────────────────────────
+pkill waybar; sleep 0.2; waybar &
+pkill mako; sleep 0.2; mako &
 
 # ── Save current theme ────────────────────────────────────────────────────────
 echo "$THEME" > "$THEMES_DIR/current"
