@@ -78,6 +78,7 @@
     gruvbox-gtk-theme
     gruvbox-dark-icons-gtk
     gsettings-desktop-schemas
+    glib
   ];
 
   # GTK/gsettings support on Wayland
