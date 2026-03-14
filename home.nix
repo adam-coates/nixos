@@ -21,6 +21,8 @@
   home.packages = with pkgs; [
     # Editor
     neovim
+    tree-sitter-cli
+    fzf
 
     # File manager
     thunar
