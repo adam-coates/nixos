@@ -55,9 +55,9 @@
     nodejs
   ];
 
-  # Theme source files (read-only is fine, theme switcher reads but doesn't write these)
-  home.file.".config/themes/gruvbox-dark.conf".source = ./themes/gruvbox-dark.conf;
-  home.file.".config/themes/gruvbox-light.conf".source = ./themes/gruvbox-light.conf;
+  # Theme source files
+  home.file.".config/themes/gruvbox-dark.sh".source = ./themes/gruvbox-dark.sh;
+  home.file.".config/themes/gruvbox-light.sh".source = ./themes/gruvbox-light.sh;
 
   # Theme switcher script
   home.file.".config/scripts/theme-switch.sh" = {
