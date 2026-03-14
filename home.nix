@@ -21,7 +21,7 @@
   home.packages = with pkgs; [
     # Editor
     neovim
-    tree-sitter-cli
+    tree-sitter
     fzf
 
     # File manager
