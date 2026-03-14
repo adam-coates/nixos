@@ -42,8 +42,8 @@
         gaps_in = 5;
         gaps_out = 10;
         border_size = 2;
-        "col.active_border" = "rgba(cba6f7ff) rgba(89b4faff) 45deg";
-        "col.inactive_border" = "rgba(595959aa)";
+        "col.active_border" = "$active_border";
+        "col.inactive_border" = "$inactive_border";
         layout = "dwindle";
         allow_tearing = false;
       };
@@ -93,6 +93,9 @@
       "$terminal" = "ghostty";
       "$fileManager" = "thunar";
       "$menu" = "rofi -show drun";
+      "$themeSwitcher" = "~/.config/scripts/theme-switch.sh";
+
+      source = [ "~/.config/themes/gruvbox-dark.conf" ];
 
       bind = [
         "$mod, Return, exec, $terminal"
@@ -104,6 +107,7 @@
         "$mod, P, pseudo,"
         "$mod, J, togglesplit,"
         "$mod, F, fullscreen,"
+        "$mod SHIFT, T, exec, $themeSwitcher"
 
         # Move focus
         "$mod, left, movefocus, l"
@@ -164,3 +168,4 @@
     };
   };
 }
+
