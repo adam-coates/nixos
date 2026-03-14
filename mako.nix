@@ -1,11 +1,11 @@
 { config, pkgs, ... }:
 
 {
-  services.mako.settings = {
+  services.mako = {
     enable = true;
-    backgroundColor = "#1e1e2e";
-    borderColor = "#cba6f7";
-    textColor = "#cdd6f4";
+    backgroundColor = "#282828";
+    borderColor = "#d79921";
+    textColor = "#ebdbb2";
     borderRadius = 10;
     borderSize = 2;
     defaultTimeout = 5000;
