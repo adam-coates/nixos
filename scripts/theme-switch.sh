@@ -8,22 +8,22 @@ WAYBAR_COLORS="$HOME/.config/waybar/colors.css"
 CHOICE=$(printf "Gruvbox Dark\nGruvbox Light" | rofi -dmenu -p " Theme" -i)
 
 case "$CHOICE" in
-  "Gruvbox Dark") THEME="gruvbox-dark" ;;
-  "Gruvbox Light") THEME="gruvbox-light" ;;
-  *) exit 0 ;;
+"Gruvbox Dark") THEME="gruvbox-dark" ;;
+"Gruvbox Light") THEME="gruvbox-light" ;;
+*) exit 0 ;;
 esac
 
 THEME_FILE="$THEMES_DIR/$THEME.sh"
 
 if [ ! -f "$THEME_FILE" ]; then
-  notify-send "Theme Switcher" "Theme file not found: $THEME_FILE"
-  exit 1
+    notify-send "Theme Switcher" "Theme file not found: $THEME_FILE"
+    exit 1
 fi
 
 source "$THEME_FILE"
 
 # ── Waybar ────────────────────────────────────────────────────────────────────
-cat > "$WAYBAR_COLORS" << EOF
+cat >"$WAYBAR_COLORS" <<EOF
 @define-color bg $waybar_bg;
 @define-color fg $waybar_fg;
 @define-color border $waybar_border;
@@ -38,7 +38,7 @@ cat > "$WAYBAR_COLORS" << EOF
 EOF
 
 # ── Hyprland ──────────────────────────────────────────────────────────────────
-cat > "$HYPR_THEME" << EOF
+cat >"$HYPR_THEME" <<EOF
 \$active_border = $active_border
 \$inactive_border = $inactive_border
 \$bg = $bg
@@ -48,7 +48,7 @@ EOF
 hyprctl reload
 
 # ── Mako ──────────────────────────────────────────────────────────────────────
-cat > "$HOME/.config/mako/config" << EOF
+cat >"$HOME/.config/mako/config" <<EOF
 background-color=$bg
 border-color=$active_border_solid
 text-color=$fg
@@ -65,7 +65,7 @@ max-icon-size=32
 EOF
 
 # ── Rofi ──────────────────────────────────────────────────────────────────────
-cat > "$HOME/.config/rofi/colors.rasi" << EOF
+cat >"$HOME/.config/rofi/colors.rasi" <<EOF
 * {
     bg: $bg;
     fg: $fg;
@@ -76,19 +76,23 @@ cat > "$HOME/.config/rofi/colors.rasi" << EOF
 EOF
 
 # ── Ghostty ───────────────────────────────────────────────────────────────────
-echo "theme = $ghostty_theme" > "$HOME/.config/ghostty/theme"
+echo "theme = $ghostty_theme" >"$HOME/.config/ghostty/theme"
 pkill -USR1 ghostty 2>/dev/null || true
 
 # ── Neovim ────────────────────────────────────────────────────────────────────
 for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
-  [ -S "$socket" ] && nvim --server "$socket" --remote-send \
-    ":set background=$nvim_background<CR>:colorscheme $nvim_colorscheme<CR>" 2>/dev/null || true
+    [ -S "$socket" ] && nvim --server "$socket" --remote-send \
+        ":set background=$nvim_background<CR>:colorscheme $nvim_colorscheme<CR>" 2>/dev/null || true
 done
 
 # ── Restart daemons ───────────────────────────────────────────────────────────
-pkill waybar; sleep 0.2; waybar &
-pkill mako; sleep 0.2; mako &
+pkill waybar
+sleep 0.2
+waybar &
+pkill mako
+sleep 0.2
+mako &
 
 # ── Save current theme ────────────────────────────────────────────────────────
-echo "$THEME" > "$THEMES_DIR/current"
+echo "$THEME" >"$THEMES_DIR/current"
 notify-send "Theme Switcher" "Switched to $CHOICE" --icon=preferences-desktop-theme
