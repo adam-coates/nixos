@@ -119,6 +119,7 @@ nixos-install --flake /mnt/etc/nixos#adam --no-root-passwd
 # ── Set passwords ─────────────────────────────────────────────────────────────
 echo -e "${BLUE}Setting password for adam...${NC}"
 nixos-enter --root /mnt -c 'passwd adam'
+nixos-enter --root /mnt -c 'passwd root'
 
 # ── Post-install: clone neovim dotfiles ───────────────────────────────────────
 echo -e "${BLUE}Setting up neovim dotfiles...${NC}"
