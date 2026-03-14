@@ -166,7 +166,9 @@ EOF
       package = pkgs.gruvbox-dark-icons-gtk;
     };
     cursorTheme = {
-      name = "Adwaita";
+      name = "Bibata-Modern-Classic";
+      size = 24;
+      package = pkgs.bibata-cursors;
     };
   };
 

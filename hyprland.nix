@@ -21,6 +21,7 @@
       # Environment variables
       env = [
         "XCURSOR_SIZE,24"
+        "XCURSOR_THEME,Bibata-Modern-Classic"
         "HYPRCURSOR_SIZE,24"
         "QT_QPA_PLATFORM,wayland"
         "XDG_CURRENT_DESKTOP,Hyprland"
@@ -30,7 +31,7 @@
 
       # Input
       input = {
-        kb_layout = "us"; 
+        kb_layout = "us";
         follow_mouse = 1;
         touchpad = {
           natural_scroll = true;

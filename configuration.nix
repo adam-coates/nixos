@@ -77,6 +77,7 @@
     # GTK theming
     gruvbox-gtk-theme
     gruvbox-dark-icons-gtk
+    bibata-cursors
   ];
 
   # GTK/dconf support on Wayland
