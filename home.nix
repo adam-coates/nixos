@@ -21,8 +21,6 @@
   home.packages = with pkgs; [
     # Editor
     neovim
-    tree-sitter
-    fzf
 
     # File manager
     thunar
@@ -53,8 +51,11 @@
     eza
     zoxide
 
-    # Node
-    nodejs
+    # Neovim dependencies
+    fzf
+    tree-sitter
+    gcc
+    gnumake
   ];
 
   # Theme source files
@@ -113,7 +114,7 @@ EOF
 background-color=$bg
 border-color=$active_border_solid
 text-color=$fg
-border-radius=0
+border-radius=10
 border-size=2
 default-timeout=5000
 font=JetBrainsMono Nerd Font 11
