@@ -60,7 +60,7 @@ for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
 done
 
 # ── Zathura ───────────────────────────────────────────────────────────────────
-if pgrep -x zathura >/dev/null; then
+if pgrep -f zathura >/dev/null; then
   # Get all zathura dbus services and send SourceConfig to reload config
   for svc in $(dbus-send --session --dest=org.freedesktop.DBus \
     --type=method_call --print-reply \
