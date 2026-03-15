@@ -52,7 +52,7 @@
 
       # Decoration
       decoration = {
-        rounding = 0;
+        rounding = 10;
         blur = {
           enabled = true;
           size = 3;
@@ -98,6 +98,8 @@
       "$fileManager" = "thunar";
       "$menu" = "rofi -show drun";
       "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
+      "$powerMenu" = "bash ~/.config/scripts/power-menu.sh";
+      "$lock" = "bash ~/.config/scripts/lock.sh";
 
       source = [ "~/.config/hypr/theme.conf" ];
 
@@ -112,6 +114,8 @@
         "$mod, J, togglesplit,"
         "$mod, F, fullscreen,"
         "$mod SHIFT, T, exec, $themeSwitcher"
+        "$mod SHIFT, P, exec, $powerMenu"
+        "$mod SHIFT, L, exec, $lock"
 
         # Move focus
         "$mod, left, movefocus, l"

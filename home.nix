@@ -56,6 +56,9 @@
     tree-sitter
     gcc
     gnumake
+
+    # Hyprlock
+    hyprlock
   ];
 
   # Theme files - declared by Nix, owned by Nix store
@@ -73,9 +76,23 @@
   xdg.configFile."ghostty/themes/gruvbox-dark".source = ./themes/ghostty-gruvbox-dark;
   xdg.configFile."ghostty/themes/gruvbox-light".source = ./themes/ghostty-gruvbox-light;
 
+  xdg.configFile."themes/gruvbox-dark/hyprlock.conf".source = ./themes/gruvbox-dark/hyprlock.conf;
+  xdg.configFile."themes/gruvbox-light/hyprlock.conf".source = ./themes/gruvbox-light/hyprlock.conf;
+  xdg.configFile."hypr/hyprlock.conf".source = ./home/hyprlock.conf;
+
   # Theme switcher script
   home.file.".config/scripts/theme-switch.sh" = {
     source = ./scripts/theme-switch.sh;
+    executable = true;
+  };
+
+  home.file.".config/scripts/lock.sh" = {
+    source = ./scripts/lock.sh;
+    executable = true;
+  };
+
+  home.file.".config/scripts/power-menu.sh" = {
+    source = ./scripts/power-menu.sh;
     executable = true;
   };
 
@@ -98,6 +115,7 @@
       ln -sf "$THEME_DIR/hyprland.conf" "$HOME/.config/hypr/theme.conf"
       ln -sf "$THEME_DIR/mako.conf"     "$HOME/.config/mako/config"
       ln -sf "$THEME_DIR/rofi.rasi"     "$HOME/.config/rofi/colors.rasi"
+      ln -sf "$THEME_DIR/hyprlock.conf" "$HOME/.config/hypr/hyprlock-theme.conf"
 
       # Ghostty symlink
       mkdir -p "$HOME/.config/ghostty/themes"
