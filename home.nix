@@ -58,11 +58,20 @@
     gnumake
   ];
 
-  # Theme source files
-  home.file.".config/themes/gruvbox-dark.sh".source = ./themes/gruvbox-dark.sh;
-  home.file.".config/themes/gruvbox-light.sh".source = ./themes/gruvbox-light.sh;
-  home.file.".config/ghostty/themes/gruvbox-dark".source = ./themes/ghostty-gruvbox-dark;
-  home.file.".config/ghostty/themes/gruvbox-light".source = ./themes/ghostty-gruvbox-light;
+  # Theme files - declared by Nix, owned by Nix store
+  # gruvbox-dark
+  xdg.configFile."themes/gruvbox-dark/waybar.css".source = ./themes/gruvbox-dark/waybar.css;
+  xdg.configFile."themes/gruvbox-dark/hyprland.conf".source = ./themes/gruvbox-dark/hyprland.conf;
+  xdg.configFile."themes/gruvbox-dark/mako.conf".source = ./themes/gruvbox-dark/mako.conf;
+  xdg.configFile."themes/gruvbox-dark/rofi.rasi".source = ./themes/gruvbox-dark/rofi.rasi;
+  # gruvbox-light
+  xdg.configFile."themes/gruvbox-light/waybar.css".source = ./themes/gruvbox-light/waybar.css;
+  xdg.configFile."themes/gruvbox-light/hyprland.conf".source = ./themes/gruvbox-light/hyprland.conf;
+  xdg.configFile."themes/gruvbox-light/mako.conf".source = ./themes/gruvbox-light/mako.conf;
+  xdg.configFile."themes/gruvbox-light/rofi.rasi".source = ./themes/gruvbox-light/rofi.rasi;
+  # ghostty themes
+  xdg.configFile."ghostty/themes/gruvbox-dark".source = ./themes/ghostty-gruvbox-dark;
+  xdg.configFile."ghostty/themes/gruvbox-light".source = ./themes/ghostty-gruvbox-light;
 
   # Theme switcher script
   home.file.".config/scripts/theme-switch.sh" = {
@@ -70,64 +79,45 @@
     executable = true;
   };
 
-  # Apply default theme script - runs on login to seed all theme files
+  # Apply theme on startup by pointing symlinks at the current theme directory
   home.file.".config/scripts/theme-apply.sh" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      # Apply current theme on startup, defaulting to gruvbox-dark
       CURRENT="$HOME/.config/themes/current"
       THEME=$(cat "$CURRENT" 2>/dev/null || echo "gruvbox-dark")
-      THEME_FILE="$HOME/.config/themes/$THEME.sh"
-      source "$THEME_FILE"
+      THEME_DIR="$HOME/.config/themes/$THEME"
 
       mkdir -p "$HOME/.config/waybar"
       mkdir -p "$HOME/.config/hypr"
       mkdir -p "$HOME/.config/mako"
       mkdir -p "$HOME/.config/rofi"
 
-      # Waybar colors
-      cat > "$HOME/.config/waybar/colors.css" << EOF
-@define-color bg $waybar_bg;
-@define-color fg $waybar_fg;
-@define-color border $waybar_border;
-@define-color accent $waybar_accent;
-@define-color red $waybar_red;
-@define-color green $waybar_green;
-@define-color blue $waybar_blue;
-@define-color purple $waybar_purple;
-@define-color aqua $waybar_aqua;
-@define-color orange $waybar_orange;
-@define-color gray $waybar_gray;
-EOF
+      # Point symlinks at current theme files
+      ln -sf "$THEME_DIR/waybar.css"    "$HOME/.config/waybar/colors.css"
+      ln -sf "$THEME_DIR/hyprland.conf" "$HOME/.config/hypr/theme.conf"
+      ln -sf "$THEME_DIR/mako.conf"     "$HOME/.config/mako/config"
+      ln -sf "$THEME_DIR/rofi.rasi"     "$HOME/.config/rofi/colors.rasi"
 
-      # Hyprland theme
-      cat > "$HOME/.config/hypr/theme.conf" << EOF
-\$active_border = $active_border
-\$inactive_border = $inactive_border
-\$bg = $bg
-\$fg = $fg
-EOF
+      # Ghostty symlink
+      mkdir -p "$HOME/.config/ghostty/themes"
+      ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"
 
-      # Mako
-      cat > "$HOME/.config/mako/config" << EOF
-background-color=$bg
-border-color=$active_border_solid
-text-color=$fg
-border-radius=10
-border-size=2
-default-timeout=5000
-font=JetBrainsMono Nerd Font 11
-width=300
-height=100
-padding=10
-margin=10
-icons=1
-max-icon-size=32
-EOF
+      # GTK via dconf
+      export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+      export PATH="/run/current-system/sw/bin:$HOME/.nix-profile/bin:$PATH"
+      if [ "$THEME" = "gruvbox-dark" ]; then
+        dconf write /org/gnome/desktop/interface/gtk-theme "'Gruvbox-Dark'"
+        dconf write /org/gnome/desktop/interface/color-scheme "'prefer-dark'"
+      else
+        dconf write /org/gnome/desktop/interface/gtk-theme "'Gruvbox-Light'"
+        dconf write /org/gnome/desktop/interface/color-scheme "'prefer-light'"
+      fi
+      dconf write /org/gnome/desktop/interface/icon-theme "'Gruvbox-Dark'"
 
-      # Rofi colors
-      cat > "$HOME/.config/rofi/colors.rasi" << EOF
+      echo "$THEME" > "$CURRENT"
+    '';
+  };
 * {
     bg: $bg;
     fg: $fg;
@@ -136,26 +126,6 @@ EOF
     red: $waybar_red;
 }
 EOF
-
-      # Write current theme name
-      echo "$THEME" > "$CURRENT"
-
-      # Ghostty - create/update theme symlink and reload
-      mkdir -p "$HOME/.config/ghostty/themes"
-      ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"
-      pkill -USR2 ghostty 2>/dev/null || true
-
-      # GTK
-      if [ "$THEME" = "gruvbox-dark" ]; then
-        gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark"
-        gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
-      else
-        gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Light"
-        gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
-      fi
-      gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Dark"
-    '';
-  };
 
   # GTK theme - default gruvbox dark
   gtk = {
