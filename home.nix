@@ -80,9 +80,8 @@
   xdg.configFile."ghostty/themes/gruvbox-dark".source = ./themes/ghostty-gruvbox-dark;
   xdg.configFile."ghostty/themes/gruvbox-light".source = ./themes/ghostty-gruvbox-light;
 
-  xdg.configFile."themes/gruvbox-dark/zathura.conf".source = ./themes/gruvbox-dark/zathura.conf;
-  xdg.configFile."themes/gruvbox-light/zathura.conf".source = ./themes/gruvbox-light/zathura.conf;
-  xdg.configFile."zathura/zathurarc".source = ./home/zathurarc;
+  xdg.configFile."themes/gruvbox-dark/zathurarc".source = ./themes/gruvbox-dark/zathurarc;
+  xdg.configFile."themes/gruvbox-light/zathurarc".source = ./themes/gruvbox-light/zathurarc;
 
   xdg.configFile."themes/gruvbox-dark/hyprlock.conf".source = ./themes/gruvbox-dark/hyprlock.conf;
   xdg.configFile."themes/gruvbox-light/hyprlock.conf".source = ./themes/gruvbox-light/hyprlock.conf;
@@ -136,7 +135,7 @@
       ln -sf "$THEME_DIR/mako.conf"     "$HOME/.config/mako/config"
       ln -sf "$THEME_DIR/rofi.rasi"     "$HOME/.config/rofi/colors.rasi"
       ln -sf "$THEME_DIR/hyprlock.conf" "$HOME/.config/hypr/hyprlock-theme.conf"
-      ln -sf "$THEME_DIR/zathura.conf"  "$HOME/.config/zathura/theme.conf"
+      ln -sf "$THEME_DIR/zathurarc"     "$HOME/.config/zathura/zathurarc"
 
       # Ghostty symlink
       mkdir -p "$HOME/.config/ghostty/themes"

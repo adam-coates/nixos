@@ -29,7 +29,7 @@ ln -sf "$THEME_DIR/hyprland.conf" "$HOME/.config/hypr/theme.conf"
 ln -sf "$THEME_DIR/mako.conf"     "$HOME/.config/mako/config"
 ln -sf "$THEME_DIR/rofi.rasi"     "$HOME/.config/rofi/colors.rasi"
 ln -sf "$THEME_DIR/hyprlock.conf" "$HOME/.config/hypr/hyprlock-theme.conf"
-ln -sf "$THEME_DIR/zathura.conf"  "$HOME/.config/zathura/theme.conf"
+ln -sf "$THEME_DIR/zathurarc"     "$HOME/.config/zathura/zathurarc"
 
 # ── Ghostty ───────────────────────────────────────────────────────────────────
 ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"

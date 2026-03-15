@@ -1,4 +1,22 @@
-# Gruvbox Dark
+# Keybindings
+map u scroll half-up
+map d scroll half-down
+map D toggle_page_mode
+map r reload
+map R rotate
+map K zoom in
+map J zoom out
+map i recolor
+map p print
+
+# General settings
+set selection-clipboard clipboard
+set render-loading      true
+set adjust-open         best-fit
+set pages-per-row       1
+set scroll-step         50
+
+# Gruvbox Dark colors
 set notification-error-bg       "rgba(50,48,47,1)"
 set notification-error-fg       "rgba(251,73,52,1)"
 set notification-warning-bg     "rgba(50,48,47,1)"
@@ -27,5 +45,5 @@ set render-loading-bg           "rgba(50,48,47,1)"
 set render-loading-fg           "rgba(235,219,178,1)"
 set recolor-lightcolor          "rgba(50,48,47,1)"
 set recolor-darkcolor           "rgba(235,219,178,1)"
-set recolor                     "true"
+set recolor                     "false"
 set recolor-keephue             "false"
