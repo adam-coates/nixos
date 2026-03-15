@@ -59,6 +59,7 @@
 
     # Hyprlock
     hyprlock
+    hypridle
   ];
 
   # Theme files - declared by Nix, owned by Nix store
@@ -79,10 +80,21 @@
   xdg.configFile."themes/gruvbox-dark/hyprlock.conf".source = ./themes/gruvbox-dark/hyprlock.conf;
   xdg.configFile."themes/gruvbox-light/hyprlock.conf".source = ./themes/gruvbox-light/hyprlock.conf;
   xdg.configFile."hypr/hyprlock.conf".source = ./home/hyprlock.conf;
+  xdg.configFile."hypr/hypridle.conf".source = ./home/hypridle.conf;
 
   # Theme switcher script
   home.file.".config/scripts/theme-switch.sh" = {
     source = ./scripts/theme-switch.sh;
+    executable = true;
+  };
+
+  home.file.".config/scripts/idle-toggle.sh" = {
+    source = ./scripts/idle-toggle.sh;
+    executable = true;
+  };
+
+  home.file.".config/scripts/idle-status.sh" = {
+    source = ./scripts/idle-status.sh;
     executable = true;
   };
 

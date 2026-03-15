@@ -12,7 +12,7 @@
         spacing = 0;
 
         modules-left = [ "hyprland/workspaces" ];
-        modules-center = [ "clock" ];
+        modules-center = [ "clock" "custom/idle-indicator" ];
         modules-right = [
           "tray"
           "bluetooth"
@@ -118,6 +118,14 @@
           icon-size = 12;
           spacing = 17;
         };
+
+        "custom/idle-indicator" = {
+          exec = "~/.config/scripts/idle-status.sh";
+          on-click = "bash ~/.config/scripts/idle-toggle.sh";
+          return-type = "json";
+          interval = 5;
+          signal = 9;
+        };
       };
     };
 
@@ -179,6 +187,19 @@
 
       #battery.warning { color: @orange; }
       #battery.critical { color: @red; }
+
+      #custom-idle-indicator {
+        padding: 0 8px;
+        color: @gray;
+      }
+
+      #custom-idle-indicator.idle-on {
+        color: @green;
+      }
+
+      #custom-idle-indicator.idle-off {
+        color: @gray;
+      }
     '';
   };
 }
