@@ -118,15 +118,6 @@
       echo "$THEME" > "$CURRENT"
     '';
   };
-* {
-    bg: $bg;
-    fg: $fg;
-    accent: $waybar_accent;
-    gray: $waybar_gray;
-    red: $waybar_red;
-}
-EOF
-
   # GTK theme - default gruvbox dark
   gtk = {
     enable = true;
