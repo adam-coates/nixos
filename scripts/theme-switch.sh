@@ -59,6 +59,14 @@ for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
     ":set background=$NVIM_BG<CR>:colorscheme gruvbox<CR>" 2>/dev/null || true
 done
 
+# ── Zathura ───────────────────────────────────────────────────────────────────
+if pgrep -x zathura >/dev/null; then
+  ZATHURA_FILE=$(lsof -c zathura 2>/dev/null | grep REG | grep -v mem | awk '{print $NF}' | grep -v '\.so' | grep -v '/nix/store' | head -1)
+  pkill zathura
+  sleep 0.2
+  [ -f "$ZATHURA_FILE" ] && zathura "$ZATHURA_FILE" &
+fi
+
 # ── Restart daemons ───────────────────────────────────────────────────────────
 pkill waybar; sleep 0.2; waybar &
 pkill mako; sleep 0.2; mako &
