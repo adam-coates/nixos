@@ -63,6 +63,7 @@
 
     # PDF reader
     zathura
+    dbus
   ];
 
   # Theme files - declared by Nix, owned by Nix store

@@ -61,11 +61,16 @@ done
 
 # ── Zathura ───────────────────────────────────────────────────────────────────
 if pgrep -x zathura >/dev/null; then
-  ZATHURA_PID=$(pgrep zathura)
-  ZATHURA_FILE=$(ls -la /proc/$ZATHURA_PID/fd 2>/dev/null | grep -v '/dev\|/nix\|pipe\|socket\|\.so\|\.sqlite\|zathura\|\.cache' | awk '{print $NF}' | grep '^/' | head -1)
-  pkill zathura
-  sleep 0.2
-  [ -f "$ZATHURA_FILE" ] && zathura "$ZATHURA_FILE" &
+  # Get all zathura dbus services and send SourceConfig to reload config
+  for svc in $(dbus-send --session --dest=org.freedesktop.DBus \
+    --type=method_call --print-reply \
+    /org/freedesktop/DBus org.freedesktop.DBus.ListNames 2>/dev/null \
+    | grep -o '"org.pwmt.zathura[^"]*"' | tr -d '"'); do
+    dbus-send --session --dest="$svc" \
+      --type=method_call \
+      /org/pwmt/zathura \
+      org.pwmt.zathura.SourceConfig 2>/dev/null || true
+  done
 fi
 
 # ── Restart daemons ───────────────────────────────────────────────────────────
