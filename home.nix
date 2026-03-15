@@ -60,6 +60,9 @@
     # Hyprlock
     hyprlock
     hypridle
+
+    # PDF reader
+    zathura
   ];
 
   # Theme files - declared by Nix, owned by Nix store
@@ -76,6 +79,10 @@
   # ghostty themes
   xdg.configFile."ghostty/themes/gruvbox-dark".source = ./themes/ghostty-gruvbox-dark;
   xdg.configFile."ghostty/themes/gruvbox-light".source = ./themes/ghostty-gruvbox-light;
+
+  xdg.configFile."themes/gruvbox-dark/zathura.conf".source = ./themes/gruvbox-dark/zathura.conf;
+  xdg.configFile."themes/gruvbox-light/zathura.conf".source = ./themes/gruvbox-light/zathura.conf;
+  xdg.configFile."zathura/zathurarc".source = ./home/zathurarc;
 
   xdg.configFile."themes/gruvbox-dark/hyprlock.conf".source = ./themes/gruvbox-dark/hyprlock.conf;
   xdg.configFile."themes/gruvbox-light/hyprlock.conf".source = ./themes/gruvbox-light/hyprlock.conf;
@@ -121,6 +128,7 @@
       mkdir -p "$HOME/.config/hypr"
       mkdir -p "$HOME/.config/mako"
       mkdir -p "$HOME/.config/rofi"
+      mkdir -p "$HOME/.config/zathura"
 
       # Point symlinks at current theme files
       ln -sf "$THEME_DIR/waybar.css"    "$HOME/.config/waybar/colors.css"
@@ -128,6 +136,7 @@
       ln -sf "$THEME_DIR/mako.conf"     "$HOME/.config/mako/config"
       ln -sf "$THEME_DIR/rofi.rasi"     "$HOME/.config/rofi/colors.rasi"
       ln -sf "$THEME_DIR/hyprlock.conf" "$HOME/.config/hypr/hyprlock-theme.conf"
+      ln -sf "$THEME_DIR/zathura.conf"  "$HOME/.config/zathura/theme.conf"
 
       # Ghostty symlink
       mkdir -p "$HOME/.config/ghostty/themes"
