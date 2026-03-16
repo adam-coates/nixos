@@ -5,7 +5,7 @@
     enable = true;
     package = pkgs.rofi;
     theme = "gruvbox";
-    font = "JetBrainsMono Nerd Font 12";
+    font = "TX02 Nerd Font 12";
     extraConfig = {
       modi = "drun,run,window";
       show-icons = true;
@@ -22,7 +22,7 @@
 
     * {
       width: 600;
-      font: "JetBrainsMono Nerd Font 12";
+      font: "TX02 Nerd Font 12";
     }
 
     element-text, element-icon, mode-switcher {

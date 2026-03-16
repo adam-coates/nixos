@@ -133,7 +133,7 @@
       @import "colors.css";
 
       * {
-        font-family: "JetBrainsMono Nerd Font";
+        font-family: "TX02 Nerd Font";
         font-size: 13px;
         min-height: 0;
         border: none;

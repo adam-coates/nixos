@@ -5,7 +5,7 @@
     enable = true;
     enableBashIntegration = true;
     settings = {
-      font-family = "JetBrainsMono Nerd Font";
+      font-family = "TX02 Nerd Font";
       font-size = 13;
       window-padding-x = 10;
       window-padding-y = 10;
