@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -122,6 +120,13 @@ echo -e "${BLUE}Setting password for adam...${NC}"
 nixos-enter --root /mnt -c 'passwd adam'
 nixos-enter --root /mnt -c 'passwd root'
 
+# ── Create nix profile directories ───────────────────────────────────────────
+echo -e "${BLUE}Setting up Nix profile directories...${NC}"
+mkdir -p /mnt/nix/var/nix/profiles/per-user/adam
+chown -R 1000:1000 /mnt/nix/var/nix/profiles/per-user/adam
+mkdir -p /mnt/home/adam/.local/state/nix/profiles
+chown -R 1000:1000 /mnt/home/adam/.local/state/nix
+
 # ── Post-install: clone neovim dotfiles ───────────────────────────────────────
 echo -e "${BLUE}Setting up neovim dotfiles...${NC}"
 git clone https://github.com/adam-coates/dotfiles.git /mnt/home/adam/dotfiles ||
@@ -141,7 +146,6 @@ chown -R 1000:1000 /mnt/home/adam/.config 2>/dev/null || true
 
 echo ""
 echo -e "${GREEN}Installation complete!${NC}"
-echo -e "${YELLOW}Things to do after first boot:${NC}"
 echo "  1. Set your password:       passwd adam"
 echo "  2. Add a wallpaper to:      ~/Pictures/ and update hyprpaper.conf"
 echo "  3. Update git email in:     home/home.nix"

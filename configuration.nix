@@ -1,19 +1,18 @@
 { config, pkgs, inputs, ... }:
-
 {
   imports = [
     ./hardware-configuration.nix
+    ./fonts.nix
   ];
 
-  # Bootloader - change to systemd-boot if using UEFI
+  # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "adam";
   networking.networkmanager.enable = true;
 
-  time.timeZone = "Europe/Vienna"; # change to your timezone
-
+  time.timeZone = "Europe/Vienna";
   i18n.defaultLocale = "en_US.UTF-8";
 
   # User
@@ -35,6 +34,12 @@
     enable = true;
     xwayland.enable = true;
   };
+
+  # Hyprlock - needed for PAM authentication
+  programs.hyprlock.enable = true;
+
+  # Hypridle
+  services.hypridle.enable = true;
 
   # Display manager - ly
   services.displayManager.ly.enable = true;
@@ -61,6 +66,9 @@
     noto-fonts-color-emoji
   ];
 
+  # Include user fonts from ~/.local/share/fonts
+  fonts.fontDir.enable = true;
+
   # System packages
   environment.systemPackages = with pkgs; [
     git
@@ -86,7 +94,7 @@
   # XDG portal for Wayland/Hyprland
   xdg.portal = {
     enable = true;
-    extraPortals = [ 
+    extraPortals = [
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
     ];
