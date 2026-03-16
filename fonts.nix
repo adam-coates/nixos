@@ -29,7 +29,7 @@ let
     pname = "font2";
     version = "1.0";
     url = "https://fonts.adamcoates.at/font2.zip";
-    sha256 = "sha256-hfnu/JMxTdAbZWdDj5Mcj0bSw1CSmIqkJXAksZBzJoE=";
+    sha256 = "sha256-ZRIULgrGq6w8I2Fu8xqY98YcsKSTaXk8If8mB2+vkd0=";
   };
 
 in {
