@@ -22,7 +22,7 @@ let
     pname = "font1";
     version = "1.0";
     url = "https://fonts.adamcoates.at/font1.zip";
-    sha256 = "sha256-VkuxfWOkzxe9cABPtIowpM5Oklm/BuPixHBWpiFlixM=";
+    sha256 = "sha256-/et4j9Wh9apX94DS+rm9g9I9IVb4uSsq+5WaPT1XfCs=";
   };
 
   font2 = mkFont {
