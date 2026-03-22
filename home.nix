@@ -1,5 +1,9 @@
 { config, pkgs, lib, ... }:
 
+let
+  gruvbox = import ./modules/colorscheme/gruvbox.nix;
+in
+
 {
   imports = [
     ./hyprland.nix
@@ -12,9 +16,9 @@
 
   options.theme = {
     colors = lib.mkOption {
-      type = lib.types.attrs;
-      description = "Base16-style color scheme attribute set.";
-      default = (import ./modules/colorscheme/gruvbox.nix).dark;
+      type = lib.types.attrsOf lib.types.anything;
+      description = "Color scheme attribute set.";
+      default = gruvbox.dark;
     };
     dark = lib.mkOption {
       type = lib.types.bool;
@@ -24,12 +28,13 @@
   };
 
   config = {
-    # Light theme specialisation — activate with:
-    #   /nix/var/nix/profiles/per-user/$USER/home-manager/specialisation/light/activate
-    # Return to dark (default) with:
-    #   /nix/var/nix/profiles/per-user/$USER/home-manager/activate
+    # Light specialisation — activated at runtime by theme-switch.sh via:
+    #   $PROFILE/specialisation/light/activate
+    # Return to dark (base) with:
+    #   $PROFILE/activate
+    # where PROFILE=/nix/var/nix/profiles/per-user/$USER/home-manager
     specialisation.light.configuration = {
-      theme.colors = (import ./modules/colorscheme/gruvbox.nix).light;
+      theme.colors = gruvbox.light;
       theme.dark = false;
     };
 
@@ -89,7 +94,7 @@
 
     # --- Generated theme configs ---
 
-    # Hyprlock theme variables
+    # Hyprlock theme variables (sourced by hyprlock.conf)
     xdg.configFile."hypr/hyprlock-theme.conf".text =
       let c = config.theme.colors; in ''
         $color = ${c.hyprlockBg}
@@ -186,6 +191,11 @@
       '';
 
     # --- Scripts ---
+
+    home.file.".config/scripts/theme-switch.sh" = {
+      source = ./scripts/theme-switch.sh;
+      executable = true;
+    };
 
     home.file.".config/scripts/idle-toggle.sh" = {
       source = ./scripts/idle-toggle.sh;

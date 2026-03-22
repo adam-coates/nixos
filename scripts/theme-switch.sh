@@ -1,82 +1,67 @@
 #!/usr/bin/env bash
+# Toggle between dark (base) and light (specialisation) themes.
+# The home-manager specialisation system manages all config files;
+# this script just activates the appropriate profile and reloads apps.
 
-THEMES_DIR="$HOME/.config/themes"
-CURRENT="$THEMES_DIR/current"
-
-# Ensure correct environment when run from Hyprland keybind
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
 export PATH="/run/current-system/sw/bin:$HOME/.nix-profile/bin:$PATH"
 
-# Pick theme via rofi
-CHOICE=$(printf "Gruvbox Dark\nGruvbox Light" | rofi -dmenu -p " Theme" -i)
+# Home-manager profile — always points to the latest nixos-rebuild result
+PROFILE="/nix/var/nix/profiles/per-user/$(whoami)/home-manager"
 
-case "$CHOICE" in
-  "Gruvbox Dark") THEME="gruvbox-dark" ;;
-  "Gruvbox Light") THEME="gruvbox-light" ;;
-  *) exit 0 ;;
-esac
+# Persist current theme so we know what to toggle next time
+STATE="$HOME/.local/state/current-theme"
+mkdir -p "$(dirname "$STATE")"
+CURRENT=$(cat "$STATE" 2>/dev/null || echo "dark")
 
-THEME_DIR="$THEMES_DIR/$THEME"
+reload_apps() {
+  local nvim_bg="$1"
 
-if [ ! -d "$THEME_DIR" ]; then
-  notify-send "Theme Switcher" "Theme not found: $THEME_DIR"
-  exit 1
-fi
+  # Hyprland (border colours are baked into hyprland config)
+  hyprctl reload 2>/dev/null || true
 
-# ── Swap symlinks ─────────────────────────────────────────────────────────────
-ln -sf "$THEME_DIR/waybar.css"    "$HOME/.config/waybar/colors.css"
-ln -sf "$THEME_DIR/hyprland.conf" "$HOME/.config/hypr/theme.conf"
-ln -sf "$THEME_DIR/mako.conf"     "$HOME/.config/mako/config"
-ln -sf "$THEME_DIR/rofi.rasi"     "$HOME/.config/rofi/colors.rasi"
-ln -sf "$THEME_DIR/hyprlock.conf" "$HOME/.config/hypr/hyprlock-theme.conf"
-ln -sf "$THEME_DIR/zathurarc"     "$HOME/.config/zathura/zathurarc"
+  # Waybar
+  pkill waybar; sleep 0.2; waybar &
 
-# ── Ghostty ───────────────────────────────────────────────────────────────────
-ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"
-pkill -USR2 ghostty 2>/dev/null || true
+  # Mako
+  pkill mako; sleep 0.2; mako &
 
-# ── Hyprland reload ───────────────────────────────────────────────────────────
-hyprctl reload
+  # Ghostty — reload config in place
+  pkill -USR2 ghostty 2>/dev/null || true
 
-# ── GTK via dconf ─────────────────────────────────────────────────────────────
-if [ "$THEME" = "gruvbox-dark" ]; then
-  dconf write /org/gnome/desktop/interface/gtk-theme "'Gruvbox-Dark'"
-  dconf write /org/gnome/desktop/interface/color-scheme "'prefer-dark'"
-else
-  dconf write /org/gnome/desktop/interface/gtk-theme "'Gruvbox-Light'"
-  dconf write /org/gnome/desktop/interface/color-scheme "'prefer-light'"
-fi
-dconf write /org/gnome/desktop/interface/icon-theme "'Gruvbox-Dark'"
+  # Zathura — dbus reload
+  if pgrep -f zathura >/dev/null; then
+    for svc in $(dbus-send --session --dest=org.freedesktop.DBus \
+        --type=method_call --print-reply \
+        /org/freedesktop/DBus org.freedesktop.DBus.ListNames 2>/dev/null \
+        | grep -o '"org.pwmt.zathura[^"]*"' | tr -d '"'); do
+      dbus-send --session --dest="$svc" --type=method_call \
+        /org/pwmt/zathura org.pwmt.zathura.SourceConfig 2>/dev/null || true
+    done
+  fi
 
-# ── Neovim ────────────────────────────────────────────────────────────────────
-if [ "$THEME" = "gruvbox-dark" ]; then
-  NVIM_BG="dark"
-else
-  NVIM_BG="light"
-fi
-for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
-  [ -S "$socket" ] && nvim --server "$socket" --remote-send \
-    ":set background=$NVIM_BG<CR>:colorscheme gruvbox<CR>" 2>/dev/null || true
-done
-
-# ── Zathura ───────────────────────────────────────────────────────────────────
-if pgrep -f zathura >/dev/null; then
-  # Get all zathura dbus services and send SourceConfig to reload config
-  for svc in $(dbus-send --session --dest=org.freedesktop.DBus \
-    --type=method_call --print-reply \
-    /org/freedesktop/DBus org.freedesktop.DBus.ListNames 2>/dev/null \
-    | grep -o '"org.pwmt.zathura[^"]*"' | tr -d '"'); do
-    dbus-send --session --dest="$svc" \
-      --type=method_call \
-      /org/pwmt/zathura \
-      org.pwmt.zathura.SourceConfig 2>/dev/null || true
+  # Neovim — update background in running instances
+  for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
+    [ -S "$socket" ] && nvim --server "$socket" --remote-send \
+      ":set background=${nvim_bg}<CR>:colorscheme gruvbox<CR>" 2>/dev/null || true
   done
+}
+
+if [ "$CURRENT" = "dark" ]; then
+  LIGHT_ACTIVATE="$PROFILE/specialisation/light/activate"
+  if [ ! -f "$LIGHT_ACTIVATE" ]; then
+    notify-send "Theme Switcher" "Light specialisation not found.\nRun nixos-rebuild switch first." -t 5000
+    exit 1
+  fi
+  notify-send "Theme" "Switching to Gruvbox Light..." -t 1500
+  "$LIGHT_ACTIVATE"
+  echo "light" > "$STATE"
+  reload_apps "light"
+  notify-send "Theme" "Gruvbox Light active" -t 2000
+else
+  notify-send "Theme" "Switching to Gruvbox Dark..." -t 1500
+  "$PROFILE/activate"
+  echo "dark" > "$STATE"
+  reload_apps "dark"
+  notify-send "Theme" "Gruvbox Dark active" -t 2000
 fi
-
-# ── Restart daemons ───────────────────────────────────────────────────────────
-pkill waybar; sleep 0.2; waybar &
-pkill mako; sleep 0.2; mako &
-
-# ── Save current theme ────────────────────────────────────────────────────────
-echo "$THEME" > "$CURRENT"
-notify-send "Theme Switcher" "Switched to $CHOICE" --icon=preferences-desktop-theme
