@@ -9,7 +9,6 @@
 
       # Autostart
       exec-once = [
-        "~/.config/scripts/theme-apply.sh"
         "hyprpaper"
         "waybar"
         "mako"
@@ -40,13 +39,13 @@
         sensitivity = 0;
       };
 
-      # General
+      # General — border colors come from theme.colors
       general = {
         gaps_in = 5;
         gaps_out = 10;
         border_size = 2;
-        "col.active_border" = "$active_border";
-        "col.inactive_border" = "$inactive_border";
+        "col.active_border" = "rgb(${config.theme.colors.accent}) rgb(${config.theme.colors.orange}) 45deg";
+        "col.inactive_border" = "rgb(${config.theme.colors.bg1})";
         layout = "dwindle";
         allow_tearing = false;
       };
@@ -98,11 +97,8 @@
       "$terminal" = "ghostty";
       "$fileManager" = "thunar";
       "$menu" = "rofi -show drun";
-      "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
       "$powerMenu" = "bash ~/.config/scripts/power-menu.sh";
       "$lock" = "bash ~/.config/scripts/lock.sh";
-
-      source = [ "~/.config/hypr/theme.conf" ];
 
       bind = [
         "$mod, Return, exec, $terminal"
@@ -114,7 +110,6 @@
         "$mod, P, pseudo,"
         "$mod, J, togglesplit,"
         "$mod, F, fullscreen,"
-        "$mod SHIFT, T, exec, $themeSwitcher"
         "$mod SHIFT, P, exec, $powerMenu"
         "$mod SHIFT, L, exec, $lock"
 
@@ -177,4 +172,3 @@
     };
   };
 }
-

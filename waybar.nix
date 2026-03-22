@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   programs.waybar = {
@@ -129,8 +129,19 @@
       };
     };
 
-    style = ''
-      @import "colors.css";
+    style =
+      let c = config.theme.colors; in ''
+      @define-color bg ${c.waybarBg};
+      @define-color fg #${c.fg};
+      @define-color border ${c.waybarBorder};
+      @define-color accent #${c.accent};
+      @define-color red #${c.red};
+      @define-color green #${c.green};
+      @define-color blue #${c.blue};
+      @define-color purple #${c.purple};
+      @define-color aqua #${c.aqua};
+      @define-color orange #${c.orange};
+      @define-color gray #${c.gray};
 
       * {
         font-family: "TX02 Nerd Font";

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
@@ -10,205 +10,260 @@
     ./ghostty.nix
   ];
 
-  home.username = "adam";
-  home.homeDirectory = "/home/adam";
-  home.stateVersion = "25.11";
-
-  # Let home-manager manage itself
-  programs.home-manager.enable = true;
-
-  # Packages managed by home-manager
-  home.packages = with pkgs; [
-    # Editor
-    neovim
-
-    # File manager
-    thunar
-    xfce.thunar-archive-plugin
-    xfce.thunar-volman
-    gvfs
-
-    # Wallpaper
-    hyprpaper
-
-    # App launcher
-    rofi
-
-    # Notifications
-    mako
-    libnotify
-
-    # Utilities
-    wl-clipboard
-    cliphist
-    grim
-    slurp
-    swappy
-    playerctl
-    pavucontrol
-    btop
-    bat
-    eza
-    zoxide
-
-    # Neovim dependencies
-    fzf
-    tree-sitter
-    gcc
-    gnumake
-
-    # Hyprlock
-    hyprlock
-    hypridle
-
-    # PDF reader
-    zathura
-    dbus
-  ];
-
-  # Theme files - declared by Nix, owned by Nix store
-  # gruvbox-dark
-  xdg.configFile."themes/gruvbox-dark/waybar.css".source = ./themes/gruvbox-dark/waybar.css;
-  xdg.configFile."themes/gruvbox-dark/hyprland.conf".source = ./themes/gruvbox-dark/hyprland.conf;
-  xdg.configFile."themes/gruvbox-dark/mako.conf".source = ./themes/gruvbox-dark/mako.conf;
-  xdg.configFile."themes/gruvbox-dark/rofi.rasi".source = ./themes/gruvbox-dark/rofi.rasi;
-  # gruvbox-light
-  xdg.configFile."themes/gruvbox-light/waybar.css".source = ./themes/gruvbox-light/waybar.css;
-  xdg.configFile."themes/gruvbox-light/hyprland.conf".source = ./themes/gruvbox-light/hyprland.conf;
-  xdg.configFile."themes/gruvbox-light/mako.conf".source = ./themes/gruvbox-light/mako.conf;
-  xdg.configFile."themes/gruvbox-light/rofi.rasi".source = ./themes/gruvbox-light/rofi.rasi;
-  # ghostty themes
-  xdg.configFile."ghostty/themes/gruvbox-dark".source = ./themes/ghostty-gruvbox-dark;
-  xdg.configFile."ghostty/themes/gruvbox-light".source = ./themes/ghostty-gruvbox-light;
-
-  xdg.configFile."themes/gruvbox-dark/zathurarc".source = ./themes/gruvbox-dark/zathurarc;
-  xdg.configFile."themes/gruvbox-light/zathurarc".source = ./themes/gruvbox-light/zathurarc;
-
-  xdg.configFile."themes/gruvbox-dark/hyprlock.conf".source = ./themes/gruvbox-dark/hyprlock.conf;
-  xdg.configFile."themes/gruvbox-light/hyprlock.conf".source = ./themes/gruvbox-light/hyprlock.conf;
-  xdg.configFile."hypr/hyprlock.conf".source = ./home/hyprlock.conf;
-  xdg.configFile."hypr/hypridle.conf".source = ./home/hypridle.conf;
-
-  # Theme switcher script
-  home.file.".config/scripts/theme-switch.sh" = {
-    source = ./scripts/theme-switch.sh;
-    executable = true;
-  };
-
-  home.file.".config/scripts/idle-toggle.sh" = {
-    source = ./scripts/idle-toggle.sh;
-    executable = true;
-  };
-
-  home.file.".config/scripts/idle-status.sh" = {
-    source = ./scripts/idle-status.sh;
-    executable = true;
-  };
-
-  home.file.".config/scripts/lock.sh" = {
-    source = ./scripts/lock.sh;
-    executable = true;
-  };
-
-  home.file.".config/scripts/power-menu.sh" = {
-    source = ./scripts/power-menu.sh;
-    executable = true;
-  };
-
-  # Apply theme on startup by pointing symlinks at the current theme directory
-  home.file.".config/scripts/theme-apply.sh" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      CURRENT="$HOME/.config/themes/current"
-      THEME=$(cat "$CURRENT" 2>/dev/null || echo "gruvbox-dark")
-      THEME_DIR="$HOME/.config/themes/$THEME"
-
-      mkdir -p "$HOME/.config/waybar"
-      mkdir -p "$HOME/.config/hypr"
-      mkdir -p "$HOME/.config/mako"
-      mkdir -p "$HOME/.config/rofi"
-      mkdir -p "$HOME/.config/zathura"
-
-      # Point symlinks at current theme files
-      ln -sf "$THEME_DIR/waybar.css"    "$HOME/.config/waybar/colors.css"
-      ln -sf "$THEME_DIR/hyprland.conf" "$HOME/.config/hypr/theme.conf"
-      ln -sf "$THEME_DIR/mako.conf"     "$HOME/.config/mako/config"
-      ln -sf "$THEME_DIR/rofi.rasi"     "$HOME/.config/rofi/colors.rasi"
-      ln -sf "$THEME_DIR/hyprlock.conf" "$HOME/.config/hypr/hyprlock-theme.conf"
-      ln -sf "$THEME_DIR/zathurarc"     "$HOME/.config/zathura/zathurarc"
-
-      # Ghostty symlink
-      mkdir -p "$HOME/.config/ghostty/themes"
-      ln -sf "$HOME/.config/ghostty/themes/$THEME" "$HOME/.config/ghostty/theme-link"
-
-      # GTK via dconf
-      export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
-      export PATH="/run/current-system/sw/bin:$HOME/.nix-profile/bin:$PATH"
-      if [ "$THEME" = "gruvbox-dark" ]; then
-        dconf write /org/gnome/desktop/interface/gtk-theme "'Gruvbox-Dark'"
-        dconf write /org/gnome/desktop/interface/color-scheme "'prefer-dark'"
-      else
-        dconf write /org/gnome/desktop/interface/gtk-theme "'Gruvbox-Light'"
-        dconf write /org/gnome/desktop/interface/color-scheme "'prefer-light'"
-      fi
-      dconf write /org/gnome/desktop/interface/icon-theme "'Gruvbox-Dark'"
-
-      echo "$THEME" > "$CURRENT"
-    '';
-  };
-  # GTK theme - default gruvbox dark
-  gtk = {
-    enable = true;
-    theme = {
-      name = "Gruvbox-Dark";
-      package = pkgs.gruvbox-gtk-theme;
+  options.theme = {
+    colors = lib.mkOption {
+      type = lib.types.attrs;
+      description = "Base16-style color scheme attribute set.";
+      default = (import ./modules/colorscheme/gruvbox.nix).dark;
     };
-    iconTheme = {
-      name = "Gruvbox-Dark";
-      package = pkgs.gruvbox-dark-icons-gtk;
-    };
-    cursorTheme = {
-      name = "Bibata-Modern-Classic";
-      size = 24;
-      package = pkgs.bibata-cursors;
+    dark = lib.mkOption {
+      type = lib.types.bool;
+      description = "Whether the active theme is dark.";
+      default = true;
     };
   };
 
-  # Direnv - auto-activate nix dev shells per project
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-    enableBashIntegration = true;
-  };
-
-  # Git
-  programs.git = {
-    enable = true;
-    userName = "adam-coates";
-    userEmail = ""; # add your email
-  };
-
-  # Shell aliases
-  programs.bash = {
-    enable = true;
-    shellAliases = {
-      ls = "eza --icons";
-      ll = "eza -la --icons";
-      cat = "bat";
-      cd = "z";
-      rebuild = "sudo nixos-rebuild switch --flake ~/.config/nixos#adam";
+  config = {
+    # Light theme specialisation — activate with:
+    #   /nix/var/nix/profiles/per-user/$USER/home-manager/specialisation/light/activate
+    # Return to dark (default) with:
+    #   /nix/var/nix/profiles/per-user/$USER/home-manager/activate
+    specialisation.light.configuration = {
+      theme.colors = (import ./modules/colorscheme/gruvbox.nix).light;
+      theme.dark = false;
     };
-    initExtra = ''
-      eval "$(zoxide init bash)"
-    '';
-  };
 
-  # XDG dirs
-  xdg.enable = true;
-  xdg.userDirs = {
-    enable = true;
-    createDirectories = true;
+    home.username = "adam";
+    home.homeDirectory = "/home/adam";
+    home.stateVersion = "25.11";
+
+    programs.home-manager.enable = true;
+
+    home.packages = with pkgs; [
+      # Editor
+      neovim
+
+      # File manager
+      thunar
+      xfce.thunar-archive-plugin
+      xfce.thunar-volman
+      gvfs
+
+      # Wallpaper
+      hyprpaper
+
+      # App launcher
+      rofi
+
+      # Notifications
+      mako
+      libnotify
+
+      # Utilities
+      wl-clipboard
+      cliphist
+      grim
+      slurp
+      swappy
+      playerctl
+      pavucontrol
+      btop
+      bat
+      eza
+      zoxide
+
+      # Neovim dependencies
+      fzf
+      tree-sitter
+      gcc
+      gnumake
+
+      # Hyprlock
+      hyprlock
+      hypridle
+
+      # PDF reader
+      zathura
+      dbus
+    ];
+
+    # --- Generated theme configs ---
+
+    # Hyprlock theme variables
+    xdg.configFile."hypr/hyprlock-theme.conf".text =
+      let c = config.theme.colors; in ''
+        $color = ${c.hyprlockBg}
+        $inner_color = ${c.hyprlockBgInner}
+        $outer_color = ${c.hyprlockOuter}
+        $font_color = ${c.hyprlockFont}
+        $check_color = ${c.hyprlockCheck}
+      '';
+
+    xdg.configFile."hypr/hyprlock.conf".source = ./home/hyprlock.conf;
+    xdg.configFile."hypr/hypridle.conf".source = ./home/hypridle.conf;
+
+    # Mako notification daemon
+    xdg.configFile."mako/config".text =
+      let c = config.theme.colors; in ''
+        background-color=#${c.bg}
+        border-color=#${c.accent}
+        text-color=#${c.fg}
+        border-radius=0
+        border-size=2
+        default-timeout=5000
+        font=TX02 Nerd Font 11
+        width=300
+        height=100
+        padding=10
+        margin=10
+        icons=1
+        max-icon-size=32
+      '';
+
+    # Rofi color variables (imported by gruvbox.rasi)
+    xdg.configFile."rofi/colors.rasi".text =
+      let c = config.theme.colors; in ''
+        * {
+            bg: #${c.bg};
+            fg: #${c.fg};
+            accent: #${c.accent};
+            gray: #${c.gray};
+            red: #${c.red};
+        }
+      '';
+
+    # Zathura
+    xdg.configFile."zathura/zathurarc".text =
+      let c = config.theme.colors; z = c.zathura; in ''
+        # Keybindings
+        map u scroll half-up
+        map d scroll half-down
+        map D toggle_page_mode
+        map r reload
+        map R rotate
+        map K zoom in
+        map J zoom out
+        map i recolor
+        map p print
+
+        # General settings
+        set selection-clipboard clipboard
+        set render-loading      true
+        set adjust-open         best-fit
+        set pages-per-row       1
+        set scroll-step         50
+
+        set notification-error-bg       "${z.notifErrBg}"
+        set notification-error-fg       "${z.notifErrFg}"
+        set notification-warning-bg     "${z.notifWarnBg}"
+        set notification-warning-fg     "${z.notifWarnFg}"
+        set notification-bg             "${z.notifBg}"
+        set notification-fg             "${z.notifFg}"
+        set completion-bg               "${z.completionBg}"
+        set completion-fg               "${z.completionFg}"
+        set completion-group-bg         "${z.completionGrpBg}"
+        set completion-group-fg         "${z.completionGrpFg}"
+        set completion-highlight-bg     "${z.completionHighBg}"
+        set completion-highlight-fg     "${z.completionHighFg}"
+        set index-bg                    "${z.indexBg}"
+        set index-fg                    "${z.indexFg}"
+        set index-active-bg             "${z.indexActiveBg}"
+        set index-active-fg             "${z.indexActiveFg}"
+        set inputbar-bg                 "${z.inputbarBg}"
+        set inputbar-fg                 "${z.inputbarFg}"
+        set statusbar-bg                "${z.statusbarBg}"
+        set statusbar-fg                "${z.statusbarFg}"
+        set highlight-color             "${z.highlightColor}"
+        set highlight-active-color      "${z.highlightActive}"
+        set default-bg                  "${z.defaultBg}"
+        set default-fg                  "${z.defaultFg}"
+        set render-loading-bg           "${z.defaultBg}"
+        set render-loading-fg           "${z.defaultFg}"
+        set recolor-lightcolor          "${z.recolorLight}"
+        set recolor-darkcolor           "${z.recolorDark}"
+        set recolor                     "false"
+        set recolor-keephue             "false"
+      '';
+
+    # --- Scripts ---
+
+    home.file.".config/scripts/idle-toggle.sh" = {
+      source = ./scripts/idle-toggle.sh;
+      executable = true;
+    };
+
+    home.file.".config/scripts/idle-status.sh" = {
+      source = ./scripts/idle-status.sh;
+      executable = true;
+    };
+
+    home.file.".config/scripts/lock.sh" = {
+      source = ./scripts/lock.sh;
+      executable = true;
+    };
+
+    home.file.".config/scripts/power-menu.sh" = {
+      source = ./scripts/power-menu.sh;
+      executable = true;
+    };
+
+    # --- GTK ---
+
+    gtk = {
+      enable = true;
+      theme = {
+        name = config.theme.colors.gtkTheme;
+        package = pkgs.gruvbox-gtk-theme;
+      };
+      iconTheme = {
+        name = "Gruvbox-Dark";
+        package = pkgs.gruvbox-dark-icons-gtk;
+      };
+      cursorTheme = {
+        name = "Bibata-Modern-Classic";
+        size = 24;
+        package = pkgs.bibata-cursors;
+      };
+    };
+
+    dconf.settings = {
+      "org/gnome/desktop/interface" = {
+        color-scheme = config.theme.colors.gtkColorScheme;
+      };
+    };
+
+    # --- Programs ---
+
+    programs.direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+      enableBashIntegration = true;
+    };
+
+    programs.git = {
+      enable = true;
+      userName = "adam-coates";
+      userEmail = ""; # add your email
+    };
+
+    programs.bash = {
+      enable = true;
+      shellAliases = {
+        ls = "eza --icons";
+        ll = "eza -la --icons";
+        cat = "bat";
+        cd = "z";
+        rebuild = "sudo nixos-rebuild switch --flake ~/.config/nixos#adam";
+      };
+      initExtra = ''
+        eval "$(zoxide init bash)"
+      '';
+    };
+
+    xdg.enable = true;
+    xdg.userDirs = {
+      enable = true;
+      createDirectories = true;
+    };
   };
 }
-

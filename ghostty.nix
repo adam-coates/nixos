@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   programs.ghostty = {
@@ -14,8 +14,19 @@
       shell-integration-features = "no-cursor";
       window-decoration = false;
       background-opacity = 0.95;
-      # Include theme via symlink - theme switcher updates this symlink
-      config-file = "~/.config/ghostty/theme-link";
+      # Theme colors are loaded from this generated file
+      config-file = "~/.config/ghostty/theme.conf";
     };
   };
+
+  # Generated from theme.colors — updated on every nixos-rebuild
+  xdg.configFile."ghostty/theme.conf".text =
+    let c = config.theme.colors; in ''
+      background = #${c.ghosttyBg}
+      foreground = #${c.ghosttyFg}
+      cursor-color = #${c.ghosttyCursor}
+      selection-background = #${c.ghosttySelBg}
+      selection-foreground = #${c.ghosttySelFg}
+      ${lib.concatStringsSep "\n" (map (p: "palette = ${p}") c.ghosttyPalette)}
+    '';
 }

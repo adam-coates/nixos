@@ -2,6 +2,6 @@
 
 {
   # Mako installed as package only.
-  # Config is managed by the theme switcher and seeded via home.activation in home.nix.
+  # Config is generated from theme.colors in home.nix via xdg.configFile."mako/config".
   home.packages = [ pkgs.mako pkgs.libnotify ];
 }
