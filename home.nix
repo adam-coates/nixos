@@ -28,15 +28,23 @@ in
   };
 
   config = {
-    # Light specialisation — activated at runtime by theme-switch.sh via:
-    #   $PROFILE/specialisation/light/activate
-    # Return to dark (base) with:
-    #   $PROFILE/activate
-    # where PROFILE=/nix/var/nix/profiles/per-user/$USER/home-manager
     specialisation.light.configuration = {
       theme.colors = gruvbox.light;
       theme.dark = false;
     };
+
+    # Record the BASE home-manager generation path for theme-switch.sh.
+    # The base package always contains a "specialisation/" directory;
+    # the specialisation packages do not — so we use that to distinguish them.
+    # This runs on every nixos-rebuild and keeps hm-generation pointing at
+    # the base, even after the user has activated the light specialisation.
+    home.activation.saveThemeProfile = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      SCRIPT_DIR="$(dirname "$(realpath "''${BASH_SOURCE[0]}")")"
+      if [ -d "$SCRIPT_DIR/specialisation" ]; then
+        $DRY_RUN_CMD mkdir -p "$HOME/.local/state"
+        $DRY_RUN_CMD ln -sfn "$SCRIPT_DIR" "$HOME/.local/state/hm-generation"
+      fi
+    '';
 
     home.username = "adam";
     home.homeDirectory = "/home/adam";
