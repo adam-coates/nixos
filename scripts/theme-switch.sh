@@ -46,7 +46,7 @@ reload_apps() {
 
   for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
     [ -S "$socket" ] && nvim --server "$socket" --remote-send \
-      ":set background=${nvim_bg}<CR>:colorscheme gruvbox<CR>" 2>/dev/null || true
+      ":set background=${nvim_bg}<CR>:colorscheme gruvbox-material<CR>" 2>/dev/null || true
   done
 }
 
