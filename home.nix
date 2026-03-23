@@ -286,6 +286,7 @@ in
       };
       initExtra = ''
         eval "$(zoxide init bash)"
+        export PATH="$HOME/.local/bin:$PATH"
       '';
     };
 
