@@ -49,6 +49,7 @@ in
     home.username = "adam";
     home.homeDirectory = "/home/adam";
     home.stateVersion = "25.11";
+    home.sessionPath = [ "$HOME/.local/bin" ];
 
     programs.home-manager.enable = true;
 
