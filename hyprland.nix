@@ -148,7 +148,7 @@
 
         # Screenshot
         ", Print, exec, grim -g \"$(slurp)\" - | swappy -f -"
-        "$mod SHIFT, S, exec, mkdir -p ~/Pictures/screenshots && grim -g \"$(slurp)\" ~/pictures/screenshot_$(date +%Y%m%d_%H%M%S).png"
+        "$mod SHIFT, S, exec, mkdir -p ~/Pictures/screenshots && grim -g \"$(slurp)\" ~/Pictures/screenshots/screenshot_$(date +%Y%m%d_%H%M%S).png"
 
         # Clipboard
         "$mod, C, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
