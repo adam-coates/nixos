@@ -32,7 +32,7 @@
 
     window {
       height: 360px;
-      border: 3px;
+      border: 1px;
       border-color: @accent;
       background-color: @bg;
       border-radius: 12px;
@@ -53,7 +53,7 @@
       background-color: @accent;
       padding: 6px;
       text-color: @bg;
-      border-radius: 3px;
+      border-radius: 1px;
       margin: 20px 0px 0px 20px;
     }
 

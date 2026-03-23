@@ -29,6 +29,9 @@ reload_apps() {
 
   hyprctl reload 2>/dev/null || true
 
+  local wallpaper="$HOME/Pictures/wallpapers/gruvbox_${nvim_bg}.png"
+  hyprctl hyprpaper wallpaper ",${wallpaper}" 2>/dev/null || true
+
   pkill waybar; sleep 0.2; waybar &
   pkill mako;   sleep 0.2; mako &
 

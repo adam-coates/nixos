@@ -122,7 +122,7 @@ in
         border-color=#${c.accent}
         text-color=#${c.fg}
         border-radius=0
-        border-size=2
+        border-size=1
         default-timeout=5000
         font=TX02 Nerd Font 11
         width=300
@@ -197,6 +197,11 @@ in
         set recolor                     "false"
         set recolor-keephue             "false"
       '';
+
+    # --- Wallpapers ---
+
+    home.file."Pictures/wallpapers/gruvbox_dark.png".source = ./modules/colorscheme/gruvbox_dark.png;
+    home.file."Pictures/wallpapers/gruvbox_light.png".source = ./modules/colorscheme/gruvbox_light.png;
 
     # --- Scripts ---
 
