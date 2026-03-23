@@ -230,6 +230,11 @@ in
       executable = true;
     };
 
+    home.file.".local/bin/mkflake" = {
+      source = ./scripts/mkflake.sh;
+      executable = true;
+    };
+
     # --- GTK ---
 
     gtk = {
