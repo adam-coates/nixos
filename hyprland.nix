@@ -43,7 +43,7 @@
       general = {
         gaps_in = 5;
         gaps_out = 10;
-        border_size = 2;
+        border_size = 1;
         "col.active_border" = "rgb(${config.theme.colors.accent}) rgb(${config.theme.colors.orange}) 45deg";
         "col.inactive_border" = "rgb(${config.theme.colors.bg1})";
         layout = "dwindle";
@@ -52,7 +52,7 @@
 
       # Decoration
       decoration = {
-        rounding = 10;
+        rounding = 0;
         blur = {
           enabled = true;
           size = 3;
@@ -84,6 +84,7 @@
       dwindle = {
         pseudotile = true;
         preserve_split = true;
+        force_split = 2;
       };
 
       # Misc
