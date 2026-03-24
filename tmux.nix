@@ -3,6 +3,17 @@
 let
   git-status-script = pkgs.writeShellScript "git-status.sh" (builtins.readFile ./scripts/tmux/git-status.sh);
   wb-git-status-script = pkgs.writeShellScript "wb-git-status.sh" (builtins.readFile ./scripts/tmux/wb-git-status.sh);
+
+  tmux-pomodoro-plus = pkgs.tmuxPlugins.mkTmuxPlugin {
+    pluginName = "tmux-pomodoro-plus";
+    version = "unstable";
+    src = pkgs.fetchFromGitHub {
+      owner = "olimorris";
+      repo = "tmux-pomodoro-plus";
+      rev = "master";
+      sha256 = pkgs.lib.fakeHash;
+    };
+  };
 in
 {
   programs.tmux = {
@@ -23,8 +34,7 @@ in
       resurrect
       continuum
       vim-tmux-navigator
-      tmux-pomodoro-plus
-    ];
+    ] ++ [ tmux-pomodoro-plus ];
 
     extraConfig = ''
       # Pane base index
