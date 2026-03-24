@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
-CHOICE=$(printf "󰌾 Lock\n󰒲 Sleep\n󰜉 Restart\n󰐥 Shutdown\n󰍃 Logout" | \
-  rofi -dmenu -p " Power" -i \
-  -theme-str 'window {width: 300px;} listview {lines: 5;}')
+menu() {
+  local prompt="$1"
+  local options="$2"
+  echo -e "$options" | walker --dmenu --width 300 --minheight 1 --maxheight 400 -p "$prompt" 2>/dev/null
+}
 
-case "$CHOICE" in
-  "󰌾 Lock")     bash ~/.config/scripts/lock.sh ;;
-  "󰒲 Sleep")    bash ~/.config/scripts/lock.sh && systemctl suspend ;;
-  "󰜉 Restart")  systemctl reboot ;;
-  "󰐥 Shutdown") systemctl poweroff ;;
-  "󰍃 Logout")   hyprctl dispatch exit ;;
+case $(menu "Power" "󰌾  Lock\n󰒲  Sleep\n󰜉  Restart\n󰐥  Shutdown\n󰍃  Logout") in
+  *Lock*)     bash ~/.config/scripts/lock.sh ;;
+  *Sleep*)    bash ~/.config/scripts/lock.sh && systemctl suspend ;;
+  *Restart*)  systemctl reboot ;;
+  *Shutdown*) systemctl poweroff ;;
+  *Logout*)   hyprctl dispatch exit ;;
 esac

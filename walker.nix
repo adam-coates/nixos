@@ -1,7 +1,86 @@
-{ config, inputs, ... }:
+{ config, inputs, lib, ... }:
 
 let
-  c = config.theme.colors;
+  gruvbox = import ./modules/colorscheme/gruvbox.nix;
+
+  mkCSS = c: ''
+    @define-color base #${c.bg};
+    @define-color text #${c.fg};
+    @define-color border #${c.accent};
+    @define-color surface #${c.bg1};
+    @define-color selected-text #${c.accent};
+    @define-color muted #${c.gray};
+
+    * {
+      all: unset;
+    }
+
+    * {
+      font-family: "TX02 Nerd Font";
+      font-size: 14px;
+      color: @text;
+    }
+
+    scrollbar {
+      opacity: 0;
+    }
+
+    .normal-icons {
+      -gtk-icon-size: 16px;
+    }
+
+    .large-icons {
+      -gtk-icon-size: 32px;
+    }
+
+    .box-wrapper {
+      background: alpha(@base, 0.97);
+      padding: 20px;
+      border: 1px solid @border;
+      border-radius: 12px;
+    }
+
+    .search-container {
+      background: @surface;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .input placeholder {
+      opacity: 0.5;
+    }
+
+    .input {
+      color: @text;
+      caret-color: @text;
+    }
+
+    .item-box {
+      padding-left: 14px;
+    }
+
+    .item-text-box {
+      padding: 10px 0;
+    }
+
+    .item-subtext {
+      font-size: 11px;
+      opacity: 0.6;
+    }
+
+    .item-image {
+      margin-right: 10px;
+    }
+
+    child:selected .item-box {
+      background: alpha(@border, 0.2);
+      border-radius: 6px;
+    }
+
+    child:selected .item-box * {
+      color: @selected-text;
+    }
+  '';
 in
 {
   imports = [ inputs.walker.homeManagerModules.default ];
@@ -12,137 +91,14 @@ in
 
     config = {
       theme = if config.theme.dark then "gruvbox-dark" else "gruvbox-light";
-      placeholder = "Search...";
+      force_keyboard_focus = true;
+      selection_wrap = true;
+      placeholders.default = { input = " Search..."; list = "No Results"; };
     };
 
     themes = {
-      gruvbox-dark = {
-        style = ''
-          * {
-            font-family: "TX02 Nerd Font";
-            font-size: 13px;
-            color: #${c.fg};
-          }
-
-          #window {
-            background: #${c.bg};
-            border: 1px solid #${c.accent};
-            border-radius: 12px;
-          }
-
-          #box {
-            padding: 12px;
-          }
-
-          #search {
-            background: #${c.bg1};
-            border: 1px solid #${c.bg2};
-            border-radius: 6px;
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            color: #${c.fg};
-          }
-
-          #search:focus {
-            border-color: #${c.accent};
-          }
-
-          #list {
-            background: transparent;
-          }
-
-          row {
-            border-radius: 6px;
-            padding: 4px 8px;
-          }
-
-          row:selected {
-            background: #${c.bg2};
-            color: #${c.accent};
-          }
-
-          .icon {
-            margin-right: 10px;
-          }
-
-          .label {
-            color: #${c.fg};
-          }
-
-          row:selected .label {
-            color: #${c.accent};
-          }
-
-          .sub {
-            color: #${c.gray};
-            font-size: 11px;
-          }
-        '';
-      };
-
-      gruvbox-light = {
-        style = ''
-          * {
-            font-family: "TX02 Nerd Font";
-            font-size: 13px;
-            color: #${c.fg};
-          }
-
-          #window {
-            background: #${c.bg};
-            border: 1px solid #${c.accent};
-            border-radius: 12px;
-          }
-
-          #box {
-            padding: 12px;
-          }
-
-          #search {
-            background: #${c.bg1};
-            border: 1px solid #${c.bg2};
-            border-radius: 6px;
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            color: #${c.fg};
-          }
-
-          #search:focus {
-            border-color: #${c.accent};
-          }
-
-          #list {
-            background: transparent;
-          }
-
-          row {
-            border-radius: 6px;
-            padding: 4px 8px;
-          }
-
-          row:selected {
-            background: #${c.bg2};
-            color: #${c.accent};
-          }
-
-          .icon {
-            margin-right: 10px;
-          }
-
-          .label {
-            color: #${c.fg};
-          }
-
-          row:selected .label {
-            color: #${c.accent};
-          }
-
-          .sub {
-            color: #${c.gray};
-            font-size: 11px;
-          }
-        '';
-      };
+      gruvbox-dark.style  = mkCSS gruvbox.dark;
+      gruvbox-light.style = mkCSS gruvbox.light;
     };
   };
 }
