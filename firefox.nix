@@ -252,6 +252,10 @@ in
         # Network
         "network.connectivity-service.enabled" = false;
 
+        # Always restore previous session on restart
+        "browser.startup.page" = 3;
+        "browser.sessionstore.resume_from_crash" = true;
+
         # Language / locale
         "general.useragent.locale" = "en-US";
         "intl.accept_languages" = "en-US, en";

@@ -250,6 +250,13 @@ in
       };
     };
 
+    xfconf.settings = {
+      thunar = {
+        "/last-view" = "ThunarDetailsView";
+        "/last-show-hidden" = true;
+      };
+    };
+
     # --- Programs ---
 
     programs.direnv = {
