@@ -48,9 +48,7 @@ reload_apps() {
     done
   fi
 
-  if pgrep -x tmux > /dev/null; then
-    tmux source-file "$HOME/.config/tmux/themes/gruvbox-${nvim_bg}.conf" 2>/dev/null || true
-  fi
+  tmux source-file "$HOME/.config/tmux/themes/gruvbox-${nvim_bg}.conf" 2>/dev/null || true
 
   for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
     [ -S "$socket" ] && nvim --server "$socket" --remote-send \
