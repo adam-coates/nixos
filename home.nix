@@ -249,12 +249,13 @@ in
       };
     };
 
-    xfconf.settings = {
-      thunar = {
-        "/last-view" = "ThunarDetailsView";
-        "/last-show-hidden" = true;
-      };
-    };
+    xdg.configFile."xfce4/xfconf/xfce-perchannel-xml/thunar.xml".text = ''
+      <?xml version="1.0" encoding="UTF-8"?>
+      <channel name="thunar" version="1.0">
+        <property name="last-view" type="string" value="ThunarDetailsView"/>
+        <property name="last-show-hidden" type="bool" value="true"/>
+      </channel>
+    '';
 
     # --- Programs ---
 
