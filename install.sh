@@ -152,6 +152,12 @@ else
     echo -e "${YELLOW}Warning: could not find .tmux in dotfiles repo${NC}"
 fi
 
+# Clone TPM (Tmux Plugin Manager)
+git clone https://github.com/tmux-plugins/tpm /mnt/home/adam/.config/tmux/plugins/tpm \
+    && echo -e "${GREEN}TPM cloned successfully${NC}" \
+    || echo -e "${YELLOW}Warning: could not clone TPM, run manually after boot:
+  git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm${NC}"
+
 # Fix ownership
 chown -R 1000:1000 /mnt/home/adam/.config 2>/dev/null || true
 
