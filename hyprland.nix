@@ -97,7 +97,7 @@
       "$mod" = "SUPER";
       "$terminal" = "ghostty";
       "$fileManager" = "thunar";
-      "$menu" = "rofi -show drun";
+      "$menu" = "walker";
       "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
       "$powerMenu" = "bash ~/.config/scripts/power-menu.sh";
       "$lock" = "bash ~/.config/scripts/lock.sh";

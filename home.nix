@@ -8,7 +8,7 @@ in
   imports = [
     ./hyprland.nix
     ./waybar.nix
-    ./rofi.nix
+    ./walker.nix
     ./mako.nix
     ./hyprpaper.nix
     ./ghostty.nix
@@ -66,8 +66,6 @@ in
       # Wallpaper
       hyprpaper
 
-      # App launcher
-      rofi
 
       # Notifications
       mako
@@ -132,18 +130,6 @@ in
         margin=10
         icons=1
         max-icon-size=32
-      '';
-
-    # Rofi color variables (imported by gruvbox.rasi)
-    xdg.configFile."rofi/colors.rasi".text =
-      let c = config.theme.colors; in ''
-        * {
-            bg: #${c.bg};
-            fg: #${c.fg};
-            accent: #${c.accent};
-            gray: #${c.gray};
-            red: #${c.red};
-        }
       '';
 
     # Zathura

@@ -34,6 +34,7 @@ reload_apps() {
 
   pkill waybar; sleep 0.2; waybar &
   pkill mako;   sleep 0.2; mako &
+  systemctl --user restart walker 2>/dev/null || true
 
   pkill -USR2 ghostty 2>/dev/null || true
 
