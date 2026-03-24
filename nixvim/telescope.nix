@@ -13,11 +13,13 @@
       defaults = {
         path_display = [ "truncate" ];
         layout_strategy = "horizontal";
-        mappings.i = {
-          "__rawKey__['<C-k>']".__raw = "require('telescope.actions').move_selection_previous";
-          "__rawKey__['<C-j>']".__raw = "require('telescope.actions').move_selection_next";
-          "__rawKey__['<C-q>']".__raw = "require('telescope.actions').send_selected_to_qflist + require('telescope.actions').open_qflist";
-        };
+        mappings.i.__raw = ''
+          {
+            ['<C-k>'] = require('telescope.actions').move_selection_previous,
+            ['<C-j>'] = require('telescope.actions').move_selection_next,
+            ['<C-q>'] = require('telescope.actions').send_selected_to_qflist + require('telescope.actions').open_qflist,
+          }
+        '';
       };
     };
 

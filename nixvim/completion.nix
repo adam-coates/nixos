@@ -8,21 +8,17 @@
       settings = {
         completion.completeopt = "menu,menuone,preview,noselect";
 
-        snippet.expand = ''
-          function(args)
-            require('luasnip').lsp_expand(args.body)
-          end
-        '';
+        snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
 
         mapping = {
-          "__rawKey__['<C-p>']" = "cmp.mapping.select_prev_item()";
-          "__rawKey__['<C-n>']" = "cmp.mapping.select_next_item()";
-          "__rawKey__['<C-b>']" = "cmp.mapping.scroll_docs(-4)";
-          "__rawKey__['<C-f>']" = "cmp.mapping.scroll_docs(4)";
-          "__rawKey__['<C-Space>']" = "cmp.mapping.complete()";
-          "__rawKey__['<C-e>']" = "cmp.mapping.abort()";
-          "__rawKey__['<CR>']" = "cmp.mapping.confirm({ select = false })";
-          "__rawKey__['<Tab>']".__raw = ''
+          "<C-p>" = "cmp.mapping.select_prev_item()";
+          "<C-n>" = "cmp.mapping.select_next_item()";
+          "<C-b>" = "cmp.mapping.scroll_docs(-4)";
+          "<C-f>" = "cmp.mapping.scroll_docs(4)";
+          "<C-Space>" = "cmp.mapping.complete()";
+          "<C-e>" = "cmp.mapping.abort()";
+          "<CR>" = "cmp.mapping.confirm({ select = false })";
+          "<Tab>" = ''
             cmp.mapping(function(fallback)
               local luasnip = require('luasnip')
               if cmp.visible() then
@@ -34,7 +30,7 @@
               end
             end, { "i", "s" })
           '';
-          "__rawKey__['<S-Tab>']".__raw = ''
+          "<S-Tab>" = ''
             cmp.mapping(function()
               require('luasnip').jump(-1)
             end, { "i", "s" })

@@ -91,16 +91,20 @@
       severity_sort = true;
       float = { border = "rounded"; source = true; header = ""; prefix = ""; };
       signs = {
-        text = {
-          "__rawKey__vim.diagnostic.severity.ERROR" = "󰅚 ";
-          "__rawKey__vim.diagnostic.severity.WARN" = "󰀪 ";
-          "__rawKey__vim.diagnostic.severity.INFO" = "󰋽 ";
-          "__rawKey__vim.diagnostic.severity.HINT" = "󰌶 ";
-        };
-        numhl = {
-          "__rawKey__vim.diagnostic.severity.ERROR" = "ErrorMsg";
-          "__rawKey__vim.diagnostic.severity.WARN" = "WarningMsg";
-        };
+        text.__raw = ''
+          {
+            [vim.diagnostic.severity.ERROR] = "󰅚 ",
+            [vim.diagnostic.severity.WARN] = "󰀪 ",
+            [vim.diagnostic.severity.INFO] = "󰋽 ",
+            [vim.diagnostic.severity.HINT] = "󰌶 ",
+          }
+        '';
+        numhl.__raw = ''
+          {
+            [vim.diagnostic.severity.ERROR] = "ErrorMsg",
+            [vim.diagnostic.severity.WARN] = "WarningMsg",
+          }
+        '';
       };
     };
 
