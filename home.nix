@@ -13,6 +13,7 @@ in
     ./hyprpaper.nix
     ./ghostty.nix
     ./tmux.nix
+    ./starship.nix
   ];
 
   options.theme = {
