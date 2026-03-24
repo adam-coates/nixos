@@ -57,6 +57,11 @@
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
+  # Thunar
+  services.gvfs.enable = true;
+  programs.xfconf.enable = true;
+  programs.dconf.enable = true;
+
   # Fonts
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
