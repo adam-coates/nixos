@@ -9,7 +9,7 @@ let
       owner = "adam-coates";
       repo = "printer.nvim";
       rev = "main";
-      sha256 = pkgs.lib.fakeHash;
+      sha256 = "0z05rxj50pmykdbk7sdz05wv0bwsb3imdqigd2m9p7zh7hsqpcvz";
     };
   };
 
@@ -21,7 +21,7 @@ let
       owner = "adam-coates";
       repo = "markdown-preview.nvim";
       rev = "master";
-      sha256 = pkgs.lib.fakeHash;
+      sha256 = "0vm04zs3pgbb6nnlfcizmiaql84f4ch5k56hxcg1zk6xiqyzq54l";
     };
   };
 in

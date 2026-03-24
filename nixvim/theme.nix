@@ -1,19 +1,48 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
+let
+  mkTheme = pname: src: pkgs.vimUtils.buildVimPlugin {
+    inherit pname src;
+    version = "unstable";
+  };
+
+  bamboo-nvim = mkTheme "bamboo-nvim" (pkgs.fetchFromGitHub {
+    owner = "ribru17"; repo = "bamboo.nvim"; rev = "master";
+    sha256 = "000bz7z7ghwaav2vbdynzp1h3rg0dy62wdp8g631b5hk1x1apljz";
+  });
+
+  flexoki-neovim = mkTheme "flexoki-neovim" (pkgs.fetchFromGitHub {
+    owner = "kepano"; repo = "flexoki-neovim"; rev = "main";
+    sha256 = "0j6r1rm9g6mm5b5x2wddwyhh6wjagk0x9babs73ky081sgvlyl2f";
+  });
+
+  matteblack-nvim = mkTheme "matteblack-nvim" (pkgs.fetchFromGitHub {
+    owner = "tahayvr"; repo = "matteblack.nvim"; rev = "main";
+    sha256 = "0zbq1g5zmjq3sd9wdil7m5s0hvmvdby692k2vfa2m07lwx626kxn";
+  });
+
+  monokai-pro-nvim = mkTheme "monokai-pro-nvim" (pkgs.fetchFromGitHub {
+    owner = "loctvl842"; repo = "monokai-pro.nvim"; rev = "master";
+    sha256 = "175pjdjr6g6ajd44ddd26ckl9dgbljrfjd8d4zgjndpn80hqdjhv";
+  });
+in
 {
   programs.nixvim = {
     colorschemes.gruvbox-material.enable = true;
 
     # Additional colorscheme plugins (available for hot-reload)
-    extraPlugins = with pkgs.vimPlugins; [
-      bamboo-nvim
+    extraPlugins = (with pkgs.vimPlugins; [
       catppuccin-nvim
       everforest
-      flexoki-neovim
       kanagawa-nvim
       nord-nvim
       rose-pine
       tokyonight-nvim
+    ]) ++ [
+      bamboo-nvim
+      flexoki-neovim
+      matteblack-nvim
+      monokai-pro-nvim
     ];
 
     # Transparency overrides

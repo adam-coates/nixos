@@ -11,7 +11,7 @@ let
       owner = "olimorris";
       repo = "tmux-pomodoro-plus";
       rev = "master";
-      sha256 = pkgs.lib.fakeHash;
+      sha256 = "002r406xvg6yjwx904nd5aik7xs4bs7vcwdbbpjd7jw0djmxysd5";
     };
   };
 in

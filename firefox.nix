@@ -16,7 +16,7 @@ let
 
   zoteroConnector = pkgs.fetchurl {
     url = "https://download.zotero.org/connector/firefox/release/Zotero_Connector.xpi";
-    sha256 = lib.fakeHash;
+    sha256 = "0wr8h7w7yzxrkwicks4x3cw3m2dc74kp863ndxyymcwyzf4x84k1";
   };
 
   userChrome = ''
