@@ -14,11 +14,6 @@ let
     };
   };
 
-  zoteroConnector = pkgs.fetchurl {
-    url = "https://download.zotero.org/connector/firefox/release/Zotero_Connector.xpi";
-    sha256 = "0wr8h7w7yzxrkwicks4x3cw3m2dc74kp863ndxyymcwyzf4x84k1";
-  };
-
   userChrome = ''
     :root {
       --gruvbox-bg:      #${c.bg};
@@ -156,12 +151,7 @@ in
         (extension "ublock-origin" "uBlock0@raymondhill.net")
         (extension "vimium-ff"     "{d7742d87-e61d-4b78-b8a1-b469842139fa}")
         (extension "todoist"       "support@todoist.com")
-      ] // {
-        "zotero@chnm.gmu.edu" = {
-          install_url = "file://${zoteroConnector}";
-          installation_mode = "normal_installed";
-        };
-      };
+      ];
 
       Preferences = {
         "browser.contentblocking.category"                                          = { Value = "strict"; Status = "locked"; };
