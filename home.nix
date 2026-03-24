@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 let
   gruvbox = import ./modules/colorscheme/gruvbox.nix;
@@ -15,6 +15,8 @@ in
     ./tmux.nix
     ./starship.nix
     ./firefox.nix
+    inputs.nixvim.homeManagerModules.nixvim
+    ./nixvim
   ];
 
   options.theme = {
@@ -57,9 +59,6 @@ in
     programs.home-manager.enable = true;
 
     home.packages = with pkgs; [
-      # Editor
-      neovim
-
       # File manager
       thunar
       xfce.thunar-archive-plugin
@@ -86,11 +85,6 @@ in
       bat
       eza
       zoxide
-
-      # Neovim dependencies
-      tree-sitter
-      gcc
-      gnumake
 
       # Hyprlock
       hyprlock

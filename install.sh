@@ -99,10 +99,11 @@ HWCONFIG=$(cat /mnt/etc/nixos/hardware-configuration.nix)
 cp "$SCRIPT_DIR"/*.nix /mnt/etc/nixos/
 cp "$SCRIPT_DIR/flake.nix" /mnt/etc/nixos/flake.nix
 
-# Copy scripts, home and modules directories
+# Copy scripts, home, modules, and nixvim directories
 cp -r "$SCRIPT_DIR/scripts" /mnt/etc/nixos/
 cp -r "$SCRIPT_DIR/home" /mnt/etc/nixos/
 cp -r "$SCRIPT_DIR/modules" /mnt/etc/nixos/
+cp -r "$SCRIPT_DIR/nixvim" /mnt/etc/nixos/
 
 # Restore hardware config (may have been overwritten)
 echo "$HWCONFIG" >/mnt/etc/nixos/hardware-configuration.nix
@@ -122,44 +123,8 @@ echo -e "${BLUE}Setting password for adam...${NC}"
 nixos-enter --root /mnt -c 'passwd adam'
 nixos-enter --root /mnt -c 'passwd root'
 
-# ── Post-install: clone neovim dotfiles ───────────────────────────────────────
-echo -e "${BLUE}Setting up neovim dotfiles...${NC}"
-git clone https://github.com/adam-coates/dotfiles.git /mnt/home/adam/dotfiles ||
-    echo -e "${YELLOW}Warning: could not clone neovim dotfiles, do this manually after boot${NC}"
-
-# Copy just the nvim config to the correct location
-if [ -d "/mnt/home/adam/dotfiles/.config/nvim" ]; then
-    mkdir -p /mnt/home/adam/.config
-    cp -r /mnt/home/adam/dotfiles/.config/nvim /mnt/home/adam/.config/nvim
-    echo -e "${GREEN}Neovim config copied successfully${NC}"
-else
-    echo -e "${YELLOW}Warning: could not find .config/nvim in dotfiles repo${NC}"
-fi
-
-# Copy tmux config and scripts
-if [ -d "/mnt/home/adam/dotfiles/.config/tmux" ]; then
-    mkdir -p /mnt/home/adam/.config
-    cp -r /mnt/home/adam/dotfiles/.config/tmux /mnt/home/adam/.config/tmux
-    echo -e "${GREEN}Tmux config copied successfully${NC}"
-else
-    echo -e "${YELLOW}Warning: could not find .config/tmux in dotfiles repo${NC}"
-fi
-
-if [ -d "/mnt/home/adam/dotfiles/.tmux" ]; then
-    cp -r /mnt/home/adam/dotfiles/.tmux /mnt/home/adam/.tmux
-    echo -e "${GREEN}Tmux scripts copied successfully${NC}"
-else
-    echo -e "${YELLOW}Warning: could not find .tmux in dotfiles repo${NC}"
-fi
-
-# Clone TPM (Tmux Plugin Manager)
-git clone https://github.com/tmux-plugins/tpm /mnt/home/adam/.config/tmux/plugins/tpm \
-    && echo -e "${GREEN}TPM cloned successfully${NC}" \
-    || echo -e "${YELLOW}Warning: could not clone TPM, run manually after boot:
-  git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm${NC}"
-
-# Fix ownership
-chown -R 1000:1000 /mnt/home/adam/.config 2>/dev/null || true
+# Fix ownership (neovim and tmux are managed declaratively by home-manager)
+chown -R 1000:1000 /mnt/home/adam 2>/dev/null || true
 
 echo ""
 echo -e "${GREEN}Installation complete!${NC}"
