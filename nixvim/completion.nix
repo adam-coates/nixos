@@ -47,13 +47,6 @@
           { name = "buffer"; }
           { name = "path"; }
         ];
-
-        formatting.format.__raw = ''
-          require('lspkind').cmp_format({
-            maxwidth = 50,
-            ellipsis_char = "...",
-          })
-        '';
       };
     };
 
@@ -66,7 +59,12 @@
     };
 
     friendly-snippets.enable = true;
-    lspkind.enable = true;
+    lspkind = {
+      enable = true;
+      cmp.enable = true;
+      cmp.maxWidth = 50;
+      cmp.ellipsisChar = "...";
+    };
     cmp-nvim-lsp.enable = true;
     cmp-buffer.enable = true;
     cmp-path.enable = true;
