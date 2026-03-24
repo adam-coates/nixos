@@ -252,6 +252,13 @@ in
         # Network
         "network.connectivity-service.enabled" = false;
 
+        # Language / locale
+        "general.useragent.locale" = "en-US";
+        "intl.accept_languages" = "en-US, en";
+        "intl.locale.requested" = "en-US";
+        "browser.search.region" = "US";
+        "distribution.searchplugins.defaultLocale" = "en-US";
+
         # Privacy
         "privacy.donottrackheader.enabled" = true;
         "dom.forms.autocomplete.formautofill" = false;
