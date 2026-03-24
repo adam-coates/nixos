@@ -182,9 +182,85 @@ in
       isDefault = true;
 
       settings = {
+        # Enable userChrome.css
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "browser.uidensity" = 1;
         "browser.compactmode.show" = true;
+
+        # UI
+        "browser.aboutConfig.showWarning" = false;
+        "browser.ctrlTab.recentlyUsedOrder" = false;
+        "browser.tabs.loadInBackground" = true;
+        "browser.link.open_newwindow" = true;
+        "general.autoScroll" = true;
+        "browser.shell.checkDefaultBrowser" = false;
+        "browser.download.useDownloadDir" = false;
+        "browser.helperApps.deleteTempFileOnExit" = true;
+        "browser.uitour.enabled" = false;
+
+        # URL bar bloat
+        "browser.urlbar.quickactions.enabled" = false;
+        "browser.urlbar.quickactions.showPrefs" = false;
+        "browser.urlbar.shortcuts.quickactions" = false;
+        "browser.urlbar.suggest.quickactions" = false;
+        "browser.urlbar.showSearchSuggestionsFirst" = false;
+        "browser.urlbar.suggest.calculator" = true;
+
+        # New tab page
+        "browser.newtabpage.activity-stream.default.sites" = "";
+        "browser.newtabpage.activity-stream.feeds.topsites" = false;
+        "browser.newtabpage.activity-stream.showSponsored" = false;
+        "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
+        "browser.discovery.enabled" = false;
+
+        # Disable geolocation via Google/OS
+        "geo.provider.use_gpsd" = false;
+        "geo.provider.use_geoclue" = false;
+
+        # Normandy/Shield (telemetry recipe system)
+        "app.normandy.enabled" = false;
+        "app.normandy.api_url" = "";
+        "app.shield.optoutstudies.enabled" = false;
+
+        # Telemetry — comprehensive kill
+        "datareporting.policy.dataSubmissionEnabled" = false;
+        "datareporting.healthreport.uploadEnabled" = false;
+        "toolkit.telemetry.unified" = false;
+        "toolkit.telemetry.enabled" = false;
+        "toolkit.telemetry.server" = "data:,";
+        "toolkit.telemetry.archive.enabled" = false;
+        "toolkit.telemetry.newProfilePing.enabled" = false;
+        "toolkit.telemetry.shutdownPingSender.enabled" = false;
+        "toolkit.telemetry.shutdownPingSender.enabledFirstSession" = false;
+        "toolkit.telemetry.updatePing.enabled" = false;
+        "toolkit.telemetry.bhrPing.enabled" = false;
+        "toolkit.telemetry.firstShutdownPing.enabled" = false;
+        "toolkit.telemetry.coverage.opt-out" = true;
+        "toolkit.coverage.opt-out" = true;
+        "toolkit.coverage.endpoint.base" = "";
+        "toolkit.telemetry.reportingpolicy.firstRun" = false;
+        "browser.ping-centre.telemetry" = false;
+        "browser.newtabpage.activity-stream.feeds.telemetry" = false;
+        "browser.newtabpage.activity-stream.telemetry" = false;
+        "browser.vpn_promo.enabled" = false;
+
+        # Extensions
+        "extensions.getAddons.showPane" = false;
+        "extensions.htmlaboutaddons.recommendations.enabled" = false;
+        "extensions.update.enabled" = false;
+
+        # Network
+        "network.connectivity-service.enabled" = false;
+
+        # Privacy
+        "privacy.donottrackheader.enabled" = true;
+        "dom.forms.autocomplete.formautofill" = false;
+
+        # Print headers/footers
+        "print.print_footerleft" = "";
+        "print.print_footerright" = "";
+        "print.print_headerleft" = "";
+        "print.print_headerright" = "";
       };
 
       userChrome = userChrome;
