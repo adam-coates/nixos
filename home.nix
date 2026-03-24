@@ -88,7 +88,6 @@ in
       zoxide
 
       # Neovim dependencies
-      fzf
       tree-sitter
       gcc
       gnumake
@@ -258,6 +257,11 @@ in
     };
 
     # --- Programs ---
+
+    programs.fzf = {
+      enable = true;
+      enableBashIntegration = true;
+    };
 
     programs.direnv = {
       enable = true;
