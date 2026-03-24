@@ -12,6 +12,7 @@ in
     ./mako.nix
     ./hyprpaper.nix
     ./ghostty.nix
+    ./tmux.nix
   ];
 
   options.theme = {

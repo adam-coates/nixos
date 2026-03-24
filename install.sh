@@ -136,6 +136,14 @@ else
     echo -e "${YELLOW}Warning: could not find .config/nvim in dotfiles repo${NC}"
 fi
 
+# Copy tmux scripts (used by status bar)
+if [ -d "/mnt/home/adam/dotfiles/.tmux" ]; then
+    cp -r /mnt/home/adam/dotfiles/.tmux /mnt/home/adam/.tmux
+    echo -e "${GREEN}Tmux scripts copied successfully${NC}"
+else
+    echo -e "${YELLOW}Warning: could not find .tmux in dotfiles repo${NC}"
+fi
+
 # Fix ownership
 chown -R 1000:1000 /mnt/home/adam/.config 2>/dev/null || true
 
