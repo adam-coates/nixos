@@ -136,7 +136,15 @@ else
     echo -e "${YELLOW}Warning: could not find .config/nvim in dotfiles repo${NC}"
 fi
 
-# Copy tmux scripts (used by status bar)
+# Copy tmux config and scripts
+if [ -d "/mnt/home/adam/dotfiles/.config/tmux" ]; then
+    mkdir -p /mnt/home/adam/.config
+    cp -r /mnt/home/adam/dotfiles/.config/tmux /mnt/home/adam/.config/tmux
+    echo -e "${GREEN}Tmux config copied successfully${NC}"
+else
+    echo -e "${YELLOW}Warning: could not find .config/tmux in dotfiles repo${NC}"
+fi
+
 if [ -d "/mnt/home/adam/dotfiles/.tmux" ]; then
     cp -r /mnt/home/adam/dotfiles/.tmux /mnt/home/adam/.tmux
     echo -e "${GREEN}Tmux scripts copied successfully${NC}"
