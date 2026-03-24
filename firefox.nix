@@ -151,7 +151,7 @@ in
         (extension "ublock-origin"          "uBlock0@raymondhill.net")
         (extension "vimium-ff"              "{d7742d87-e61d-4b78-b8a1-b469842139fa}")
         (extension "zotero-connector"       "zotero@chnm.gmu.edu")
-        (extension "todoist-task-manager"   "todoist@todoist.com")
+        (extension "todoist"   "support@todoist.com")
       ];
 
       Preferences = {
