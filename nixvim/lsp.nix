@@ -21,7 +21,7 @@
           };
         };
 
-        ltex_plus = {
+        ltex = {
           enable = true;
           settings = {
             ltex = {
