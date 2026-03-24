@@ -37,7 +37,6 @@
     shellcheck
     markdownlint-cli
     yamllint
-    nodePackages.jsonlint
     htmlhint
     ruff
     mypy
