@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   c = config.theme.colors;
@@ -12,6 +12,11 @@ let
       install_url = "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
       installation_mode = "normal_installed";
     };
+  };
+
+  zoteroConnector = pkgs.fetchurl {
+    url = "https://download.zotero.org/connector/firefox/release/Zotero_Connector.xpi";
+    sha256 = lib.fakeHash;
   };
 
   userChrome = ''
@@ -148,11 +153,15 @@ in
       };
 
       ExtensionSettings = builtins.listToAttrs [
-        (extension "ublock-origin"          "uBlock0@raymondhill.net")
-        (extension "vimium-ff"              "{d7742d87-e61d-4b78-b8a1-b469842139fa}")
-        (extension "zotero-connector"       "zotero@chnm.gmu.edu")
-        (extension "todoist"   "support@todoist.com")
-      ];
+        (extension "ublock-origin" "uBlock0@raymondhill.net")
+        (extension "vimium-ff"     "{d7742d87-e61d-4b78-b8a1-b469842139fa}")
+        (extension "todoist"       "support@todoist.com")
+      ] // {
+        "zotero@chnm.gmu.edu" = {
+          install_url = "file://${zoteroConnector}";
+          installation_mode = "normal_installed";
+        };
+      };
 
       Preferences = {
         "browser.contentblocking.category"                                          = { Value = "strict"; Status = "locked"; };
