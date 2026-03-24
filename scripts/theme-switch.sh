@@ -38,6 +38,12 @@ reload_apps() {
 
   pkill -USR2 ghostty 2>/dev/null || true
 
+  if pgrep firefox > /dev/null; then
+    pkill firefox
+    sleep 0.5
+    firefox &
+  fi
+
   if pgrep -f zathura >/dev/null; then
     for svc in $(dbus-send --session --dest=org.freedesktop.DBus \
         --type=method_call --print-reply \

@@ -14,6 +14,7 @@ in
     ./ghostty.nix
     ./tmux.nix
     ./starship.nix
+    ./firefox.nix
   ];
 
   options.theme = {
