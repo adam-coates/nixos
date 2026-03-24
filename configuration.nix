@@ -60,7 +60,6 @@
   # Thunar
   services.gvfs.enable = true;
   programs.xfconf.enable = true;
-  programs.dconf.enable = true;
 
   # Fonts
   fonts.packages = with pkgs; [
