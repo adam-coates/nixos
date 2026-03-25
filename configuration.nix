@@ -86,6 +86,7 @@
     pamixer
     networkmanagerapplet
     nodejs
+    yarn
     # GTK theming
     gruvbox-gtk-theme
     gruvbox-dark-icons-gtk
