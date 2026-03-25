@@ -13,7 +13,7 @@ let
     };
   };
 
-  # Custom plugin: markdown-preview.nvim (custom fork)
+  # Custom fork: markdown-preview.nvim (needs yarn build)
   markdown-preview-nvim = pkgs.vimUtils.buildVimPlugin {
     pname = "markdown-preview-nvim";
     version = "latest";
@@ -23,7 +23,14 @@ let
       rev = "master";
       sha256 = "0vm04zs3pgbb6nnlfcizmiaql84f4ch5k56hxcg1zk6xiqyzq54l";
     };
+    nativeBuildInputs = [ pkgs.nodejs pkgs.yarn pkgs.cacert ];
+    buildPhase = ''
+      cd app
+      export HOME=$(mktemp -d)
+      yarn install --frozen-lockfile --production
+    '';
   };
+
 in
 {
   programs.nixvim = {
