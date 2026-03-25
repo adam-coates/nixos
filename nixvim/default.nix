@@ -22,6 +22,12 @@
   programs.nixvim = {
     enable = true;
 
+    # Set leader keys BEFORE any keymaps are registered
+    extraConfigLuaPre = ''
+      vim.g.mapleader = " "
+      vim.g.maplocalleader = ","
+    '';
+
     # Globals
     globals = {
       mapleader = " ";
