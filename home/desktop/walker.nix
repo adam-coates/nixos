@@ -1,7 +1,7 @@
 { config, inputs, lib, ... }:
 
 let
-  gruvbox = import ./modules/colorscheme/gruvbox.nix;
+  gruvbox = import ../../modules/colorscheme/gruvbox.nix;
 
   mkCSS = c: ''
     @define-color base #${c.bg};

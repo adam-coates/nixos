@@ -1,8 +1,8 @@
 { pkgs, ... }:
 
 let
-  git-status-script = pkgs.writeShellScript "git-status.sh" (builtins.readFile ./scripts/tmux/git-status.sh);
-  wb-git-status-script = pkgs.writeShellScript "wb-git-status.sh" (builtins.readFile ./scripts/tmux/wb-git-status.sh);
+  git-status-script = pkgs.writeShellScript "git-status.sh" (builtins.readFile ../../scripts/tmux/git-status.sh);
+  wb-git-status-script = pkgs.writeShellScript "wb-git-status.sh" (builtins.readFile ../../scripts/tmux/wb-git-status.sh);
 
   tmux-pomodoro-plus = pkgs.tmuxPlugins.mkTmuxPlugin {
     pluginName = "tmux-pomodoro-plus";

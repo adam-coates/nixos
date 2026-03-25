@@ -1,6 +1,13 @@
 { config, pkgs, ... }:
 
+let
+  darkWallpaper  = "/home/adam/Pictures/wallpapers/gruvbox_dark.png";
+  lightWallpaper = "/home/adam/Pictures/wallpapers/gruvbox_light.png";
+  activeWallpaper = if config.theme.dark then darkWallpaper else lightWallpaper;
+  c = config.theme.colors;
+in
 {
+  # ── Hyprland ──────────────────────────────────────────────────────────────
   wayland.windowManager.hyprland = {
     enable = true;
     settings = {
@@ -44,8 +51,8 @@
         gaps_in = 5;
         gaps_out = 10;
         border_size = 1;
-        "col.active_border" = "rgb(${config.theme.colors.accent}) rgb(${config.theme.colors.orange}) 45deg";
-        "col.inactive_border" = "rgb(${config.theme.colors.bg1})";
+        "col.active_border" = "rgb(${c.accent}) rgb(${c.orange}) 45deg";
+        "col.inactive_border" = "rgb(${c.bg1})";
         layout = "dwindle";
         allow_tearing = false;
       };
@@ -148,7 +155,7 @@
 
         # Screenshot
         ", Print, exec, grim -g \"$(slurp)\" - | swappy -f -"
-        "$mod SHIFT, S, exec, mkdir -p ~/Pictures/screenshots && grim -g \"$(slurp)\" ~/Pictures/screenshots/screenshot_$(date +%Y%m%d_%H%M%S).png && notify-send \"Screenshot saved\" \"~/Pictures/screenshots\" -t 2000"
+        ''$mod SHIFT, S, exec, mkdir -p ~/Pictures/screenshots && grim -g "$(slurp)" ~/Pictures/screenshots/screenshot_$(date +%Y%m%d_%H%M%S).png && notify-send "Screenshot saved" "~/Pictures/screenshots" -t 2000''
 
         # Clipboard
         "$mod, C, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
@@ -173,6 +180,63 @@
         ", XF86AudioNext, exec, playerctl next"
         ", XF86AudioPrev, exec, playerctl previous"
       ];
+    };
+  };
+
+  # ── Hyprpaper ─────────────────────────────────────────────────────────────
+  home.packages = [ pkgs.hyprpaper ];
+
+  xdg.configFile."hypr/hyprpaper.conf".text = ''
+    preload = ${darkWallpaper}
+    preload = ${lightWallpaper}
+    wallpaper = ,${activeWallpaper}
+    splash = false
+  '';
+
+  # ── Hypridle ──────────────────────────────────────────────────────────────
+  xdg.configFile."hypr/hypridle.conf".source = ./hypridle.conf;
+
+  # ── Hyprlock ──────────────────────────────────────────────────────────────
+  programs.hyprlock = {
+    enable = true;
+
+    settings = {
+      general = {
+        ignore_empty_input = true;
+      };
+
+      background = [{
+        monitor = "";
+        color = c.hyprlockBg;
+        blur_passes = 3;
+      }];
+
+      animations = {
+        enabled = false;
+      };
+
+      input-field = [{
+        monitor = "";
+        size = "650, 100";
+        position = "0, 0";
+        halign = "center";
+        valign = "center";
+        inner_color = c.hyprlockBgInner;
+        outer_color = c.hyprlockOuter;
+        outline_thickness = 4;
+        font_family = "TX02 Nerd Font";
+        font_color = c.hyprlockFont;
+        placeholder_text = "Enter Password";
+        check_color = c.hyprlockCheck;
+        fail_text = "<i>$FAIL ($ATTEMPTS)</i>";
+        rounding = 0;
+        shadow_passes = 0;
+        fade_on_empty = false;
+      }];
+
+      auth = {
+        "fingerprint:enabled" = false;
+      };
     };
   };
 }

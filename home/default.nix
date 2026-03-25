@@ -1,22 +1,15 @@
 { config, pkgs, lib, inputs, ... }:
 
 let
-  gruvbox = import ./modules/colorscheme/gruvbox.nix;
+  gruvbox = import ../modules/colorscheme/gruvbox.nix;
 in
 
 {
   imports = [
-    ./hyprland.nix
-    ./waybar.nix
-    ./walker.nix
-    ./mako.nix
-    ./hyprpaper.nix
-    ./ghostty.nix
-    ./tmux.nix
-    ./starship.nix
-    ./firefox.nix
-    ./hyprlock.nix
-    ./zathura.nix
+    ./hyprland
+    ./desktop
+    ./programs
+    ./shell
     inputs.nixvim.homeManagerModules.nixvim
     ./nixvim
   ];
@@ -41,10 +34,6 @@ in
     };
 
     # Record the BASE home-manager generation path for theme-switch.sh.
-    # The base package always contains a "specialisation/" directory;
-    # the specialisation packages do not — so we use that to distinguish them.
-    # This runs on every nixos-rebuild and keeps hm-generation pointing at
-    # the base, even after the user has activated the light specialisation.
     home.activation.saveThemeProfile = lib.hm.dag.entryAfter ["writeBoundary"] ''
       SCRIPT_DIR="$(dirname "$(realpath "''${BASH_SOURCE[0]}")")"
       if [ -d "$SCRIPT_DIR/specialisation" ]; then
@@ -67,10 +56,6 @@ in
       xfce.thunar-volman
       gvfs
 
-      # Wallpaper
-      hyprpaper
-
-
       # Notifications (mako managed by services.mako)
       libnotify
 
@@ -87,51 +72,47 @@ in
       eza
       zoxide
 
-      # Hyprlock (hyprlock managed by programs.hyprlock)
+      # Hyprlock (managed by programs.hyprlock)
       hypridle
 
       # PDF reader (zathura managed by programs.zathura)
       dbus
     ];
 
-    # --- Generated theme configs ---
-
-    xdg.configFile."hypr/hypridle.conf".source = ./home/hypridle.conf;
-
     # --- Wallpapers ---
 
-    home.file."Pictures/wallpapers/gruvbox_dark.png".source = ./modules/colorscheme/gruvbox_dark.png;
-    home.file."Pictures/wallpapers/gruvbox_light.png".source = ./modules/colorscheme/gruvbox_light.png;
+    home.file."Pictures/wallpapers/gruvbox_dark.png".source = ../modules/colorscheme/gruvbox_dark.png;
+    home.file."Pictures/wallpapers/gruvbox_light.png".source = ../modules/colorscheme/gruvbox_light.png;
 
     # --- Scripts ---
 
     home.file.".config/scripts/theme-switch.sh" = {
-      source = ./scripts/theme-switch.sh;
+      source = ../scripts/theme-switch.sh;
       executable = true;
     };
 
     home.file.".config/scripts/idle-toggle.sh" = {
-      source = ./scripts/idle-toggle.sh;
+      source = ../scripts/idle-toggle.sh;
       executable = true;
     };
 
     home.file.".config/scripts/idle-status.sh" = {
-      source = ./scripts/idle-status.sh;
+      source = ../scripts/idle-status.sh;
       executable = true;
     };
 
     home.file.".config/scripts/lock.sh" = {
-      source = ./scripts/lock.sh;
+      source = ../scripts/lock.sh;
       executable = true;
     };
 
     home.file.".config/scripts/power-menu.sh" = {
-      source = ./scripts/power-menu.sh;
+      source = ../scripts/power-menu.sh;
       executable = true;
     };
 
     home.file.".local/bin/mkflake" = {
-      source = ./scripts/mkflake.sh;
+      source = ../scripts/mkflake.sh;
       executable = true;
     };
 
@@ -179,27 +160,6 @@ in
       enable = true;
       nix-direnv.enable = true;
       enableBashIntegration = true;
-    };
-
-    programs.git = {
-      enable = true;
-      userName = "adam-coates";
-      userEmail = ""; # add your email
-    };
-
-    programs.bash = {
-      enable = true;
-      shellAliases = {
-        ls = "eza --icons";
-        ll = "eza -la --icons";
-        cat = "bat";
-        cd = "z";
-        rebuild = "sudo nixos-rebuild switch --flake ~/.config/nixos#adam";
-      };
-      initExtra = ''
-        eval "$(zoxide init bash)"
-        export PATH="$HOME/.local/bin:$PATH"
-      '';
     };
 
     xdg.enable = true;
