@@ -13,22 +13,16 @@ let
     };
   };
 
-  # Custom fork: markdown-preview.nvim (needs yarn build)
-  markdown-preview-nvim = pkgs.vimUtils.buildVimPlugin {
-    pname = "markdown-preview-nvim";
-    version = "latest";
+  # Custom fork: markdown-preview.nvim
+  # Override nixpkgs version (which handles the offline yarn build) with our fork's source
+  markdown-preview-nvim = pkgs.vimPlugins.markdown-preview-nvim.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "adam-coates";
       repo = "markdown-preview.nvim";
       rev = "master";
       sha256 = "0vm04zs3pgbb6nnlfcizmiaql84f4ch5k56hxcg1zk6xiqyzq54l";
     };
-    nativeBuildInputs = [ pkgs.nodejs pkgs.yarn pkgs.cacert ];
-    buildPhase = ''
-      export HOME=$(mktemp -d)
-      cd app && yarn install --frozen-lockfile --production
-    '';
-  };
+  });
 
 in
 {
