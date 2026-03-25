@@ -23,11 +23,10 @@ let
       rev = "master";
       sha256 = "0vm04zs3pgbb6nnlfcizmiaql84f4ch5k56hxcg1zk6xiqyzq54l";
     };
-    nativeBuildInputs = [ pkgs.nodejs pkgs.yarn pkgs.cacert ];
+    nativeBuildInputs = [ pkgs.nodejs pkgs.cacert ];
     buildPhase = ''
-      cd app
       export HOME=$(mktemp -d)
-      yarn install --frozen-lockfile --production
+      cd app && npm install
     '';
   };
 
