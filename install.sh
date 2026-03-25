@@ -95,18 +95,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Save generated hardware config
 HWCONFIG=$(cat /mnt/etc/nixos/hardware-configuration.nix)
 
-# Copy all nix files flat into /mnt/etc/nixos
-cp "$SCRIPT_DIR"/*.nix /mnt/etc/nixos/
+# Copy flake and directory structure
 cp "$SCRIPT_DIR/flake.nix" /mnt/etc/nixos/flake.nix
-
-# Copy scripts, home, modules, and nixvim directories
-cp -r "$SCRIPT_DIR/scripts" /mnt/etc/nixos/
 cp -r "$SCRIPT_DIR/home" /mnt/etc/nixos/
+cp -r "$SCRIPT_DIR/hosts" /mnt/etc/nixos/
 cp -r "$SCRIPT_DIR/modules" /mnt/etc/nixos/
-cp -r "$SCRIPT_DIR/nixvim" /mnt/etc/nixos/
+cp -r "$SCRIPT_DIR/scripts" /mnt/etc/nixos/
 
-# Restore hardware config (may have been overwritten)
-echo "$HWCONFIG" >/mnt/etc/nixos/hardware-configuration.nix
+# Restore hardware config (overwrites the stub with the real generated one)
+echo "$HWCONFIG" >/mnt/etc/nixos/hosts/adam/hardware-configuration.nix
 
 mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
@@ -131,8 +128,8 @@ echo -e "${GREEN}Installation complete!${NC}"
 echo -e "${YELLOW}Things to do after first boot:${NC}"
 echo "  1. Set your password:       passwd adam"
 echo "  2. Add a wallpaper to:      ~/Pictures/ and update hyprpaper.conf"
-echo "  3. Update git email in:     home/home.nix"
-echo "  4. Update timezone in:      hosts/default/configuration.nix"
+echo "  3. Update git email in:     home/programs/git.nix"
+echo "  4. Update timezone in:      hosts/adam/default.nix"
 echo "  5. Move config to dotfiles: cp -r /etc/nixos ~/.config/nixos"
 echo "  6. Rebuild anytime with:    sudo nixos-rebuild switch --flake ~/.config/nixos#adam"
 echo ""
