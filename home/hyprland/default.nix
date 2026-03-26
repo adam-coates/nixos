@@ -95,10 +95,10 @@
       "$mod" = "SUPER";
       "$terminal" = "ghostty";
       "$fileManager" = "thunar";
-      "$menu" = "quickshell msg toggle-launcher";
+      "$menu" = "qs ipc call shell toggleLauncher";
       "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
-      "$powerMenu" = "quickshell msg toggle-powermenu";
-      "$lock" = "quickshell msg lock";
+      "$powerMenu" = "qs ipc call shell togglePowermenu";
+      "$lock" = "qs ipc call shell lock";
 
       bind = [
         "$mod, Return, exec, $terminal"

@@ -41,21 +41,13 @@ ShellRoot {
   LockScreen {}
 
   // ── IPC handler for external commands ──
-  SocketServer {
-    active: true
-    path: "/tmp/quickshell-" + Qt.application.sessionId + ".sock"
+  IpcHandler {
+    target: "shell"
 
-    handler: SocketHandler {
-      onConnected: (connection) => {
-        connection.onTextReceived.connect(function(text) {
-          var cmd = text.trim()
-          if (cmd === "toggle-launcher") GlobalState.toggle("launcher")
-          else if (cmd === "toggle-powermenu") GlobalState.toggle("powermenu")
-          else if (cmd === "toggle-controlcenter") GlobalState.toggle("controlcenter")
-          else if (cmd === "lock") GlobalState.requestLock()
-          else if (cmd === "close-all") GlobalState.closeAll()
-        })
-      }
-    }
+    function toggleLauncher(): void { GlobalState.toggle("launcher") }
+    function togglePowermenu(): void { GlobalState.toggle("powermenu") }
+    function toggleControlcenter(): void { GlobalState.toggle("controlcenter") }
+    function lock(): void { GlobalState.requestLock() }
+    function closeAll(): void { GlobalState.closeAll() }
   }
 }
