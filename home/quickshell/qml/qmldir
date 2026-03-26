@@ -1,2 +1,20 @@
 singleton Theme Theme.qml
 singleton GlobalState GlobalState.qml
+Audio Audio.qml
+AudioSlider AudioSlider.qml
+Bar Bar.qml
+Battery Battery.qml
+Bluetooth Bluetooth.qml
+BluetoothPanel BluetoothPanel.qml
+Clock Clock.qml
+ControlCenter ControlCenter.qml
+IdleIndicator IdleIndicator.qml
+Launcher Launcher.qml
+LockScreen LockScreen.qml
+Network Network.qml
+NetworkPanel NetworkPanel.qml
+NotifPopup NotifPopup.qml
+NotifServer NotifServer.qml
+PowerMenu PowerMenu.qml
+Wallpaper Wallpaper.qml
+Workspaces Workspaces.qml
