@@ -1,11 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ./hyprpaper.nix
-    ./hyprlock.nix
-  ];
-
   wayland.windowManager.hyprland = {
     enable = true;
     settings = {
@@ -14,8 +9,7 @@
 
       # Autostart
       exec-once = [
-        "hyprpaper"
-        "noctalia-shell"
+        "quickshell"
         "hypridle"
         "nm-applet --indicator"
         "wl-paste --type text --watch cliphist store"
@@ -101,10 +95,10 @@
       "$mod" = "SUPER";
       "$terminal" = "ghostty";
       "$fileManager" = "thunar";
-      "$menu" = "walker";
+      "$menu" = "quickshell msg toggle-launcher";
       "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
-      "$powerMenu" = "bash ~/.config/scripts/power-menu.sh";
-      "$lock" = "bash ~/.config/scripts/lock.sh";
+      "$powerMenu" = "quickshell msg toggle-powermenu";
+      "$lock" = "quickshell msg lock";
 
       bind = [
         "$mod, Return, exec, $terminal"

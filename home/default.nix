@@ -7,12 +7,9 @@ in
 {
   imports = [
     ./hyprland
-    ./waybar
-    ./walker
-    ./mako
+    ./quickshell
     ./programs
     ./shell
-    ./noctalia
     inputs.nixvim.homeModules.nixvim
     ../nixvim
   ];
@@ -63,10 +60,7 @@ in
       thunar-volman
       gvfs
 
-      # Wallpaper
-      hyprpaper
-
-      # Notifications (mako managed by services.mako)
+      # Notifications (for notify-send CLI tool)
       libnotify
 
       # Utilities
@@ -76,13 +70,12 @@ in
       slurp
       swappy
       playerctl
-      pavucontrol
       btop
       bat
       eza
       zoxide
 
-      # Hyprlock (hyprlock managed by programs.hyprlock)
+      # Idle management
       hypridle
 
       # PDF reader (zathura managed by programs.zathura)
@@ -106,18 +99,8 @@ in
       executable = true;
     };
 
-    home.file.".config/scripts/idle-status.sh" = {
-      source = ./scripts/idle-status.sh;
-      executable = true;
-    };
-
     home.file.".config/scripts/lock.sh" = {
       source = ./scripts/lock.sh;
-      executable = true;
-    };
-
-    home.file.".config/scripts/power-menu.sh" = {
-      source = ./scripts/power-menu.sh;
       executable = true;
     };
 

@@ -35,11 +35,11 @@
     xwayland.enable = true;
   };
 
-  # Hyprlock - needed for PAM authentication
-  programs.hyprlock.enable = true;
-
   # Hypridle
   services.hypridle.enable = true;
+
+  # PAM service for quickshell lock screen
+  security.pam.services.login.enableGnomeKeyring = true;
 
   # Display manager - ly
   services.displayManager.ly.enable = true;
@@ -57,7 +57,7 @@
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
-  # Power management (required by noctalia)
+  # Power management (required by quickshell widgets)
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
 
