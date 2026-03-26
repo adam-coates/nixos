@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick 6.0
 
-QtObject {
+Item {
   id: root
 
   // Track which popup is currently open (only one at a time)
