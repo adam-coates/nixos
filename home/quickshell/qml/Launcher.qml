@@ -14,6 +14,7 @@ PanelWindow {
     if (showing) {
       searchInput.text = ""
       searchInput.forceActiveFocus()
+      if (allApps.length === 0) appScanner.running = true
       updateResults()
     }
   }
@@ -116,9 +117,14 @@ PanelWindow {
         spacing: 2
 
         delegate: Rectangle {
+          required property int index
+          required property string name
+          required property string exec
+          required property string icon
+
           width: resultsList.width
           height: 40
-          color: ListView.isCurrentItem ? Theme.accentAlpha(0.2) : "transparent"
+          color: resultsList.currentIndex === index ? Theme.accentAlpha(0.2) : "transparent"
           radius: 6
 
           RowLayout {
@@ -130,7 +136,7 @@ PanelWindow {
             spacing: 10
 
             Image {
-              source: model.icon ? ("image://icon/" + model.icon) : ""
+              source: icon ? ("image://icon/" + icon) : ""
               Layout.preferredWidth: 24
               Layout.preferredHeight: 24
               visible: source !== ""
@@ -138,10 +144,10 @@ PanelWindow {
 
             Text {
               Layout.fillWidth: true
-              text: model.name
+              text: name
               font.family: Theme.fontFamily
               font.pixelSize: 13
-              color: ListView.isCurrentItem ? Theme.accent : Theme.fg
+              color: resultsList.currentIndex === parent.parent.index ? Theme.accent : Theme.fg
               elide: Text.ElideRight
             }
           }
@@ -149,7 +155,7 @@ PanelWindow {
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: launchApp(model.exec)
+            onClicked: launchApp(exec)
             hoverEnabled: true
             onEntered: resultsList.currentIndex = index
           }
@@ -162,55 +168,51 @@ PanelWindow {
     id: resultsModel
   }
 
-  // Desktop entry scanner
+  // Desktop entry scanner — outputs "name\texec\ticon" per line
   property var allApps: []
+  property var pendingApps: []
 
   Process {
     id: appScanner
     command: ["bash", "-c",
-      "find /run/current-system/sw/share/applications " +
-      "$HOME/.local/share/applications " +
-      "$HOME/.nix-profile/share/applications " +
-      "/usr/share/applications " +
-      "-name '*.desktop' -type f 2>/dev/null | sort -u"
+      "for f in /run/current-system/sw/share/applications/*.desktop " +
+      "$HOME/.nix-profile/share/applications/*.desktop " +
+      "$HOME/.local/share/applications/*.desktop; do " +
+      "[ -f \"$f\" ] || continue; " +
+      "name=\"\" exec=\"\" icon=\"\" nodisplay=\"\"; " +
+      "while IFS= read -r line; do " +
+      "case \"$line\" in " +
+      "\\[*\\]) [ -n \"$name\" ] && break ;; " +
+      "Name=*) [ -z \"$name\" ] && name=\"${line#Name=}\" ;; " +
+      "Exec=*) [ -z \"$exec\" ] && exec=\"${line#Exec=}\" ;; " +
+      "Icon=*) [ -z \"$icon\" ] && icon=\"${line#Icon=}\" ;; " +
+      "NoDisplay=true) nodisplay=1 ;; " +
+      "esac; " +
+      "done < \"$f\"; " +
+      "[ -n \"$name\" ] && [ -n \"$exec\" ] && [ -z \"$nodisplay\" ] && " +
+      "printf '%s\\t%s\\t%s\\n' \"$name\" \"$exec\" \"$icon\"; " +
+      "done | sort -t$'\\t' -k1 -u"
     ]
-    onExited: {
-      var files = stdout.trim().split("\n")
-      allApps = []
-      for (var i = 0; i < files.length; i++) {
-        if (files[i]) parseDesktop.parseFile(files[i])
+
+    stdout: SplitParser {
+      splitMarker: "\n"
+      onRead: data => {
+        var parts = data.split("\t")
+        if (parts.length >= 2) {
+          var execStr = parts[1].replace(/%[fFuUdDnNickvm]/g, "").trim()
+          launcher.pendingApps.push({
+            name: parts[0],
+            exec: execStr,
+            icon: parts.length >= 3 ? parts[2] : ""
+          })
+        }
       }
     }
-  }
 
-  // Parse .desktop files
-  QtObject {
-    id: parseDesktop
-    function parseFile(path) {
-      var reader = Qt.createQmlObject(
-        'import Quickshell.Io; FileView { path: "' + path + '" }',
-        launcher)
-      var text = reader.text()
-      reader.destroy()
-
-      var name = "", exec = "", icon = "", noDisplay = false
-      var lines = text.split("\n")
-      var inEntry = false
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i].trim()
-        if (line === "[Desktop Entry]") { inEntry = true; continue }
-        if (line.startsWith("[") && inEntry) break
-        if (!inEntry) continue
-
-        if (line.startsWith("Name=")) name = line.substring(5)
-        else if (line.startsWith("Exec=")) exec = line.substring(5).replace(/%[fFuUdDnNickvm]/g, "").trim()
-        else if (line.startsWith("Icon=")) icon = line.substring(5)
-        else if (line.startsWith("NoDisplay=true")) noDisplay = true
-      }
-
-      if (name && exec && !noDisplay) {
-        allApps.push({ name: name, exec: exec, icon: icon })
-      }
+    onExited: {
+      launcher.allApps = launcher.pendingApps
+      launcher.pendingApps = []
+      launcher.updateResults()
     }
   }
 
@@ -228,10 +230,12 @@ PanelWindow {
 
     // Sort: exact prefix matches first, then alphabetical
     matches.sort(function(a, b) {
-      var aStart = a.name.toLowerCase().startsWith(query)
-      var bStart = b.name.toLowerCase().startsWith(query)
-      if (aStart && !bStart) return -1
-      if (!aStart && bStart) return 1
+      if (query) {
+        var aStart = a.name.toLowerCase().startsWith(query)
+        var bStart = b.name.toLowerCase().startsWith(query)
+        if (aStart && !bStart) return -1
+        if (!aStart && bStart) return 1
+      }
       return a.name.localeCompare(b.name)
     })
 

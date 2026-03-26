@@ -14,8 +14,9 @@ Singleton {
     id: themeFileView
     path: root.themeFile
     watchChanges: true
-    onTextChanged: {
-      root.isDark = (text.trim() !== "light")
+    onFileChanged: reload()
+    onLoaded: {
+      root.isDark = (text().trim() !== "light")
     }
   }
 

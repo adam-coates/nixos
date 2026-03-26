@@ -62,7 +62,6 @@ PanelWindow {
       Bluetooth {}
       Network {}
       Audio {}
-      Battery {}
     }
   }
 }

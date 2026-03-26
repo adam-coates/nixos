@@ -11,7 +11,7 @@ RowLayout {
     Rectangle {
       required property int index
       property int wsId: index + 1
-      property bool active: HyprlandIpc.activeWorkspace === wsId
+      property bool active: Hyprland.focusedMonitor?.activeWorkspace?.id === wsId
 
       Layout.preferredWidth: 28
       Layout.preferredHeight: 26
@@ -26,33 +26,20 @@ RowLayout {
       }
 
       Text {
+        id: wsText
         anchors.centerIn: parent
         text: parent.wsId.toString()
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSize
-        color: parent.active ? Theme.accent : Theme.gray
+        color: parent.active ? Theme.accent : (hoverArea.containsMouse ? Theme.fg : Theme.gray)
       }
 
-      MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          HyprlandIpc.dispatch("workspace " + parent.wsId)
-        }
-      }
-
-      // Hover effect
       MouseArea {
         id: hoverArea
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: HyprlandIpc.dispatch("workspace " + parent.wsId)
-      }
-
-      states: State {
-        when: hoverArea.containsMouse && !active
-        PropertyChanges { target: parent.children[1]; color: Theme.fg }
+        onClicked: Hyprland.dispatch("workspace " + parent.wsId)
       }
     }
   }

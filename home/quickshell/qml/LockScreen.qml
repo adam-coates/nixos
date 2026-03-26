@@ -13,15 +13,13 @@ Scope {
   function activate() {
     locked = true
     errorText = ""
-    passwordInput.text = ""
   }
 
   Component.onCompleted: {
     GlobalState.lockRequested.connect(activate)
   }
 
-  function tryUnlock() {
-    var password = passwordInput.text
+  function tryUnlock(password) {
     if (password === "") return
 
     pamAuth.command = ["bash", "-c",
@@ -31,18 +29,19 @@ Scope {
     pamAuth.running = true
   }
 
+  // Signal to tell delegates to clear input
+  signal authFinished(bool success)
+
   Process {
     id: pamAuth
     onExited: (code) => {
       if (code === 0) {
-        locked = false
-        passwordInput.text = ""
-        errorText = ""
+        lockScope.locked = false
+        lockScope.errorText = ""
       } else {
-        errorText = "Authentication failed"
-        passwordInput.text = ""
-        passwordInput.forceActiveFocus()
+        lockScope.errorText = "Authentication failed"
       }
+      lockScope.authFinished(code === 0)
     }
   }
 
@@ -66,6 +65,14 @@ Scope {
         exclusionMode: ExclusionMode.Ignore
 
         color: Theme.bg
+
+        Connections {
+          target: lockScope
+          function onAuthFinished(success) {
+            passwordInput.text = ""
+            if (!success) passwordInput.forceActiveFocus()
+          }
+        }
 
         // Centered password field
         ColumnLayout {
@@ -107,7 +114,7 @@ Scope {
               focus: true
               clip: true
 
-              onAccepted: lockScope.tryUnlock()
+              onAccepted: lockScope.tryUnlock(text)
 
               Keys.onEscapePressed: {} // prevent escape from doing anything
 
@@ -127,12 +134,12 @@ Scope {
           // Error message
           Text {
             Layout.alignment: Qt.AlignHCenter
-            text: errorText
+            text: lockScope.errorText
             font.family: Theme.fontFamily
             font.pixelSize: 14
             font.italic: true
             color: Theme.red
-            visible: errorText !== ""
+            visible: lockScope.errorText !== ""
           }
         }
 
