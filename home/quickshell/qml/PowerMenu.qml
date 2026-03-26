@@ -102,10 +102,10 @@ PanelWindow {
     GlobalState.closeAll()
     switch (cmd) {
       case "lock":
-        Lock.Lock.activate()
+        GlobalState.requestLock()
         break
       case "sleep":
-        Lock.Lock.activate()
+        GlobalState.requestLock()
         suspendProc.running = true
         break
       case "restart":

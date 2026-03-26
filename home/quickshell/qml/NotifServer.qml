@@ -20,7 +20,7 @@ Scope {
   Variants {
     model: Quickshell.screens
     delegate: Component {
-      NotificationPopup {
+      NotifPopup {
         screen: modelData
         notifications: server.trackedNotifications
       }

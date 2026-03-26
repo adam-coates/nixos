@@ -16,6 +16,10 @@ Scope {
     passwordInput.text = ""
   }
 
+  Component.onCompleted: {
+    GlobalState.lockRequested.connect(activate)
+  }
+
   function tryUnlock() {
     var password = passwordInput.text
     if (password === "") return

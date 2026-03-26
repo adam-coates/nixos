@@ -9,7 +9,7 @@ ShellRoot {
   Variants {
     model: Quickshell.screens
     delegate: Component {
-      Bar.Bar {
+      Bar {
         screen: modelData
       }
     }
@@ -19,26 +19,26 @@ ShellRoot {
   Variants {
     model: Quickshell.screens
     delegate: Component {
-      Wallpaper.Wallpaper {
+      Wallpaper {
         screen: modelData
       }
     }
   }
 
   // ── Notification daemon (single instance) ──
-  Notifications.NotificationServer {}
+  NotifServer {}
 
   // ── Launcher (single instance, shown on focused screen) ──
-  Launcher.Launcher {}
+  Launcher {}
 
   // ── Power menu ──
-  PowerMenu.PowerMenu {}
+  PowerMenu {}
 
   // ── Control center ──
-  ControlCenter.ControlCenter {}
+  ControlCenter {}
 
   // ── Lock screen ──
-  Lock.Lock {}
+  LockScreen {}
 
   // ── IPC handler for external commands ──
   SocketServer {
@@ -52,7 +52,7 @@ ShellRoot {
           if (cmd === "toggle-launcher") GlobalState.toggle("launcher")
           else if (cmd === "toggle-powermenu") GlobalState.toggle("powermenu")
           else if (cmd === "toggle-controlcenter") GlobalState.toggle("controlcenter")
-          else if (cmd === "lock") Lock.Lock.activate()
+          else if (cmd === "lock") GlobalState.requestLock()
           else if (cmd === "close-all") GlobalState.closeAll()
         })
       }

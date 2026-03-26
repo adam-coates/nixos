@@ -7,6 +7,9 @@ Singleton {
   // Track which popup is currently open (only one at a time)
   property string activePopup: "" // "launcher", "powermenu", "controlcenter", ""
 
+  // Lock screen signal
+  signal lockRequested()
+
   function toggle(name) {
     if (activePopup === name) {
       activePopup = ""
@@ -17,5 +20,10 @@ Singleton {
 
   function closeAll() {
     activePopup = ""
+  }
+
+  function requestLock() {
+    closeAll()
+    lockRequested()
   }
 }
