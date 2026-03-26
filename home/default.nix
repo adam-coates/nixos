@@ -12,6 +12,7 @@ in
     ./mako
     ./programs
     ./shell
+    ./noctalia
     inputs.nixvim.homeModules.nixvim
     ../nixvim
   ];

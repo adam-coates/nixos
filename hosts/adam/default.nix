@@ -57,6 +57,10 @@
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
+  # Power management (required by noctalia)
+  services.power-profiles-daemon.enable = true;
+  services.upower.enable = true;
+
   # Thunar
   services.gvfs.enable = true;
   programs.xfconf.enable = true;

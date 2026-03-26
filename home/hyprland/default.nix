@@ -15,8 +15,7 @@
       # Autostart
       exec-once = [
         "hyprpaper"
-        "waybar"
-        "mako"
+        "noctalia-shell"
         "hypridle"
         "nm-applet --indicator"
         "wl-paste --type text --watch cliphist store"
