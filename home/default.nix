@@ -1,24 +1,19 @@
 { config, pkgs, lib, inputs, ... }:
 
 let
-  gruvbox = import ./modules/colorscheme/gruvbox.nix;
+  gruvbox = import ../modules/colorscheme/gruvbox.nix;
 in
 
 {
   imports = [
-    ./hyprland.nix
-    ./waybar.nix
-    ./walker.nix
-    ./mako.nix
-    ./hyprpaper.nix
-    ./ghostty.nix
-    ./tmux.nix
-    ./starship.nix
-    ./firefox.nix
-    ./hyprlock.nix
-    ./zathura.nix
+    ./hyprland
+    ./waybar
+    ./walker
+    ./mako
+    ./programs
+    ./shell
     inputs.nixvim.homeManagerModules.nixvim
-    ./nixvim
+    ../nixvim
   ];
 
   options.theme = {
@@ -70,7 +65,6 @@ in
       # Wallpaper
       hyprpaper
 
-
       # Notifications (mako managed by services.mako)
       libnotify
 
@@ -94,14 +88,10 @@ in
       dbus
     ];
 
-    # --- Generated theme configs ---
-
-    xdg.configFile."hypr/hypridle.conf".source = ./home/hypridle.conf;
-
     # --- Wallpapers ---
 
-    home.file."Pictures/wallpapers/gruvbox_dark.png".source = ./modules/colorscheme/gruvbox_dark.png;
-    home.file."Pictures/wallpapers/gruvbox_light.png".source = ./modules/colorscheme/gruvbox_light.png;
+    home.file."Pictures/wallpapers/gruvbox_dark.png".source = ../modules/colorscheme/gruvbox_dark.png;
+    home.file."Pictures/wallpapers/gruvbox_light.png".source = ../modules/colorscheme/gruvbox_light.png;
 
     # --- Scripts ---
 
@@ -167,40 +157,6 @@ in
         <property name="last-show-hidden" type="bool" value="true"/>
       </channel>
     '';
-
-    # --- Programs ---
-
-    programs.fzf = {
-      enable = true;
-      enableBashIntegration = true;
-    };
-
-    programs.direnv = {
-      enable = true;
-      nix-direnv.enable = true;
-      enableBashIntegration = true;
-    };
-
-    programs.git = {
-      enable = true;
-      userName = "adam-coates";
-      userEmail = ""; # add your email
-    };
-
-    programs.bash = {
-      enable = true;
-      shellAliases = {
-        ls = "eza --icons";
-        ll = "eza -la --icons";
-        cat = "bat";
-        cd = "z";
-        rebuild = "sudo nixos-rebuild switch --flake ~/.config/nixos#adam";
-      };
-      initExtra = ''
-        eval "$(zoxide init bash)"
-        export PATH="$HOME/.local/bin:$PATH"
-      '';
-    };
 
     xdg.enable = true;
     xdg.userDirs = {

@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+  imports = [
+    ./hyprpaper.nix
+    ./hyprlock.nix
+  ];
+
   wayland.windowManager.hyprland = {
     enable = true;
     settings = {
@@ -175,4 +180,6 @@
       ];
     };
   };
+
+  xdg.configFile."hypr/hypridle.conf".source = ./hypridle.conf;
 }

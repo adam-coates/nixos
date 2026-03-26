@@ -2,7 +2,7 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./fonts.nix
+    ../../modules/fonts.nix
   ];
 
   # Bootloader
