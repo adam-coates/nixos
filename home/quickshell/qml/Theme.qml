@@ -1,8 +1,9 @@
 pragma Singleton
 import QtQuick 6.0
+import Quickshell
 import Quickshell.Io
 
-Item {
+Singleton {
   id: root
 
   // ── File watcher: reads ~/.local/state/current-theme ──

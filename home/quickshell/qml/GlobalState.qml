@@ -1,7 +1,8 @@
 pragma Singleton
 import QtQuick 6.0
+import Quickshell
 
-Item {
+Singleton {
   id: root
 
   // Track which popup is currently open (only one at a time)
