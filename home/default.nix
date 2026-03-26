@@ -152,6 +152,7 @@ in
       };
     };
 
+    xdg.configFile."xfce4/xfconf/xfce-perchannel-xml/thunar.xml".force = true;
     xdg.configFile."xfce4/xfconf/xfce-perchannel-xml/thunar.xml".text = ''
       <?xml version="1.0" encoding="UTF-8"?>
       <channel name="thunar" version="1.0">
