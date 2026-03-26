@@ -5,23 +5,21 @@
     dap = {
       enable = true;
 
-      extensions = {
-        dap-ui.enable = true;
-        dap-virtual-text = {
-          enable = true;
-          settings.commented = true;
-        };
-        dap-python = {
-          enable = true;
-          adapterPythonPath = "python3";
-        };
-      };
-
       signs = {
         dapBreakpoint = { text = ""; texthl = "DiagnosticSignError"; };
         dapBreakpointRejected = { text = ""; texthl = "DiagnosticSignError"; };
         dapStopped = { text = ""; texthl = "DiagnosticSignWarn"; linehl = "Visual"; numhl = "DiagnosticSignWarn"; };
       };
+    };
+
+    dap-ui.enable = true;
+    dap-virtual-text = {
+      enable = true;
+      settings.commented = true;
+    };
+    dap-python = {
+      enable = true;
+      adapterPythonPath = "python3";
     };
   };
 

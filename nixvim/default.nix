@@ -57,9 +57,10 @@
       require("ui.statusline")
     '';
 
+    plugins.web-devicons.enable = true;
+
     # Extra plugins not in nixvim
     extraPlugins = with pkgs.vimPlugins; [
-      nvim-web-devicons
       plenary-nvim
       vim-tmux-navigator
     ];

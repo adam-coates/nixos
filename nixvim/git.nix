@@ -6,7 +6,7 @@
 
     lazygit = {
       enable = true;
-      settings.floating_window_use_plenary = false;
+      settings.floating_window_use_plenary = 0;
     };
   };
 

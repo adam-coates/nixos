@@ -12,7 +12,7 @@ in
     ./mako
     ./programs
     ./shell
-    inputs.nixvim.homeManagerModules.nixvim
+    inputs.nixvim.homeModules.nixvim
     ../nixvim
   ];
 
@@ -58,8 +58,8 @@ in
     home.packages = with pkgs; [
       # File manager
       thunar
-      xfce.thunar-archive-plugin
-      xfce.thunar-volman
+      thunar-archive-plugin
+      thunar-volman
       gvfs
 
       # Wallpaper
@@ -129,6 +129,7 @@ in
 
     gtk = {
       enable = true;
+      gtk4.theme = null;
       theme = {
         name = config.theme.colors.gtkTheme;
         package = pkgs.gruvbox-gtk-theme;
@@ -162,6 +163,7 @@ in
     xdg.userDirs = {
       enable = true;
       createDirectories = true;
+      setSessionVariables = true;
     };
   };
 }

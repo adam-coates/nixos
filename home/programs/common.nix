@@ -14,7 +14,9 @@
 
   programs.git = {
     enable = true;
-    userName = "adam-coates";
-    userEmail = ""; # add your email
+    settings.user = {
+      name = "adam-coates";
+      email = ""; # add your email
+    };
   };
 }

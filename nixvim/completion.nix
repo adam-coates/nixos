@@ -57,9 +57,11 @@
     friendly-snippets.enable = true;
     lspkind = {
       enable = true;
-      cmp.enable = true;
-      cmp.maxWidth = 50;
-      cmp.ellipsisChar = "...";
+      settings.cmp = {
+        enable = true;
+        max_width = 50;
+        ellipsis_char = "...";
+      };
     };
     cmp-nvim-lsp.enable = true;
     cmp-buffer.enable = true;

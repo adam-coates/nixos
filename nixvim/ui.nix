@@ -4,20 +4,22 @@
   programs.nixvim.plugins = {
     nvim-tree = {
       enable = true;
-      view = {
-        width = 50;
-        relativenumber = true;
-      };
-      renderer = {
-        indentMarkers.enable = true;
-        icons.glyphs.folder = {
-          arrowClosed = "";
-          arrowOpen = "";
+      settings = {
+        view = {
+          width = 50;
+          relativenumber = true;
         };
+        renderer = {
+          indent_markers.enable = true;
+          icons.glyphs.folder = {
+            arrow_closed = "";
+            arrow_open = "";
+          };
+        };
+        actions.open_file.window_picker.enable = false;
+        filters.custom = [ ".DS_Store" ];
+        git.ignore = false;
       };
-      actions.openFile.windowPicker.enable = false;
-      filters.custom = [ ".DS_Store" ];
-      git.ignore = false;
     };
 
     which-key = {
