@@ -4,7 +4,7 @@ find \
     /run/current-system/sw/share/applications \
     "$HOME/.nix-profile/share/applications" \
     "$HOME/.local/share/applications" \
-    -name '*.desktop' -type f 2>/dev/null \
+    -name '*.desktop' 2>/dev/null \
 | sort -u \
 | while IFS= read -r f; do
     awk -F= '
