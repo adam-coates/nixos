@@ -40,6 +40,7 @@
 
   # PAM service for quickshell lock screen
   security.pam.services.login.enableGnomeKeyring = true;
+  security.pam.services.quickshell = {};
 
   # Display manager - ly
   services.displayManager.ly.enable = true;

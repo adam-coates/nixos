@@ -2,17 +2,19 @@ import QtQuick 6.0
 import QtQuick.Layouts 6.0
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Io
+import Quickshell.Services.Pam
 
 Scope {
   id: lockScope
 
   property bool locked: false
   property string errorText: ""
+  property bool authenticating: false
 
   function activate() {
     locked = true
     errorText = ""
+    authenticating = false
   }
 
   Component.onCompleted: {
@@ -20,30 +22,50 @@ Scope {
   }
 
   function tryUnlock(password) {
-    if (password === "") return
-
-    pamAuth.command = ["bash", "-c",
-      "echo '" + password.replace(/'/g, "'\\''") + "' | " +
-      "su -c 'exit 0' adam 2>/dev/null"
-    ]
-    pamAuth.running = true
+    if (password === "" || authenticating) return
+    authenticating = true
+    errorText = ""
+    pam.start()
   }
 
-  // Signal to tell delegates to clear input
   signal authFinished(bool success)
 
-  Process {
-    id: pamAuth
-    onExited: (code) => {
-      if (code === 0) {
+  PamContext {
+    id: pam
+    configDirectory: "/etc/pam.d"
+    config: "quickshell"
+    user: Quickshell.env("USER")
+
+    onPamMessage: (message, isError, responseRequired) => {
+      if (responseRequired) {
+        // PAM is asking for the password
+        pam.respond(inputBuffer)
+      }
+    }
+
+    onCompleted: result => {
+      lockScope.authenticating = false
+      if (result === PamResult.Success) {
         lockScope.locked = false
         lockScope.errorText = ""
+        lockScope.authFinished(true)
       } else {
         lockScope.errorText = "Authentication failed"
+        lockScope.authFinished(false)
       }
-      lockScope.authFinished(code === 0)
+      inputBuffer = ""
+    }
+
+    onError: (error, message) => {
+      lockScope.authenticating = false
+      lockScope.errorText = message || "Authentication error"
+      lockScope.authFinished(false)
+      inputBuffer = ""
     }
   }
+
+  // Temporary storage for the password so PamContext can access it
+  property string inputBuffer: ""
 
   // Lock surface per screen
   Variants {
@@ -74,7 +96,6 @@ Scope {
           }
         }
 
-        // Centered password field
         ColumnLayout {
           anchors.centerIn: parent
           spacing: 20
@@ -94,7 +115,7 @@ Scope {
             width: 650
             height: 100
             color: Theme.bgAlpha(0.8)
-            border.color: Theme.accent
+            border.color: lockScope.authenticating ? Theme.gray : Theme.accent
             border.width: 4
             radius: 0
 
@@ -110,19 +131,23 @@ Scope {
               font.pixelSize: 18
               color: Theme.fg
               echoMode: TextInput.Password
-              passwordCharacter: "\u{2022}" // bullet
+              passwordCharacter: "\u{2022}"
               focus: true
               clip: true
+              enabled: !lockScope.authenticating
 
-              onAccepted: lockScope.tryUnlock(text)
+              onAccepted: {
+                lockScope.inputBuffer = text
+                lockScope.tryUnlock(text)
+              }
 
-              Keys.onEscapePressed: {} // prevent escape from doing anything
+              Keys.onEscapePressed: {}
 
               Text {
                 anchors.fill: parent
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                text: "Enter Password"
+                text: lockScope.authenticating ? "Authenticating..." : "Enter Password"
                 font.family: Theme.fontFamily
                 font.pixelSize: 18
                 color: Theme.gray

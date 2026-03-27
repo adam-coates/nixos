@@ -175,18 +175,20 @@ PanelWindow {
   Process {
     id: appScanner
     command: ["bash", "-c",
-      "for f in /run/current-system/sw/share/applications/*.desktop " +
-      "$HOME/.nix-profile/share/applications/*.desktop " +
-      "$HOME/.local/share/applications/*.desktop; do " +
-      "[ -f \"$f\" ] || continue; " +
-      "name=\"\" exec=\"\" icon=\"\" nodisplay=\"\"; " +
+      "find /run/current-system/sw/share/applications " +
+      "$HOME/.nix-profile/share/applications " +
+      "$HOME/.local/share/applications " +
+      "-name '*.desktop' -type f 2>/dev/null | sort -u | while read -r f; do " +
+      "name=\"\" exec=\"\" icon=\"\" nodisplay=\"\" insection=\"\"; " +
       "while IFS= read -r line; do " +
       "case \"$line\" in " +
-      "\\[*\\]) [ -n \"$name\" ] && break ;; " +
-      "Name=*) [ -z \"$name\" ] && name=\"${line#Name=}\" ;; " +
-      "Exec=*) [ -z \"$exec\" ] && exec=\"${line#Exec=}\" ;; " +
-      "Icon=*) [ -z \"$icon\" ] && icon=\"${line#Icon=}\" ;; " +
+      "\"[Desktop Entry]\") insection=1 ;; " +
+      "\\[*\\]) [ -n \"$insection\" ] && break ;; " +
+      "Name=*) [ -z \"$name\" ] && [ -n \"$insection\" ] && name=\"${line#Name=}\" ;; " +
+      "Exec=*) [ -z \"$exec\" ] && [ -n \"$insection\" ] && exec=\"${line#Exec=}\" ;; " +
+      "Icon=*) [ -z \"$icon\" ] && [ -n \"$insection\" ] && icon=\"${line#Icon=}\" ;; " +
       "NoDisplay=true) nodisplay=1 ;; " +
+      "Type=*) [ \"${line#Type=}\" != Application ] && [ -n \"$insection\" ] && nodisplay=1 ;; " +
       "esac; " +
       "done < \"$f\"; " +
       "[ -n \"$name\" ] && [ -n \"$exec\" ] && [ -z \"$nodisplay\" ] && " +

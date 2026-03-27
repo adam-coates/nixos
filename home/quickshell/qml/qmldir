@@ -3,7 +3,6 @@ singleton GlobalState GlobalState.qml
 Audio Audio.qml
 AudioSlider AudioSlider.qml
 Bar Bar.qml
-Battery Battery.qml
 Bluetooth Bluetooth.qml
 BluetoothPanel BluetoothPanel.qml
 Clock Clock.qml
