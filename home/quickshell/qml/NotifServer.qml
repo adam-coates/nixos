@@ -7,7 +7,15 @@ import Quickshell.Services.Notifications
 Scope {
   id: notifScope
 
+  // Strong JS references to notification objects keyed by id
+  property var notifMap: ({})
+
   function removeFromPopup(nid) {
+    const n = notifMap[nid]
+    if (n) {
+      n.expire()
+      delete notifMap[nid]
+    }
     for (var i = 0; i < popupModel.count; i++) {
       if (popupModel.get(i).notifId === nid) {
         popupModel.remove(i)
@@ -26,7 +34,17 @@ Scope {
 
     onNotification: notification => {
       const nid = notification.id
-      popupModel.insert(0, { "notif": notification, "notifId": nid })
+      notifScope.notifMap[nid] = notification
+
+      // Store only primitives — QObjects in ListModel are unreliable
+      popupModel.insert(0, {
+        "notifId":       nid,
+        "appName":       notification.appName  || "",
+        "appIcon":       notification.appIcon  || "",
+        "summary":       notification.summary  || "",
+        "body":          notification.body     || "",
+        "expireTimeout": notification.expireTimeout
+      })
 
       NotifState.addToHistory(
         notification.appName,
@@ -63,9 +81,15 @@ Scope {
 
         delegate: Rectangle {
           id: card
-          required property int index
-          required property var notif
-          required property int notifId
+
+          // All display data comes from typed model roles — no QObject needed
+          required property int    index
+          required property var    notifId
+          required property string appName
+          required property string appIcon
+          required property string summary
+          required property string body
+          required property int    expireTimeout
 
           Layout.fillWidth: true
           height: cardCol.implicitHeight + 20
@@ -78,15 +102,12 @@ Scope {
           Component.onCompleted: opacity = 1
           Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
-          // Auto-dismiss — directly removes from model, no signal dependency
+          // Auto-dismiss: capture id locally so the timer closure is self-contained
           Timer {
-            property int nid: card.notifId
-            interval: card.notif.expireTimeout > 0 ? card.notif.expireTimeout : 5000
+            property var nid: card.notifId
+            interval: card.expireTimeout > 0 ? card.expireTimeout : 5000
             running: true
-            onTriggered: {
-              card.notif.expire()
-              notifScope.removeFromPopup(nid)
-            }
+            onTriggered: notifScope.removeFromPopup(nid)
           }
 
           ColumnLayout {
@@ -99,8 +120,8 @@ Scope {
               spacing: 8
 
               Image {
-                visible: card.notif.appIcon !== ""
-                source: card.notif.appIcon !== "" ? Quickshell.iconPath(card.notif.appIcon, true) : ""
+                visible: card.appIcon !== ""
+                source: card.appIcon !== "" ? Quickshell.iconPath(card.appIcon, true) : ""
                 Layout.preferredWidth: 24
                 Layout.preferredHeight: 24
                 fillMode: Image.PreserveAspectFit
@@ -112,8 +133,8 @@ Scope {
 
                 Text {
                   Layout.fillWidth: true
-                  visible: card.notif.appName !== ""
-                  text: card.notif.appName || ""
+                  visible: card.appName !== ""
+                  text: card.appName
                   font.family: Theme.fontFamily
                   font.pixelSize: 10
                   color: Theme.gray
@@ -122,7 +143,7 @@ Scope {
 
                 Text {
                   Layout.fillWidth: true
-                  text: card.notif.summary || ""
+                  text: card.summary
                   font.family: Theme.fontFamily
                   font.pixelSize: 12
                   font.bold: true
@@ -139,18 +160,15 @@ Scope {
                 MouseArea {
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
-                  onClicked: {
-                    card.notif.dismiss()
-                    notifScope.removeFromPopup(card.notifId)
-                  }
+                  onClicked: notifScope.removeFromPopup(card.notifId)
                 }
               }
             }
 
             Text {
               Layout.fillWidth: true
-              visible: card.notif.body !== ""
-              text: card.notif.body || ""
+              visible: card.body !== ""
+              text: card.body
               font.family: Theme.fontFamily
               font.pixelSize: 11
               color: Theme.gray
@@ -159,33 +177,31 @@ Scope {
               elide: Text.ElideRight
             }
 
-            RowLayout {
-              Layout.fillWidth: true
-              spacing: 4
-              visible: card.notif.actions.length > 0
-
-              Repeater {
-                model: card.notif.actions
-                delegate: Rectangle {
-                  required property var modelData
-                  Layout.fillWidth: true
-                  height: 22
-                  color: Theme.bg1
-                  radius: 3
-                  Text {
-                    anchors.centerIn: parent
-                    text: parent.modelData.text
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 11
-                    color: Theme.accent
-                  }
-                  MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                      parent.modelData.invoke()
-                      notifScope.removeFromPopup(card.notifId)
-                    }
+            // Actions — look up the live object only here, evaluated once at creation
+            Repeater {
+              model: {
+                const n = notifScope.notifMap[card.notifId]
+                return n ? n.actions : null
+              }
+              delegate: Rectangle {
+                required property var modelData
+                Layout.fillWidth: true
+                height: 22
+                color: Theme.bg1
+                radius: 3
+                Text {
+                  anchors.centerIn: parent
+                  text: modelData.text
+                  font.family: Theme.fontFamily
+                  font.pixelSize: 11
+                  color: Theme.accent
+                }
+                MouseArea {
+                  anchors.fill: parent
+                  cursorShape: Qt.PointingHandCursor
+                  onClicked: {
+                    modelData.invoke()
+                    notifScope.removeFromPopup(card.notifId)
                   }
                 }
               }
