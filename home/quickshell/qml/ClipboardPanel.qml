@@ -33,10 +33,18 @@ PanelWindow {
   exclusionMode: ExclusionMode.Ignore
   color: "transparent"
 
+  // Ensure home packages (cliphist, wl-copy) are on PATH
+  readonly property string nixPath:
+    "export PATH=\"$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
+
+  property bool loaded: false
+
   // Load clipboard history from cliphist
   Process {
     id: listProc
+    command: ["bash", "-c", clipPanel.nixPath + "cliphist list 2>/dev/null"]
     running: false
+    onExited: clipPanel.loaded = true
     stdout: SplitParser {
       onRead: line => {
         if (!line.trim()) return
@@ -44,46 +52,43 @@ PanelWindow {
         if (tab < 0) return
         const lineNum = parseInt(line.slice(0, tab))
         const preview = line.slice(tab + 1).trim()
-        // Skip binary entries (images etc.) - they show as [[ binary data ]]
-        if (!preview.startsWith("[[")) {
+        if (preview && !preview.startsWith("[[")) {
           clipPanel.entries = [...clipPanel.entries, { line: lineNum, preview }]
         }
       }
     }
   }
 
-  // Paste selected entry by piping to cliphist decode → wl-copy
-  Process {
-    id: pasteProc
-    running: false
-  }
+  Process { id: pasteProc; running: false }
 
-  // Wipe all history
   Process {
     id: wipeProc
-    command: ["cliphist", "wipe"]
     running: false
-    onExited: {
-      clipPanel.entries = []
-    }
+    onExited: clipPanel.entries = []
   }
 
   function loadHistory() {
     entries = []
+    loaded = false
     listProc.running = false
     listProc.running = true
   }
 
   function pasteEntry(lineNum) {
-    // cliphist list | awk to find the line by id, then decode and copy
     pasteProc.command = [
       "bash", "-c",
-      "cliphist list | awk -F'\\t' -v id=" + lineNum +
+      nixPath + "cliphist list | awk -F'\\t' -v id=" + lineNum +
       " '$1==id{print;exit}' | cliphist decode | wl-copy"
     ]
     pasteProc.running = false
     pasteProc.running = true
     GlobalState.closeAll()
+  }
+
+  function clearHistory() {
+    wipeProc.command = ["bash", "-c", nixPath + "cliphist wipe"]
+    wipeProc.running = false
+    wipeProc.running = true
   }
 
   Rectangle {
@@ -120,7 +125,7 @@ PanelWindow {
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: wipeProc.running = true
+            onClicked: clipPanel.clearHistory()
           }
         }
       }
@@ -163,8 +168,8 @@ PanelWindow {
       // Empty state
       Text {
         Layout.fillWidth: true
-        visible: clipPanel.entries.length === 0
-        text: "No clipboard history\n(requires cliphist)"
+        visible: clipPanel.entries.length === 0 && clipPanel.loaded
+        text: "No clipboard history"
         font.family: Theme.fontFamily
         font.pixelSize: 12
         color: Theme.gray

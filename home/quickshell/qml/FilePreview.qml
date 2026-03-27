@@ -29,18 +29,35 @@ PanelWindow {
 
   function fileKind(path) {
     if (!path) return "none"
-    const ext = path.split('.').pop().toLowerCase()
-    if (["png","jpg","jpeg","gif","webp","svg","bmp","ico","avif","tiff"].includes(ext))
+    const basename = path.split('/').pop()
+    // For dotfiles like ".bashrc", lastIndexOf gives index of first dot (pos 0),
+    // so ext would be empty — we want the part after the LAST dot if it's not pos 0
+    const dotIdx = basename.lastIndexOf('.')
+    const ext = (dotIdx > 0) ? basename.slice(dotIdx + 1).toLowerCase() : ""
+
+    if (["png","jpg","jpeg","gif","webp","bmp","ico","avif","tiff","heic"].includes(ext))
       return "image"
+    // SVG can be previewed as image too
+    if (ext === "svg") return "image"
     if (ext === "pdf") return "pdf"
-    if (["txt","md","markdown","rst","log","diff","patch",
-         "js","ts","jsx","tsx","mjs","cjs",
-         "py","rb","go","rs","c","cpp","h","hpp","java","kt","swift",
-         "sh","bash","zsh","fish",
-         "json","yaml","yml","toml","nix","conf","cfg","ini","env",
-         "html","css","scss","sass","xml","svg",
-         "sql","csv","gitignore","dockerfile","makefile"].includes(ext))
-      return "text"
+
+    const textExts = [
+      "txt","md","markdown","rst","org","tex","adoc",
+      "js","ts","jsx","tsx","mjs","cjs","vue","svelte",
+      "py","rb","go","rs","c","cc","cpp","h","hpp","cs","java","kt","swift","scala",
+      "sh","bash","zsh","fish","ps1","bat",
+      "json","json5","yaml","yml","toml","xml","html","htm","css","scss","sass","less",
+      "sql","graphql","gql",
+      "nix","hcl","tf","dhall",
+      "conf","config","cfg","ini","env","properties","lock","sum",
+      "csv","tsv","log","out","diff","patch",
+      "r","m","pl","lua","vim","el","clj","hs","erl","ex","exs"
+    ]
+    if (textExts.includes(ext)) return "text"
+
+    // No extension OR hidden dotfile (.bashrc, .zshrc, .gitignore, etc.) → text
+    if (!ext || basename.startsWith('.')) return "text"
+
     return "other"
   }
 

@@ -60,7 +60,8 @@ PanelWindow {
       launcher.fileResults = []
       fileProc.running = false
       fileProc.command = [
-        "fd", "--max-results", "30", "--hidden",
+        "fd", "--type", "f", "--absolute-path",
+        "--max-results", "30", "--hidden",
         "--exclude", ".git", "--exclude", "node_modules",
         term.trim() || ".", Quickshell.env("HOME")
       ]
@@ -242,10 +243,10 @@ PanelWindow {
             anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
             spacing: 10
 
+            // calc/web prefix symbol (not for files or apps)
             Text {
-              visible: modelData._t !== "app"
-              text: (modelData._t === "calc" || modelData._t === "calc_err") ? "="
-                    : modelData._t === "web" ? "?" : "~"
+              visible: modelData._t === "calc" || modelData._t === "calc_err" || modelData._t === "web"
+              text: (modelData._t === "calc" || modelData._t === "calc_err") ? "=" : "?"
               font.family: Theme.fontFamily
               font.pixelSize: 15
               font.bold: true
@@ -263,32 +264,25 @@ PanelWindow {
               fillMode: Image.PreserveAspectFit
             }
 
+            // Main label — for files shows the full shortened path
             Text {
               Layout.fillWidth: true
-              text: modelData._t === "calc"     ? modelData.expr + "  =  " + modelData.result
-                  : modelData._t === "calc_err" ? "Invalid expression"
-                  : modelData._t === "web"      ? "Search Google:  " + modelData.query
-                  : modelData._t === "file"     ? modelData.name
-                  : modelData.entry.name
+              text: {
+                if (modelData._t === "calc")     return modelData.expr + "  =  " + modelData.result
+                if (modelData._t === "calc_err") return "Invalid expression"
+                if (modelData._t === "web")      return "Search Google:  " + modelData.query
+                if (modelData._t === "file") {
+                  const home = Quickshell.env("HOME")
+                  return modelData.path.startsWith(home)
+                    ? "~" + modelData.path.slice(home.length)
+                    : modelData.path
+                }
+                return modelData.entry.name
+              }
               font.family: Theme.fontFamily
               font.pixelSize: 13
               color: resultsList.currentIndex === index ? Theme.accent : Theme.fg
               elide: Text.ElideRight
-            }
-
-            Text {
-              visible: modelData._t === "file"
-              text: {
-                if (modelData._t !== "file") return ""
-                const home = Quickshell.env("HOME")
-                return modelData.path.startsWith(home)
-                  ? "~" + modelData.path.slice(home.length) : modelData.path
-              }
-              font.family: Theme.fontFamily
-              font.pixelSize: 10
-              color: Theme.gray
-              elide: Text.ElideRight
-              Layout.maximumWidth: 180
             }
           }
 
