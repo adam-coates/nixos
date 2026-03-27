@@ -82,7 +82,7 @@ in
       dbus
 
       # File preview (pdftoppm for PDF thumbnails in launcher)
-      poppler_utils
+      poppler-utils
     ];
 
     # --- Wallpapers ---
