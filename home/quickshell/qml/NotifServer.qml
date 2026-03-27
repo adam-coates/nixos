@@ -19,7 +19,15 @@ Scope {
       const nid = notification.id
       popupModel.insert(0, { "notif": notification, "notifId": nid })
 
-      // Remove from list when the notification is closed from any source
+      // Save to history
+      NotifState.addToHistory(
+        notification.appName,
+        notification.appIcon,
+        notification.summary,
+        notification.body
+      )
+
+      // Remove from popup when closed from any source
       notification.closed.connect(() => {
         for (var i = 0; i < popupModel.count; i++) {
           if (popupModel.get(i).notifId === nid) {
@@ -59,6 +67,7 @@ Scope {
           id: card
           required property int index
           required property var notif
+          required property int notifId
 
           Layout.fillWidth: true
           height: cardCol.implicitHeight + 20
@@ -71,11 +80,19 @@ Scope {
           Component.onCompleted: opacity = 1
           Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
-          // Auto-dismiss — expire() triggers the closed signal which removes from model
+          // Auto-dismiss
           Timer {
             interval: card.notif.expireTimeout > 0 ? card.notif.expireTimeout : 5000
             running: true
-            onTriggered: card.notif.expire()
+            onTriggered: {
+              card.notif.expire()
+              for (var i = 0; i < popupModel.count; i++) {
+                if (popupModel.get(i).notifId === card.notifId) {
+                  popupModel.remove(i)
+                  break
+                }
+              }
+            }
           }
 
           ColumnLayout {

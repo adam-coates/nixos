@@ -1,5 +1,6 @@
 singleton Theme Theme.qml
 singleton GlobalState GlobalState.qml
+singleton NotifState NotifState.qml
 Audio Audio.qml
 AudioSlider AudioSlider.qml
 Bar Bar.qml
@@ -12,6 +13,7 @@ Launcher Launcher.qml
 LockScreen LockScreen.qml
 Network Network.qml
 NetworkPanel NetworkPanel.qml
+NotifPanel NotifPanel.qml
 NotifServer NotifServer.qml
 PowerMenu PowerMenu.qml
 Wallpaper Wallpaper.qml

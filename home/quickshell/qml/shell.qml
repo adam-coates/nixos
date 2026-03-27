@@ -37,6 +37,9 @@ ShellRoot {
   // ── Control center ──
   ControlCenter {}
 
+  // ── Notification history panel ──
+  NotifPanel {}
+
   // ── Lock screen ──
   LockScreen {}
 
