@@ -83,6 +83,9 @@ in
 
       # File preview (pdftoppm for PDF thumbnails in launcher)
       poppler-utils
+
+      # WebP/AVIF/TIFF support for Qt image viewer (Quickshell file preview)
+      qt6.qtimageformats
     ];
 
     # --- Wallpapers ---
