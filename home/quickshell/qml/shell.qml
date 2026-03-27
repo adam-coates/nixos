@@ -34,8 +34,14 @@ ShellRoot {
   // ── Power menu ──
   PowerMenu {}
 
-  // ── Control center ──
-  ControlCenter {}
+  // ── Audio panel ──
+  AudioPanel {}
+
+  // ── Bluetooth panel ──
+  BluetoothPanel {}
+
+  // ── Network panel ──
+  NetworkPanel {}
 
   // ── Notification history panel ──
   NotifPanel {}
@@ -58,7 +64,9 @@ ShellRoot {
 
     function toggleLauncher(): void { GlobalState.toggle("launcher") }
     function togglePowermenu(): void { GlobalState.toggle("powermenu") }
-    function toggleControlcenter(): void { GlobalState.toggle("controlcenter") }
+    function toggleAudio(): void { GlobalState.toggle("audio") }
+    function toggleBluetooth(): void { GlobalState.toggle("bluetooth") }
+    function toggleNetwork(): void { GlobalState.toggle("network") }
     function toggleTriggers(): void { GlobalState.toggle("triggers") }
     function lock(): void { GlobalState.requestLock() }
     function closeAll(): void { GlobalState.closeAll() }

@@ -30,7 +30,7 @@ Item {
       if (mouse.button === Qt.RightButton) {
         if (defaultSink) defaultSink.audio.muted = !defaultSink.audio.muted
       } else {
-        GlobalState.toggle("controlcenter")
+        GlobalState.toggle("audio")
       }
     }
     onWheel: (wheel) => {

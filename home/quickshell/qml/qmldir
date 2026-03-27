@@ -4,12 +4,11 @@ singleton NotifState NotifState.qml
 ClipboardPanel ClipboardPanel.qml
 FilePreview FilePreview.qml
 Audio Audio.qml
-AudioSlider AudioSlider.qml
+AudioPanel AudioPanel.qml
 Bar Bar.qml
 Bluetooth Bluetooth.qml
 BluetoothPanel BluetoothPanel.qml
 Clock Clock.qml
-ControlCenter ControlCenter.qml
 IdleIndicator IdleIndicator.qml
 Launcher Launcher.qml
 LockScreen LockScreen.qml

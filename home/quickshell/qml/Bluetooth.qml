@@ -37,7 +37,7 @@ Item {
 
   MouseArea {
     anchors.fill: parent
-    onClicked: GlobalState.toggle("controlcenter")
+    onClicked: GlobalState.toggle("bluetooth")
     hoverEnabled: true
   }
 }
