@@ -174,7 +174,7 @@ PanelWindow {
 
   Process {
     id: appScanner
-    command: [Quickshell.env("HOME") + "/.local/bin/qs-list-apps"]
+    command: ["bash", "-l", Quickshell.env("HOME") + "/.local/bin/qs-list-apps"]
 
     stdout: SplitParser {
       splitMarker: "\n"
