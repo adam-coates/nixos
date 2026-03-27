@@ -44,9 +44,7 @@ ColumnLayout {
       MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          wifiToggle.running = true
-        }
+        onClicked: wifiToggle.running = true
       }
     }
   }
@@ -71,11 +69,7 @@ ColumnLayout {
       radius: 4
 
       RowLayout {
-        anchors {
-          fill: parent
-          leftMargin: 8
-          rightMargin: 8
-        }
+        anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
         spacing: 8
 
         Text {
@@ -100,18 +94,33 @@ ColumnLayout {
         cursorShape: Qt.PointingHandCursor
         onClicked: {
           connectNetwork.command = ["nmcli", "connection", "up", modelData.ssid]
+          connectNetwork.running = false
           connectNetwork.running = true
         }
       }
     }
   }
 
-  // Scan for networks
+  // Empty state
+  Text {
+    visible: networkList.length === 0
+    text: "No networks found"
+    font.family: Theme.fontFamily
+    font.pixelSize: 11
+    color: Theme.gray
+  }
+
+  // Processes
   Process {
     id: networkScanner
     command: ["nmcli", "-t", "-f", "ACTIVE,SSID,SIGNAL", "dev", "wifi", "list", "--rescan", "auto"]
+    property var _lines: []
+    stdout: SplitParser {
+      onRead: line => networkScanner._lines.push(line)
+    }
     onExited: {
-      var lines = stdout.trim().split("\n")
+      var lines = networkScanner._lines
+      networkScanner._lines = []
       var nets = []
       currentNetwork = ""
       for (var i = 0; i < lines.length; i++) {
@@ -129,8 +138,13 @@ ColumnLayout {
   Process {
     id: wifiStatusCheck
     command: ["nmcli", "radio", "wifi"]
+    property string _output: ""
+    stdout: SplitParser {
+      onRead: line => { wifiStatusCheck._output += line }
+    }
     onExited: {
-      wifiEnabled = stdout.trim() === "enabled"
+      wifiEnabled = wifiStatusCheck._output.trim() === "enabled"
+      wifiStatusCheck._output = ""
     }
   }
 
@@ -143,9 +157,7 @@ ColumnLayout {
     }
   }
 
-  Process {
-    id: connectNetwork
-  }
+  Process { id: connectNetwork }
 
   Timer {
     id: refreshTimer
@@ -154,7 +166,9 @@ ColumnLayout {
     repeat: true
     triggeredOnStart: true
     onTriggered: {
+      networkScanner.running = false
       networkScanner.running = true
+      wifiStatusCheck.running = false
       wifiStatusCheck.running = true
     }
   }

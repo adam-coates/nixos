@@ -99,6 +99,8 @@
       "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
       "$powerMenu" = "qs ipc call shell togglePowermenu";
       "$lock" = "qs ipc call shell lock";
+      "$triggers" = "qs ipc call shell toggleTriggers";
+      "$controls" = "qs ipc call shell toggleControlcenter";
 
       bind = [
         "$mod, Return, exec, $terminal"
@@ -113,6 +115,8 @@
         "$mod SHIFT, T, exec, $themeSwitcher"
         "$mod SHIFT, P, exec, $powerMenu"
         "$mod SHIFT, L, exec, $lock"
+        "$mod, grave, exec, $triggers"
+        "$mod SHIFT, C, exec, $controls"
 
         # Move focus
         "$mod, left, movefocus, l"

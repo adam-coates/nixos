@@ -59,6 +59,7 @@ ShellRoot {
     function toggleLauncher(): void { GlobalState.toggle("launcher") }
     function togglePowermenu(): void { GlobalState.toggle("powermenu") }
     function toggleControlcenter(): void { GlobalState.toggle("controlcenter") }
+    function toggleTriggers(): void { GlobalState.toggle("triggers") }
     function lock(): void { GlobalState.requestLock() }
     function closeAll(): void { GlobalState.closeAll() }
   }

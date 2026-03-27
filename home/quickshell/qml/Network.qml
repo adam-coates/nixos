@@ -6,30 +6,30 @@ Item {
   height: 26
 
   property string status: ""
-  property string tooltip: ""
 
   Process {
     id: nmcliCheck
     command: ["nmcli", "-t", "-f", "TYPE,STATE,CONNECTION", "device"]
     running: true
+    property var _lines: []
+    stdout: SplitParser {
+      onRead: line => nmcliCheck._lines.push(line)
+    }
     onExited: {
-      var lines = stdout.trim().split("\n")
+      var lines = nmcliCheck._lines
+      nmcliCheck._lines = []
       var wifiLine = ""
       var ethLine = ""
       for (var i = 0; i < lines.length; i++) {
         if (lines[i].startsWith("wifi:")) wifiLine = lines[i]
         if (lines[i].startsWith("ethernet:")) ethLine = lines[i]
       }
-
       if (ethLine.indexOf("connected") >= 0) {
         status = "\u{f0200}" // 󰀂 ethernet
-        tooltip = "Ethernet: " + ethLine.split(":").pop()
       } else if (wifiLine.indexOf("connected") >= 0) {
         status = "\u{f05a9}" // 󰖩 wifi
-        tooltip = "WiFi: " + wifiLine.split(":").pop()
       } else {
         status = "\u{f092e}" // 󰤮 disconnected
-        tooltip = "Disconnected"
       }
     }
   }

@@ -9,56 +9,45 @@ PanelWindow {
   property bool showing: GlobalState.activePopup === "controlcenter"
 
   visible: showing
-  anchors {
-    top: true
-    right: true
-  }
+  anchors.top: true
+  anchors.right: true
+  margins { top: 30; right: 4 }
 
-  margins {
-    top: 30
-    right: 10
-  }
-
-  width: 320
+  width: 300
   height: ccContent.implicitHeight + 20
 
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.namespace: "quickshell-controlcenter"
   WlrLayershell.keyboardFocus: showing ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
   exclusionMode: ExclusionMode.Ignore
+  color: "transparent"
 
-  color: Theme.bg
-  // border
   Rectangle {
     anchors.fill: parent
-    color: "transparent"
+    color: Theme.bgAlpha(0.97)
     border.color: Theme.accent
     border.width: 1
-  }
+    radius: 6
 
-  ColumnLayout {
-    id: ccContent
-    anchors {
-      top: parent.top
-      left: parent.left
-      right: parent.right
-      margins: 10
+    ColumnLayout {
+      id: ccContent
+      anchors { top: parent.top; left: parent.left; right: parent.right; margins: 12 }
+      spacing: 12
+
+      // ── Audio ──
+      AudioSlider {}
+
+      Rectangle { Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3) }
+
+      // ── Bluetooth ──
+      BluetoothPanel {}
+
+      Rectangle { Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3) }
+
+      // ── Network ──
+      NetworkPanel {}
+
+      Item { height: 4 }
     }
-    spacing: 15
-
-    // ── Audio Section ──
-    AudioSlider {}
-
-    // Separator
-    Rectangle { Layout.fillWidth: true; height: 1; color: Theme.bg1 }
-
-    // ── Bluetooth Section ──
-    BluetoothPanel {}
-
-    // Separator
-    Rectangle { Layout.fillWidth: true; height: 1; color: Theme.bg1 }
-
-    // ── Network Section ──
-    NetworkPanel {}
   }
 }

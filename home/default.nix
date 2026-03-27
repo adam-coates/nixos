@@ -141,6 +141,14 @@ in
       };
     };
 
+    # --- swappy screenshot editor ---
+    xdg.configFile."swappy/config".text = ''
+      [Default]
+      save_dir=${config.home.homeDirectory}/Pictures/screenshots
+      save_filename_format=screenshot_%Y%m%d_%H%M%S.png
+      show_panel=true
+    '';
+
     xdg.configFile."xfce4/xfconf/xfce-perchannel-xml/thunar.xml".force = true;
     xdg.configFile."xfce4/xfconf/xfce-perchannel-xml/thunar.xml".text = ''
       <?xml version="1.0" encoding="UTF-8"?>
