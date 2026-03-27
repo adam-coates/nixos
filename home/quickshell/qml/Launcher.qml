@@ -2,20 +2,18 @@ import QtQuick 6.0
 import QtQuick.Layouts 6.0
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Io
 
 PanelWindow {
   id: launcher
 
   property bool showing: GlobalState.activePopup === "launcher"
+  property string query: ""
 
   visible: showing
   onShowingChanged: {
     if (showing) {
-      searchInput.text = ""
+      query = ""
       searchInput.forceActiveFocus()
-      if (allApps.length === 0) appScanner.running = true
-      updateResults()
     }
   }
 
@@ -33,23 +31,20 @@ PanelWindow {
 
   color: Qt.rgba(0, 0, 0, 0.3)
 
-  // Click backdrop to close
   MouseArea {
     anchors.fill: parent
     onClicked: GlobalState.closeAll()
   }
 
-  // Centered launcher box
   Rectangle {
     anchors.centerIn: parent
     width: 600
-    height: 400
+    height: 420
     color: Theme.bgAlpha(0.97)
     border.color: Theme.accent
     border.width: 1
     radius: 12
 
-    // Prevent click-through to backdrop
     MouseArea { anchors.fill: parent }
 
     ColumnLayout {
@@ -66,25 +61,20 @@ PanelWindow {
 
         TextInput {
           id: searchInput
-          anchors {
-            fill: parent
-            leftMargin: 10
-            rightMargin: 10
-          }
+          anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
           verticalAlignment: TextInput.AlignVCenter
           font.family: Theme.fontFamily
           font.pixelSize: 14
           color: Theme.fg
           clip: true
-
-          onTextChanged: updateResults()
+          text: launcher.query
+          onTextChanged: {
+            launcher.query = text
+            resultsList.currentIndex = 0
+          }
 
           Keys.onEscapePressed: GlobalState.closeAll()
-          Keys.onReturnPressed: {
-            if (resultsList.count > 0) {
-              launchApp(resultsModel.get(resultsList.currentIndex).exec)
-            }
-          }
+          Keys.onReturnPressed: launchCurrent()
           Keys.onDownPressed: {
             if (resultsList.currentIndex < resultsList.count - 1)
               resultsList.currentIndex++
@@ -106,21 +96,41 @@ PanelWindow {
         }
       }
 
-      // Results list
+      // Results list — filtered directly from DesktopEntries
       ListView {
         id: resultsList
         Layout.fillWidth: true
         Layout.fillHeight: true
         clip: true
-        model: resultsModel
         currentIndex: 0
         spacing: 2
+        keyNavigationWraps: false
+
+        model: ScriptModel {
+          values: {
+            const q = launcher.query.trim().toLowerCase()
+            const all = [...DesktopEntries.applications.values].filter(e =>
+              e.name && e.noDisplay !== true
+            )
+            const filtered = q === ""
+              ? all
+              : all.filter(e => e.name.toLowerCase().includes(q))
+            filtered.sort((a, b) => {
+              if (q) {
+                const as = a.name.toLowerCase().startsWith(q)
+                const bs = b.name.toLowerCase().startsWith(q)
+                if (as && !bs) return -1
+                if (!as && bs) return 1
+              }
+              return a.name.localeCompare(b.name)
+            })
+            return filtered
+          }
+        }
 
         delegate: Rectangle {
           required property int index
-          required property string name
-          required property string exec
-          required property string icon
+          required property var modelData
 
           width: resultsList.width
           height: 40
@@ -128,23 +138,19 @@ PanelWindow {
           radius: 6
 
           RowLayout {
-            anchors {
-              fill: parent
-              leftMargin: 14
-              rightMargin: 14
-            }
+            anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
             spacing: 10
 
             Image {
-              source: icon ? ("image://icon/" + icon) : ""
+              source: modelData.icon ? Quickshell.iconPath(modelData.icon, true) : ""
               Layout.preferredWidth: 24
               Layout.preferredHeight: 24
-              visible: source !== ""
+              visible: modelData.icon !== ""
             }
 
             Text {
               Layout.fillWidth: true
-              text: name
+              text: modelData.name
               font.family: Theme.fontFamily
               font.pixelSize: 13
               color: resultsList.currentIndex === parent.parent.index ? Theme.accent : Theme.fg
@@ -155,86 +161,24 @@ PanelWindow {
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: launchApp(exec)
             hoverEnabled: true
             onEntered: resultsList.currentIndex = index
+            onClicked: {
+              resultsList.currentIndex = index
+              launchCurrent()
+            }
           }
         }
       }
     }
   }
 
-  ListModel {
-    id: resultsModel
-  }
-
-  // Desktop entry scanner — outputs "name\texec\ticon" per line
-  property var allApps: []
-  property var pendingApps: []
-
-  Process {
-    id: appScanner
-    command: ["bash", "-l", Quickshell.env("HOME") + "/.local/bin/qs-list-apps"]
-
-    stdout: SplitParser {
-      splitMarker: "\n"
-      onRead: data => {
-        var parts = data.split("\t")
-        if (parts.length >= 2 && parts[0]) {
-          launcher.pendingApps.push({
-            name: parts[0],
-            exec: parts[1],
-            icon: parts.length >= 3 ? parts[2].trim() : ""
-          })
-        }
-      }
-    }
-
-    onExited: {
-      launcher.allApps = launcher.pendingApps
-      launcher.pendingApps = []
-      launcher.updateResults()
+  function launchCurrent() {
+    if (resultsList.currentIndex < 0 || resultsList.count === 0) return
+    const entry = resultsList.model.values[resultsList.currentIndex]
+    if (entry) {
+      GlobalState.closeAll()
+      entry.execute()
     }
   }
-
-  function updateResults() {
-    resultsModel.clear()
-    var query = searchInput.text.toLowerCase()
-    var matches = []
-
-    for (var i = 0; i < allApps.length; i++) {
-      var app = allApps[i]
-      if (!query || app.name.toLowerCase().indexOf(query) >= 0) {
-        matches.push(app)
-      }
-    }
-
-    // Sort: exact prefix matches first, then alphabetical
-    matches.sort(function(a, b) {
-      if (query) {
-        var aStart = a.name.toLowerCase().startsWith(query)
-        var bStart = b.name.toLowerCase().startsWith(query)
-        if (aStart && !bStart) return -1
-        if (!aStart && bStart) return 1
-      }
-      return a.name.localeCompare(b.name)
-    })
-
-    for (var j = 0; j < Math.min(matches.length, 20); j++) {
-      resultsModel.append(matches[j])
-    }
-    resultsList.currentIndex = 0
-  }
-
-  function launchApp(exec) {
-    GlobalState.closeAll()
-    launchProc.command = ["bash", "-c", exec + " &"]
-    launchProc.running = true
-  }
-
-  Process {
-    id: launchProc
-  }
-
-  Component.onCompleted: appScanner.running = true
 }

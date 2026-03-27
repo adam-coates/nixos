@@ -7,7 +7,7 @@ Singleton {
   id: root
 
   // ── File watcher: reads ~/.local/state/current-theme ──
-  property string themeFile: StandardPaths.home + "/.local/state/current-theme"
+  property string themeFile: Quickshell.env("HOME") + "/.local/state/current-theme"
   property bool isDark: true
 
   FileView {
