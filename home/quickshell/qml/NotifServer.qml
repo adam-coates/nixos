@@ -7,23 +7,6 @@ import Quickshell.Services.Notifications
 Scope {
   id: notifScope
 
-  // Strong JS references to notification objects keyed by id
-  property var notifMap: ({})
-
-  function removeFromPopup(nid) {
-    const n = notifMap[nid]
-    if (n) {
-      n.expire()
-      delete notifMap[nid]
-    }
-    for (var i = 0; i < popupModel.count; i++) {
-      if (popupModel.get(i).notifId === nid) {
-        popupModel.remove(i)
-        break
-      }
-    }
-  }
-
   NotificationServer {
     id: server
     bodySupported: true
@@ -33,12 +16,7 @@ Scope {
     keepOnReload: true
 
     onNotification: notification => {
-      const nid = notification.id
-      notifScope.notifMap[nid] = notification
-
-      // Store only primitives — QObjects in ListModel are unreliable
       popupModel.insert(0, {
-        "notifId":       nid,
         "appName":       notification.appName  || "",
         "appIcon":       notification.appIcon  || "",
         "summary":       notification.summary  || "",
@@ -82,9 +60,7 @@ Scope {
         delegate: Rectangle {
           id: card
 
-          // All display data comes from typed model roles — no QObject needed
           required property int    index
-          required property var    notifId
           required property string appName
           required property string appIcon
           required property string summary
@@ -102,12 +78,11 @@ Scope {
           Component.onCompleted: opacity = 1
           Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
-          // Auto-dismiss: capture id locally so the timer closure is self-contained
+          // card.index is kept current by QML as other items are removed
           Timer {
-            property var nid: card.notifId
-            interval: card.expireTimeout > 0 ? card.expireTimeout : 5000
+            interval: card.expireTimeout > 0 ? card.expireTimeout : 3000
             running: true
-            onTriggered: notifScope.removeFromPopup(nid)
+            onTriggered: popupModel.remove(card.index)
           }
 
           ColumnLayout {
@@ -160,7 +135,7 @@ Scope {
                 MouseArea {
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
-                  onClicked: notifScope.removeFromPopup(card.notifId)
+                  onClicked: popupModel.remove(card.index)
                 }
               }
             }
@@ -175,36 +150,6 @@ Scope {
               wrapMode: Text.WordWrap
               maximumLineCount: 4
               elide: Text.ElideRight
-            }
-
-            // Actions — look up the live object only here, evaluated once at creation
-            Repeater {
-              model: {
-                const n = notifScope.notifMap[card.notifId]
-                return n ? n.actions : null
-              }
-              delegate: Rectangle {
-                required property var modelData
-                Layout.fillWidth: true
-                height: 22
-                color: Theme.bg1
-                radius: 3
-                Text {
-                  anchors.centerIn: parent
-                  text: modelData.text
-                  font.family: Theme.fontFamily
-                  font.pixelSize: 11
-                  color: Theme.accent
-                }
-                MouseArea {
-                  anchors.fill: parent
-                  cursorShape: Qt.PointingHandCursor
-                  onClicked: {
-                    modelData.invoke()
-                    notifScope.removeFromPopup(card.notifId)
-                  }
-                }
-              }
             }
           }
         }
