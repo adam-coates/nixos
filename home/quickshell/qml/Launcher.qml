@@ -1,6 +1,7 @@
 import QtQuick 6.0
 import QtQuick.Layouts 6.0
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 
 PanelWindow {
@@ -8,21 +9,79 @@ PanelWindow {
 
   property bool showing: GlobalState.activePopup === "launcher"
   property string query: ""
+  property var fileResults: []
+
+  // Mode detection from query prefix
+  readonly property string mode: {
+    const q = query
+    if (q.startsWith("=")) return "calc"
+    if (q.startsWith("?")) return "web"
+    if (q.startsWith("~/") || q.startsWith("/")) return "file"
+    return "app"
+  }
+
+  // Calculator: evaluate expression after "="
+  readonly property string calcResult: {
+    if (mode !== "calc") return ""
+    const expr = query.slice(1).trim()
+    if (!expr) return ""
+    if (!/^[\d\s+\-*/().,^%]+$/.test(expr)) return ""
+    try {
+      const r = Function("return (" + expr.replace(/\^/g, "**") + ")")()
+      if (typeof r !== "number" || !isFinite(r)) return ""
+      return Number.isInteger(r) ? String(r) : parseFloat(r.toFixed(8)).toString()
+    } catch(e) { return "" }
+  }
+
+  // File search via fd
+  Process {
+    id: fileProc
+    running: false
+    stdout: SplitParser {
+      onRead: line => {
+        if (line.trim()) launcher.fileResults = [...launcher.fileResults, line.trim()]
+      }
+    }
+  }
+
+  Timer {
+    id: fileDebounce
+    interval: 200
+    onTriggered: {
+      if (launcher.mode !== "file") return
+      const q = launcher.query
+      const term = q.startsWith("~/") ? q.slice(2) : q.slice(1)
+      launcher.fileResults = []
+      fileProc.running = false
+      fileProc.command = [
+        "fd", "--max-results", "25", "--hidden",
+        "--exclude", ".git", "--exclude", "node_modules",
+        term.trim() || ".", Quickshell.env("HOME")
+      ]
+      fileProc.running = true
+    }
+  }
+
+  onQueryChanged: {
+    if (mode === "file") {
+      fileDebounce.restart()
+    } else {
+      fileProc.running = false
+      fileResults = []
+    }
+    resultsList.currentIndex = 0
+  }
 
   visible: showing
   onShowingChanged: {
     if (showing) {
       query = ""
+      fileResults = []
       searchInput.forceActiveFocus()
     }
   }
 
-  anchors {
-    top: true
-    left: true
-    right: true
-    bottom: true
-  }
+  anchors { top: true; left: true; right: true; bottom: true }
 
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.namespace: "quickshell-launcher"
@@ -38,8 +97,8 @@ PanelWindow {
 
   Rectangle {
     anchors.centerIn: parent
-    width: 600
-    height: 420
+    width: 620
+    height: 460
     color: Theme.bgAlpha(0.97)
     border.color: Theme.accent
     border.width: 1
@@ -59,44 +118,65 @@ PanelWindow {
         color: Theme.bg1
         radius: 6
 
-        TextInput {
-          id: searchInput
+        RowLayout {
           anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
-          verticalAlignment: TextInput.AlignVCenter
-          font.family: Theme.fontFamily
-          font.pixelSize: 14
-          color: Theme.fg
-          clip: true
-          text: launcher.query
-          onTextChanged: {
-            launcher.query = text
-            resultsList.currentIndex = 0
-          }
+          spacing: 0
 
-          Keys.onEscapePressed: GlobalState.closeAll()
-          Keys.onReturnPressed: launchCurrent()
-          Keys.onDownPressed: {
-            if (resultsList.currentIndex < resultsList.count - 1)
-              resultsList.currentIndex++
-          }
-          Keys.onUpPressed: {
-            if (resultsList.currentIndex > 0)
-              resultsList.currentIndex--
-          }
-
-          Text {
-            anchors.fill: parent
-            verticalAlignment: Text.AlignVCenter
-            text: " Search..."
+          TextInput {
+            id: searchInput
+            Layout.fillWidth: true
+            verticalAlignment: TextInput.AlignVCenter
             font.family: Theme.fontFamily
             font.pixelSize: 14
-            color: Theme.gray
-            visible: searchInput.text === ""
+            color: Theme.fg
+            clip: true
+            text: launcher.query
+            onTextChanged: launcher.query = text
+
+            Keys.onEscapePressed: GlobalState.closeAll()
+            Keys.onReturnPressed: launchCurrent()
+            Keys.onDownPressed: {
+              if (resultsList.currentIndex < resultsList.count - 1)
+                resultsList.currentIndex++
+            }
+            Keys.onUpPressed: {
+              if (resultsList.currentIndex > 0)
+                resultsList.currentIndex--
+            }
+
+            Text {
+              anchors.fill: parent
+              verticalAlignment: Text.AlignVCenter
+              font.family: Theme.fontFamily
+              font.pixelSize: 14
+              color: Theme.gray
+              visible: searchInput.text === ""
+              text: "  Search apps...  ( = calculator   ? web   ~/ files )"
+            }
+          }
+
+          // Mode badge
+          Rectangle {
+            visible: launcher.mode !== "app"
+            width: modeLabel.implicitWidth + 12
+            height: 24
+            radius: 4
+            color: Theme.accentAlpha(0.2)
+
+            Text {
+              id: modeLabel
+              anchors.centerIn: parent
+              text: launcher.mode === "calc" ? "calc" :
+                    launcher.mode === "web"  ? "web"  : "files"
+              font.family: Theme.fontFamily
+              font.pixelSize: 11
+              color: Theme.accent
+            }
           }
         }
       }
 
-      // Results list — filtered directly from DesktopEntries
+      // Results
       ListView {
         id: resultsList
         Layout.fillWidth: true
@@ -108,23 +188,46 @@ PanelWindow {
 
         model: ScriptModel {
           values: {
-            const q = launcher.query.trim().toLowerCase()
+            const q = launcher.query.trim()
+
+            if (launcher.mode === "calc") {
+              const expr = q.slice(1).trim()
+              const r = launcher.calcResult
+              if (r !== "") return [{ _t: "calc", expr, result: r }]
+              return expr ? [{ _t: "calc_err", expr }] : []
+            }
+
+            if (launcher.mode === "web") {
+              const wq = q.slice(1).trim()
+              return wq ? [{ _t: "web", query: wq }] : []
+            }
+
+            if (launcher.mode === "file") {
+              return launcher.fileResults.map(p => ({
+                _t: "file",
+                path: p,
+                name: p.split("/").pop()
+              }))
+            }
+
+            // App mode
+            const ql = q.toLowerCase()
             const all = [...DesktopEntries.applications.values].filter(e =>
               e.name && e.noDisplay !== true
             )
-            const filtered = q === ""
+            const filtered = ql === ""
               ? all
-              : all.filter(e => e.name.toLowerCase().includes(q))
+              : all.filter(e => e.name.toLowerCase().includes(ql))
             filtered.sort((a, b) => {
-              if (q) {
-                const as = a.name.toLowerCase().startsWith(q)
-                const bs = b.name.toLowerCase().startsWith(q)
+              if (ql) {
+                const as = a.name.toLowerCase().startsWith(ql)
+                const bs = b.name.toLowerCase().startsWith(ql)
                 if (as && !bs) return -1
                 if (!as && bs) return 1
               }
               return a.name.localeCompare(b.name)
             })
-            return filtered
+            return filtered.map(e => ({ _t: "app", entry: e }))
           }
         }
 
@@ -141,20 +244,58 @@ PanelWindow {
             anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
             spacing: 10
 
-            Image {
-              source: modelData.icon ? Quickshell.iconPath(modelData.icon, true) : ""
+            // Symbol icon for non-app results
+            Text {
+              visible: modelData._t !== "app"
+              text: (modelData._t === "calc" || modelData._t === "calc_err") ? "="
+                    : modelData._t === "web" ? "?"
+                    : "~"
+              font.family: Theme.fontFamily
+              font.pixelSize: 15
+              font.bold: true
+              color: resultsList.currentIndex === index ? Theme.accent : Theme.gray
               Layout.preferredWidth: 24
-              Layout.preferredHeight: 24
-              visible: modelData.icon !== ""
+              horizontalAlignment: Text.AlignHCenter
             }
 
+            // App icon
+            Image {
+              visible: modelData._t === "app"
+              source: (modelData._t === "app" && modelData.entry.icon)
+                      ? Quickshell.iconPath(modelData.entry.icon, true) : ""
+              Layout.preferredWidth: 24
+              Layout.preferredHeight: 24
+              fillMode: Image.PreserveAspectFit
+            }
+
+            // Primary label
             Text {
               Layout.fillWidth: true
-              text: modelData.name
+              text: modelData._t === "calc"     ? modelData.expr + "  =  " + modelData.result
+                  : modelData._t === "calc_err" ? "Invalid expression"
+                  : modelData._t === "web"      ? "Search Google:  " + modelData.query
+                  : modelData._t === "file"     ? modelData.name
+                  : modelData.entry.name
               font.family: Theme.fontFamily
               font.pixelSize: 13
-              color: resultsList.currentIndex === parent.parent.index ? Theme.accent : Theme.fg
+              color: resultsList.currentIndex === index ? Theme.accent : Theme.fg
               elide: Text.ElideRight
+            }
+
+            // File path (secondary)
+            Text {
+              visible: modelData._t === "file"
+              text: {
+                if (modelData._t !== "file") return ""
+                const home = Quickshell.env("HOME")
+                const p = modelData.path
+                return p.startsWith(home) ? "~" + p.slice(home.length) : p
+              }
+              font.family: Theme.fontFamily
+              font.pixelSize: 10
+              color: Theme.gray
+              elide: Text.ElideRight
+              Layout.maximumWidth: 200
             }
           }
 
@@ -174,11 +315,23 @@ PanelWindow {
   }
 
   function launchCurrent() {
-    if (resultsList.currentIndex < 0 || resultsList.count === 0) return
-    const entry = resultsList.model.values[resultsList.currentIndex]
-    if (entry) {
+    if (resultsList.count === 0) return
+    const item = resultsList.model.values[resultsList.currentIndex]
+    if (!item) return
+
+    if (item._t === "app") {
       GlobalState.closeAll()
-      entry.execute()
+      item.entry.execute()
+    } else if (item._t === "calc") {
+      // Put result back into search bar so it can be copied
+      searchInput.text = item.result
+      searchInput.selectAll()
+    } else if (item._t === "web") {
+      GlobalState.closeAll()
+      Qt.openUrlExternally("https://www.google.com/search?q=" + encodeURIComponent(item.query))
+    } else if (item._t === "file") {
+      GlobalState.closeAll()
+      Qt.openUrlExternally("file://" + item.path)
     }
   }
 }
