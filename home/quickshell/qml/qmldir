@@ -12,7 +12,6 @@ Launcher Launcher.qml
 LockScreen LockScreen.qml
 Network Network.qml
 NetworkPanel NetworkPanel.qml
-NotifPopup NotifPopup.qml
 NotifServer NotifServer.qml
 PowerMenu PowerMenu.qml
 Wallpaper Wallpaper.qml
