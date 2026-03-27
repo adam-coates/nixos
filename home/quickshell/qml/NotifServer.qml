@@ -11,19 +11,13 @@ Scope {
     actionsSupported: true
     keepOnReload: true
 
-    onNotification: (notification) => {
+    onNotification: notification => {
       notification.tracked = true
     }
   }
 
-  // Notification popup container
-  Variants {
-    model: Quickshell.screens
-    delegate: Component {
-      NotifPopup {
-        screen: modelData
-        notifications: server.trackedNotifications
-      }
-    }
+  // Single popup — appears on the focused/active output
+  NotifPopup {
+    notifications: server.trackedNotifications
   }
 }
