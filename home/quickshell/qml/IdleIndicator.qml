@@ -2,10 +2,12 @@ import QtQuick 6.0
 import Quickshell.Io
 
 Item {
-  width: idleText.width + 16
-  height: 26
+  // Only occupies space when visible; when idle is ON (hypridle running) this is hidden
+  property bool idleActive: true
 
-  property bool idleActive: false
+  width: idleActive ? 0 : (idleText.width + 8)
+  height: 26
+  visible: !idleActive
 
   Process {
     id: idleCheck
@@ -28,20 +30,7 @@ Item {
     anchors.centerIn: parent
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: idleActive ? Theme.green : Theme.gray
-    text: "󱫖" // 󱮦
-  }
-
-  MouseArea {
-    anchors.fill: parent
-    onClicked: {
-      toggleIdle.running = true
-    }
-  }
-
-  Process {
-    id: toggleIdle
-    command: ["bash", "-c", "~/.config/scripts/idle-toggle.sh"]
-    onExited: idleCheck.running = true
+    color: Theme.red
+    text: "󱫖"
   }
 }

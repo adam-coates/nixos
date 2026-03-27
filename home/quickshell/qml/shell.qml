@@ -43,6 +43,9 @@ ShellRoot {
   // ── Clipboard manager ──
   ClipboardPanel {}
 
+  // ── Triggers / quick actions panel ──
+  TriggersPanel {}
+
   // ── File preview (companion to launcher file mode) ──
   FilePreview {}
 

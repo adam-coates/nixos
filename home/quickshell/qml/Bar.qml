@@ -59,6 +59,20 @@ PanelWindow {
       Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
       spacing: 8
 
+      // Triggers menu
+      Text {
+        text: "󱐋"
+        font.family: Theme.fontFamily
+        font.pixelSize: 14
+        color: GlobalState.activePopup === "triggers" ? Theme.accent : Theme.gray
+        verticalAlignment: Text.AlignVCenter
+        MouseArea {
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+          onClicked: GlobalState.toggle("triggers")
+        }
+      }
+
       // Clipboard
       Text {
         text: "󰅎"

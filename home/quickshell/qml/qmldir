@@ -18,5 +18,6 @@ NetworkPanel NetworkPanel.qml
 NotifPanel NotifPanel.qml
 NotifServer NotifServer.qml
 PowerMenu PowerMenu.qml
+TriggersPanel TriggersPanel.qml
 Wallpaper Wallpaper.qml
 Workspaces Workspaces.qml
