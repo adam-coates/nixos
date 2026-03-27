@@ -7,11 +7,7 @@ import Quickshell.Services.Notifications
 Scope {
   id: notifScope
 
-  // Strong references to notification objects, keyed by id
-  property var notifMap: ({})
-
   function removeFromPopup(nid) {
-    delete notifMap[nid]
     for (var i = 0; i < popupModel.count; i++) {
       if (popupModel.get(i).notifId === nid) {
         popupModel.remove(i)
@@ -30,8 +26,7 @@ Scope {
 
     onNotification: notification => {
       const nid = notification.id
-      notifScope.notifMap[nid] = notification
-      popupModel.insert(0, { "notifId": nid })
+      popupModel.insert(0, { "notif": notification, "notifId": nid })
 
       NotifState.addToHistory(
         notification.appName,
@@ -69,10 +64,8 @@ Scope {
         delegate: Rectangle {
           id: card
           required property int index
+          required property var notif
           required property int notifId
-
-          // Look up the live notification object from the map
-          property var notif: notifScope.notifMap[notifId] || null
 
           Layout.fillWidth: true
           height: cardCol.implicitHeight + 20
@@ -88,10 +81,10 @@ Scope {
           // Auto-dismiss — directly removes from model, no signal dependency
           Timer {
             property int nid: card.notifId
-            interval: card.notif && card.notif.expireTimeout > 0 ? card.notif.expireTimeout : 5000
+            interval: card.notif.expireTimeout > 0 ? card.notif.expireTimeout : 5000
             running: true
             onTriggered: {
-              if (card.notif) card.notif.expire()
+              card.notif.expire()
               notifScope.removeFromPopup(nid)
             }
           }
@@ -101,14 +94,13 @@ Scope {
             anchors { fill: parent; margins: 10 }
             spacing: 6
 
-            // Header: icon + names + close
             RowLayout {
               Layout.fillWidth: true
               spacing: 8
 
               Image {
-                visible: card.notif && card.notif.appIcon !== ""
-                source: card.notif && card.notif.appIcon !== "" ? Quickshell.iconPath(card.notif.appIcon, true) : ""
+                visible: card.notif.appIcon !== ""
+                source: card.notif.appIcon !== "" ? Quickshell.iconPath(card.notif.appIcon, true) : ""
                 Layout.preferredWidth: 24
                 Layout.preferredHeight: 24
                 fillMode: Image.PreserveAspectFit
@@ -120,8 +112,8 @@ Scope {
 
                 Text {
                   Layout.fillWidth: true
-                  visible: card.notif && card.notif.appName !== ""
-                  text: card.notif ? (card.notif.appName || "") : ""
+                  visible: card.notif.appName !== ""
+                  text: card.notif.appName || ""
                   font.family: Theme.fontFamily
                   font.pixelSize: 10
                   color: Theme.gray
@@ -130,7 +122,7 @@ Scope {
 
                 Text {
                   Layout.fillWidth: true
-                  text: card.notif ? (card.notif.summary || "") : ""
+                  text: card.notif.summary || ""
                   font.family: Theme.fontFamily
                   font.pixelSize: 12
                   font.bold: true
@@ -148,18 +140,17 @@ Scope {
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
                   onClicked: {
-                    if (card.notif) card.notif.dismiss()
+                    card.notif.dismiss()
                     notifScope.removeFromPopup(card.notifId)
                   }
                 }
               }
             }
 
-            // Body
             Text {
               Layout.fillWidth: true
-              visible: card.notif && card.notif.body !== ""
-              text: card.notif ? (card.notif.body || "") : ""
+              visible: card.notif.body !== ""
+              text: card.notif.body || ""
               font.family: Theme.fontFamily
               font.pixelSize: 11
               color: Theme.gray
@@ -168,14 +159,13 @@ Scope {
               elide: Text.ElideRight
             }
 
-            // Actions
             RowLayout {
               Layout.fillWidth: true
               spacing: 4
-              visible: card.notif && card.notif.actions.length > 0
+              visible: card.notif.actions.length > 0
 
               Repeater {
-                model: card.notif ? card.notif.actions : []
+                model: card.notif.actions
                 delegate: Rectangle {
                   required property var modelData
                   Layout.fillWidth: true
