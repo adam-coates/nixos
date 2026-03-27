@@ -174,38 +174,17 @@ PanelWindow {
 
   Process {
     id: appScanner
-    command: ["bash", "-c",
-      "find /run/current-system/sw/share/applications " +
-      "$HOME/.nix-profile/share/applications " +
-      "$HOME/.local/share/applications " +
-      "-name '*.desktop' -type f 2>/dev/null | sort -u | while read -r f; do " +
-      "name=\"\" exec=\"\" icon=\"\" nodisplay=\"\" insection=\"\"; " +
-      "while IFS= read -r line; do " +
-      "case \"$line\" in " +
-      "\"[Desktop Entry]\") insection=1 ;; " +
-      "\\[*\\]) [ -n \"$insection\" ] && break ;; " +
-      "Name=*) [ -z \"$name\" ] && [ -n \"$insection\" ] && name=\"${line#Name=}\" ;; " +
-      "Exec=*) [ -z \"$exec\" ] && [ -n \"$insection\" ] && exec=\"${line#Exec=}\" ;; " +
-      "Icon=*) [ -z \"$icon\" ] && [ -n \"$insection\" ] && icon=\"${line#Icon=}\" ;; " +
-      "NoDisplay=true) nodisplay=1 ;; " +
-      "Type=*) [ \"${line#Type=}\" != Application ] && [ -n \"$insection\" ] && nodisplay=1 ;; " +
-      "esac; " +
-      "done < \"$f\"; " +
-      "[ -n \"$name\" ] && [ -n \"$exec\" ] && [ -z \"$nodisplay\" ] && " +
-      "printf '%s\\t%s\\t%s\\n' \"$name\" \"$exec\" \"$icon\"; " +
-      "done | sort -t$'\\t' -k1 -u"
-    ]
+    command: [Quickshell.env("HOME") + "/.local/bin/qs-list-apps"]
 
     stdout: SplitParser {
       splitMarker: "\n"
       onRead: data => {
         var parts = data.split("\t")
-        if (parts.length >= 2) {
-          var execStr = parts[1].replace(/%[fFuUdDnNickvm]/g, "").trim()
+        if (parts.length >= 2 && parts[0]) {
           launcher.pendingApps.push({
             name: parts[0],
-            exec: execStr,
-            icon: parts.length >= 3 ? parts[2] : ""
+            exec: parts[1],
+            icon: parts.length >= 3 ? parts[2].trim() : ""
           })
         }
       }

@@ -34,13 +34,11 @@ Scope {
     id: pam
     configDirectory: "/etc/pam.d"
     config: "quickshell"
-    user: Quickshell.env("USER")
+    user: Quickshell.env("USER") || Quickshell.env("LOGNAME") || "adam"
 
-    onPamMessage: (message, isError, responseRequired) => {
-      if (responseRequired) {
-        // PAM is asking for the password
-        pam.respond(inputBuffer)
-      }
+    onPamMessage: {
+      // PAM is asking for input — always respond with the buffered password
+      pam.respond(lockScope.inputBuffer)
     }
 
     onCompleted: result => {
