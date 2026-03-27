@@ -23,9 +23,6 @@ PanelWindow {
   exclusionMode: ExclusionMode.Ignore
   color: "transparent"
 
-  opacity: filePath !== "" ? 1.0 : 0.0
-  Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-
   // --- state ---
   property int  pdfStamp: 0      // bumped on each new PDF render to bust image cache
   property string bodyText: ""   // loaded text file content
