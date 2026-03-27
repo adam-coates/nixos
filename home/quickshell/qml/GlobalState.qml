@@ -5,8 +5,8 @@ import Quickshell
 Singleton {
   id: root
 
-  // Track which popup is currently open (only one at a time)
-  property string activePopup: "" // "launcher", "powermenu", "controlcenter", ""
+  property string activePopup: ""
+  property string previewFile: ""   // path shown in FilePreview window
 
   // Lock screen signal
   signal lockRequested()
@@ -21,6 +21,7 @@ Singleton {
 
   function closeAll() {
     activePopup = ""
+    previewFile = ""
   }
 
   function requestLock() {

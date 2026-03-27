@@ -80,6 +80,9 @@ in
 
       # PDF reader (zathura managed by programs.zathura)
       dbus
+
+      # File preview (pdftoppm for PDF thumbnails in launcher)
+      poppler_utils
     ];
 
     # --- Wallpapers ---

@@ -43,6 +43,9 @@ ShellRoot {
   // ── Clipboard manager ──
   ClipboardPanel {}
 
+  // ── File preview (companion to launcher file mode) ──
+  FilePreview {}
+
   // ── Lock screen ──
   LockScreen {}
 
