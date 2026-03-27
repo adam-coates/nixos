@@ -59,6 +59,20 @@ PanelWindow {
       Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
       spacing: 8
 
+      // Clipboard
+      Text {
+        text: "󰅎"
+        font.family: Theme.fontFamily
+        font.pixelSize: 14
+        color: GlobalState.activePopup === "clipboard" ? Theme.accent : Theme.gray
+        verticalAlignment: Text.AlignVCenter
+        MouseArea {
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+          onClicked: GlobalState.toggle("clipboard")
+        }
+      }
+
       // Notification bell
       Text {
         text: NotifState.unreadCount > 0 ? "󰂚" : "󰂜"

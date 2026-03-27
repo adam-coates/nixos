@@ -40,6 +40,9 @@ ShellRoot {
   // ── Notification history panel ──
   NotifPanel {}
 
+  // ── Clipboard manager ──
+  ClipboardPanel {}
+
   // ── Lock screen ──
   LockScreen {}
 

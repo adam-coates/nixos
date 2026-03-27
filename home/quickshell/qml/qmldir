@@ -1,6 +1,7 @@
 singleton Theme Theme.qml
 singleton GlobalState GlobalState.qml
 singleton NotifState NotifState.qml
+ClipboardPanel ClipboardPanel.qml
 Audio Audio.qml
 AudioSlider AudioSlider.qml
 Bar Bar.qml
