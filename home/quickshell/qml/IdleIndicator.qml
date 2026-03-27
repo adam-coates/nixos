@@ -29,7 +29,7 @@ Item {
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
     color: idleActive ? Theme.green : Theme.gray
-    text: "\u{f1BA6}" // 󱮦
+    text: "󱫖" // 󱮦
   }
 
   MouseArea {
