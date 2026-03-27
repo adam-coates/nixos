@@ -16,8 +16,14 @@ Scope {
     }
   }
 
-  // Single popup — appears on the focused/active output
-  NotifPopup {
-    notifications: server.trackedNotifications
+  // One popup per screen so the layer shell has a valid output to attach to
+  Variants {
+    model: Quickshell.screens
+    delegate: Component {
+      NotifPopup {
+        screen: modelData
+        notifications: server.trackedNotifications
+      }
+    }
   }
 }

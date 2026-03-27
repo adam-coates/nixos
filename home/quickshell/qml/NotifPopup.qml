@@ -1,4 +1,3 @@
-pragma ComponentBehavior: Bound
 import QtQuick 6.0
 import QtQuick.Layouts 6.0
 import Quickshell
@@ -8,20 +7,21 @@ import Quickshell.Services.Notifications
 PanelWindow {
   id: root
 
-  required property ObjectModel notifications
+  property var screen
+  property var notifications
 
   anchors.top: true
   anchors.right: true
   margins { top: 36; right: 10 }
 
   width: 320
-  height: notifColumn.implicitHeight + (notifColumn.implicitHeight > 0 ? 10 : 0)
-  visible: notifications.count > 0
+  // Always occupy space; height collapses to 0 when empty
+  height: notifColumn.implicitHeight > 0 ? notifColumn.implicitHeight + 10 : 0
+  visible: height > 0
 
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.namespace: "quickshell-notifications"
   exclusionMode: ExclusionMode.Ignore
-
   color: "transparent"
 
   ColumnLayout {
@@ -32,68 +32,64 @@ PanelWindow {
     Repeater {
       model: root.notifications
 
-      Rectangle {
+      delegate: Rectangle {
         id: card
-        required property Notification modelData
+        property var notif: modelData
 
         Layout.fillWidth: true
-        height: cardLayout.implicitHeight + 20
+        height: innerLayout.implicitHeight + 20
         color: Theme.bg
         border.color: Theme.accent
         border.width: 1
         radius: 4
 
-        // Fade in
         opacity: 0
         Component.onCompleted: opacity = 1
         Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
-        // Auto-dismiss
         Timer {
-          interval: card.modelData.expireTimeout > 0 ? card.modelData.expireTimeout : 5000
+          interval: card.notif.expireTimeout > 0 ? card.notif.expireTimeout : 5000
           running: true
-          onTriggered: card.modelData.expire()
+          onTriggered: card.notif.expire()
         }
 
         ColumnLayout {
-          id: cardLayout
+          id: innerLayout
           anchors { fill: parent; margins: 10 }
           spacing: 6
 
-          // Header row: icon + summary + close
+          // Header: icon + text + close
           RowLayout {
             Layout.fillWidth: true
             spacing: 8
 
-            // App icon
             Image {
-              source: card.modelData.appIcon
-                ? Quickshell.iconPath(card.modelData.appIcon, true)
+              visible: card.notif.appIcon !== ""
+              source: card.notif.appIcon !== ""
+                ? Quickshell.iconPath(card.notif.appIcon, true)
                 : ""
               Layout.preferredWidth: 24
               Layout.preferredHeight: 24
-              visible: card.modelData.appIcon !== ""
               fillMode: Image.PreserveAspectFit
             }
 
-            // App name + summary
             ColumnLayout {
               Layout.fillWidth: true
               spacing: 1
 
               Text {
                 Layout.fillWidth: true
-                text: card.modelData.appName || ""
+                visible: card.notif.appName !== ""
+                text: card.notif.appName || ""
                 font.family: Theme.fontFamily
                 font.pixelSize: 10
                 color: Theme.gray
                 elide: Text.ElideRight
-                visible: card.modelData.appName !== ""
               }
 
               Text {
                 Layout.fillWidth: true
-                text: card.modelData.summary || ""
+                text: card.notif.summary || ""
                 font.family: Theme.fontFamily
                 font.pixelSize: 12
                 font.bold: true
@@ -102,17 +98,15 @@ PanelWindow {
               }
             }
 
-            // Close button
             Text {
               text: "×"
               font.pixelSize: 18
               color: Theme.gray
               Layout.alignment: Qt.AlignTop
-
               MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: card.modelData.dismiss()
+                onClicked: card.notif.dismiss()
               }
             }
           }
@@ -120,27 +114,26 @@ PanelWindow {
           // Body
           Text {
             Layout.fillWidth: true
-            text: card.modelData.body || ""
+            visible: card.notif.body !== ""
+            text: card.notif.body || ""
             font.family: Theme.fontFamily
             font.pixelSize: 11
             color: Theme.gray
             wrapMode: Text.WordWrap
             maximumLineCount: 4
             elide: Text.ElideRight
-            visible: card.modelData.body !== ""
           }
 
           // Actions
           RowLayout {
             Layout.fillWidth: true
+            visible: card.notif.actions.length > 0
             spacing: 4
-            visible: card.modelData.actions.length > 0
 
             Repeater {
-              model: card.modelData.actions
-
-              Rectangle {
-                required property NotificationAction modelData
+              model: card.notif.actions
+              delegate: Rectangle {
+                property var action: modelData
                 Layout.fillWidth: true
                 height: 22
                 color: Theme.bg1
@@ -148,16 +141,15 @@ PanelWindow {
 
                 Text {
                   anchors.centerIn: parent
-                  text: parent.modelData.text
+                  text: action.text
                   font.family: Theme.fontFamily
                   font.pixelSize: 11
                   color: Theme.accent
                 }
-
                 MouseArea {
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
-                  onClicked: parent.modelData.invoke()
+                  onClicked: action.invoke()
                 }
               }
             }
