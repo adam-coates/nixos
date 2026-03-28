@@ -14,7 +14,7 @@ PanelWindow {
   visible: active
 
   anchors { top: true; left: true; right: true; bottom: true }
-  WlrLayershell.layer: WlrLayer.Overlay
+  WlrLayershell.layer: WlrLayer.Top
   WlrLayershell.namespace: "quickshell-backdrop"
   WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
   exclusionMode: ExclusionMode.Ignore
