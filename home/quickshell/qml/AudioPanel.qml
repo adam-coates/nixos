@@ -3,6 +3,7 @@ import QtQuick.Layouts 6.0
 import Quickshell
 import Quickshell.Services.Pipewire
 import Quickshell.Wayland
+import Quickshell.Io
 
 PanelWindow {
   id: audioPanel
