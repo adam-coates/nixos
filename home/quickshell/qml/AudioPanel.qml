@@ -52,6 +52,12 @@ PanelWindow {
     border.width: 1
     radius: 6
 
+    opacity: audioPanel.showing ? 1 : 0
+    scale: audioPanel.showing ? 1 : 0.96
+    transformOrigin: Item.TopRight
+    Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
     Flickable {
       id: panelFlick
       anchors.fill: parent
@@ -374,8 +380,90 @@ PanelWindow {
           }
         }
 
+        // ── Equalizer ──
+        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3) }
+
+        RowLayout {
+          Layout.fillWidth: true
+          spacing: 6
+
+          Text {
+            text: "Equalizer"
+            font.family: Theme.fontFamily
+            font.pixelSize: 11
+            color: Theme.gray
+          }
+
+          Item { Layout.fillWidth: true }
+
+          Text {
+            text: "Open EasyEffects"
+            font.family: Theme.fontFamily
+            font.pixelSize: 10
+            color: Theme.accent
+            MouseArea {
+              anchors.fill: parent
+              cursorShape: Qt.PointingHandCursor
+              onClicked: {
+                eqLaunchProc.running = false
+                eqLaunchProc.running = true
+              }
+            }
+          }
+        }
+
+        // Preset buttons
+        Flow {
+          Layout.fillWidth: true
+          spacing: 4
+
+          Repeater {
+            model: ["Flat", "Bass Boost", "Rock", "Vocal", "Treble"]
+
+            Rectangle {
+              required property string modelData
+              required property int index
+              width: presetLabel.implicitWidth + 14
+              height: 24; radius: 4
+              color: audioPanel.activePreset === modelData ? Theme.accentAlpha(0.25) : Theme.bg2
+
+              Behavior on color { ColorAnimation { duration: 100 } }
+
+              Text {
+                id: presetLabel
+                anchors.centerIn: parent
+                text: modelData
+                font.family: Theme.fontFamily
+                font.pixelSize: 10
+                color: audioPanel.activePreset === modelData ? Theme.accent : Theme.fg
+              }
+
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                  audioPanel.activePreset = modelData
+                  eqLoadProc.command = ["easyeffects", "-l", modelData]
+                  eqLoadProc.running = false
+                  eqLoadProc.running = true
+                }
+              }
+            }
+          }
+        }
+
         Item { height: 4 }
       }
     }
+  }
+
+  // EQ state
+  property string activePreset: "Flat"
+
+  Process { id: eqLoadProc; running: false }
+  Process {
+    id: eqLaunchProc
+    command: ["easyeffects"]
+    running: false
   }
 }

@@ -1,0 +1,24 @@
+{
+  "output": {
+    "blocklist": [],
+    "plugins_order": ["equalizer#0"],
+    "equalizer#0": {
+      "bypass": false,
+      "input-gain": 0.0,
+      "output-gain": -2.0,
+      "mode": "IIR",
+      "num-bands": 10,
+      "split-channels": false,
+      "band0": { "frequency": 32.0, "gain": 8.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band1": { "frequency": 64.0, "gain": 6.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band2": { "frequency": 125.0, "gain": 4.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band3": { "frequency": 250.0, "gain": 2.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band4": { "frequency": 500.0, "gain": 0.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band5": { "frequency": 1000.0, "gain": 0.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band6": { "frequency": 2000.0, "gain": 0.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band7": { "frequency": 4000.0, "gain": 0.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band8": { "frequency": 8000.0, "gain": 0.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" },
+      "band9": { "frequency": 16000.0, "gain": 0.0, "mode": "RLC (BT)", "mute": false, "q": 1.504, "slope": "x1", "solo": false, "type": "Bell" }
+    }
+  }
+}

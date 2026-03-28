@@ -54,18 +54,22 @@ PanelWindow {
 
     Item { Layout.fillWidth: true }
 
-    // ── Right: System widgets ──
+    // ── Right: System widgets (even spacing) ──
     RowLayout {
       Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-      spacing: 8
+      spacing: 0
 
       // Clipboard
-      Text {
-        text: "󰅎"
-        font.family: Theme.fontFamily
-        font.pixelSize: 14
-        color: GlobalState.activePopup === "clipboard" ? Theme.accent : Theme.gray
-        verticalAlignment: Text.AlignVCenter
+      Item {
+        width: 28; height: 26
+        Text {
+          anchors.centerIn: parent
+          text: "󰅎"
+          font.family: Theme.fontFamily
+          font.pixelSize: 14
+          color: GlobalState.activePopup === "clipboard" ? Theme.accent : Theme.gray
+          Behavior on color { ColorAnimation { duration: 120 } }
+        }
         MouseArea {
           anchors.fill: parent
           cursorShape: Qt.PointingHandCursor
@@ -74,13 +78,16 @@ PanelWindow {
       }
 
       // Notification bell
-      Text {
-        text: NotifState.unreadCount > 0 ? "󰂚" : "󰂜"
-        font.family: Theme.fontFamily
-        font.pixelSize: 14
-        color: NotifState.unreadCount > 0 ? Theme.accent : Theme.gray
-        verticalAlignment: Text.AlignVCenter
-
+      Item {
+        width: 28; height: 26
+        Text {
+          anchors.centerIn: parent
+          text: NotifState.unreadCount > 0 ? "󰂚" : "󰂜"
+          font.family: Theme.fontFamily
+          font.pixelSize: 14
+          color: NotifState.unreadCount > 0 ? Theme.accent : Theme.gray
+          Behavior on color { ColorAnimation { duration: 120 } }
+        }
         MouseArea {
           anchors.fill: parent
           cursorShape: Qt.PointingHandCursor
@@ -88,9 +95,23 @@ PanelWindow {
         }
       }
 
-      Bluetooth {}
-      Network {}
-      Audio {}
+      // Bluetooth
+      Item {
+        width: 28; height: 26
+        Bluetooth { anchors.fill: parent }
+      }
+
+      // Network
+      Item {
+        width: 28; height: 26
+        Network { anchors.fill: parent }
+      }
+
+      // Audio
+      Item {
+        width: 28; height: 26
+        Audio { anchors.fill: parent }
+      }
     }
   }
 }

@@ -53,6 +53,9 @@ in
 
     programs.home-manager.enable = true;
 
+    # Audio effects / equalizer
+    services.easyeffects.enable = true;
+
     home.packages = with pkgs; [
       # File manager
       thunar

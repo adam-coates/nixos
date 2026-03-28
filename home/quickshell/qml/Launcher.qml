@@ -19,10 +19,115 @@ PanelWindow {
     return "app"
   }
 
+  // ── Unit conversion tables ──
+  readonly property var unitTable: ({
+    // Length → meters
+    km:  { cat: "length", f: 1000 },
+    m:   { cat: "length", f: 1 },
+    cm:  { cat: "length", f: 0.01 },
+    mm:  { cat: "length", f: 0.001 },
+    mi:  { cat: "length", f: 1609.344 },
+    yd:  { cat: "length", f: 0.9144 },
+    ft:  { cat: "length", f: 0.3048 },
+    "in": { cat: "length", f: 0.0254 },
+    nm:  { cat: "length", f: 1852 },
+    // Weight → grams
+    kg:  { cat: "weight", f: 1000 },
+    g:   { cat: "weight", f: 1 },
+    mg:  { cat: "weight", f: 0.001 },
+    lb:  { cat: "weight", f: 453.592 },
+    lbs: { cat: "weight", f: 453.592 },
+    oz:  { cat: "weight", f: 28.3495 },
+    st:  { cat: "weight", f: 6350.29 },
+    t:   { cat: "weight", f: 1000000 },
+    // Volume → liters
+    l:    { cat: "volume", f: 1 },
+    ml:   { cat: "volume", f: 0.001 },
+    gal:  { cat: "volume", f: 3.78541 },
+    qt:   { cat: "volume", f: 0.946353 },
+    pt:   { cat: "volume", f: 0.473176 },
+    cup:  { cat: "volume", f: 0.236588 },
+    floz: { cat: "volume", f: 0.0295735 },
+    tbsp: { cat: "volume", f: 0.0147868 },
+    tsp:  { cat: "volume", f: 0.00492892 },
+    // Speed → m/s
+    "m/s":  { cat: "speed", f: 1 },
+    "km/h": { cat: "speed", f: 0.277778 },
+    kmh:    { cat: "speed", f: 0.277778 },
+    kph:    { cat: "speed", f: 0.277778 },
+    mph:    { cat: "speed", f: 0.44704 },
+    kn:     { cat: "speed", f: 0.514444 },
+    knot:   { cat: "speed", f: 0.514444 },
+    knots:  { cat: "speed", f: 0.514444 },
+    // Data → bytes
+    b:   { cat: "data", f: 1 },
+    kb:  { cat: "data", f: 1024 },
+    mb:  { cat: "data", f: 1048576 },
+    gb:  { cat: "data", f: 1073741824 },
+    tb:  { cat: "data", f: 1099511627776 },
+    // Time → seconds
+    s:   { cat: "time", f: 1 },
+    sec: { cat: "time", f: 1 },
+    min: { cat: "time", f: 60 },
+    h:   { cat: "time", f: 3600 },
+    hr:  { cat: "time", f: 3600 },
+    hrs: { cat: "time", f: 3600 },
+    d:   { cat: "time", f: 86400 },
+    wk:  { cat: "time", f: 604800 },
+    // Area → m²
+    m2:   { cat: "area", f: 1 },
+    km2:  { cat: "area", f: 1000000 },
+    ft2:  { cat: "area", f: 0.092903 },
+    mi2:  { cat: "area", f: 2589988 },
+    acre: { cat: "area", f: 4046.86 },
+    ha:   { cat: "area", f: 10000 },
+    // Temperature (special)
+    c: { cat: "temp" }, f: { cat: "temp" }, k: { cat: "temp" }
+  })
+
+  function tryConvert(expr) {
+    const m = expr.match(/^([\d.]+)\s*([a-z/²]+)\s+(?:to|in|as)\s+([a-z/²]+)$/i)
+    if (!m) return ""
+    const val = parseFloat(m[1])
+    const from = m[2].toLowerCase()
+    const to = m[3].toLowerCase()
+    if (isNaN(val)) return ""
+
+    const fu = unitTable[from]
+    const tu = unitTable[to]
+    if (!fu || !tu || fu.cat !== tu.cat) return ""
+
+    var result
+    if (fu.cat === "temp") {
+      // Convert to Celsius first, then to target
+      var celsius
+      if (from === "c") celsius = val
+      else if (from === "f") celsius = (val - 32) * 5 / 9
+      else celsius = val - 273.15 // kelvin
+
+      if (to === "c") result = celsius
+      else if (to === "f") result = celsius * 9 / 5 + 32
+      else result = celsius + 273.15
+    } else {
+      result = val * fu.f / tu.f
+    }
+
+    if (!isFinite(result)) return ""
+    var s = Number.isInteger(result) ? String(result) : parseFloat(result.toFixed(6)).toString()
+    return val + " " + from + " = " + s + " " + to
+  }
+
   readonly property string calcResult: {
     if (mode !== "calc") return ""
     const expr = query.slice(1).trim()
-    if (!expr || !/^[\d\s+\-*/().,^%]+$/.test(expr)) return ""
+    if (!expr) return ""
+
+    // Try unit conversion first
+    const conv = tryConvert(expr)
+    if (conv !== "") return conv
+
+    // Math eval
+    if (!/^[\d\s+\-*/().,^%]+$/.test(expr)) return ""
     try {
       const r = Function("return (" + expr.replace(/\^/g, "**") + ")")()
       if (typeof r !== "number" || !isFinite(r)) return ""
@@ -30,7 +135,7 @@ PanelWindow {
     } catch(e) { return "" }
   }
 
-  // Selected file path in file mode — drives the separate FilePreview window
+  // Selected file path in file mode
   readonly property string selectedPath: {
     if (mode !== "file" || fileResults.length === 0) return ""
     const idx = resultsList.currentIndex
@@ -95,11 +200,18 @@ PanelWindow {
   WlrLayershell.namespace: "quickshell-launcher"
   WlrLayershell.keyboardFocus: showing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
   exclusionMode: ExclusionMode.Ignore
-  color: Qt.rgba(0, 0, 0, 0.3)
+  color: "transparent"
 
-  MouseArea {
+  // Dim backdrop
+  Rectangle {
     anchors.fill: parent
-    onClicked: GlobalState.closeAll()
+    color: Qt.rgba(0, 0, 0, showing ? 0.3 : 0)
+    Behavior on color { ColorAnimation { duration: 150 } }
+
+    MouseArea {
+      anchors.fill: parent
+      onClicked: GlobalState.closeAll()
+    }
   }
 
   Rectangle {
@@ -110,6 +222,12 @@ PanelWindow {
     border.color: Theme.accent
     border.width: 1
     radius: 12
+
+    // Slide + fade animation
+    opacity: showing ? 1 : 0
+    scale: showing ? 1 : 0.95
+    Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
 
     MouseArea { anchors.fill: parent }
 
@@ -158,7 +276,7 @@ PanelWindow {
               font.pixelSize: 14
               color: Theme.gray
               visible: searchInput.text === ""
-              text: "  Search apps...  ( = calc   ? web   ~/ files )"
+              text: "  Search...  ( = calc/convert   ? web   ~/ files )"
             }
           }
 
@@ -171,7 +289,12 @@ PanelWindow {
             Text {
               id: modeLabel
               anchors.centerIn: parent
-              text: launcher.mode === "calc" ? "calc" : launcher.mode === "web" ? "web" : "files"
+              text: {
+                if (launcher.mode === "calc") {
+                  return launcher.calcResult.indexOf(" = ") > 0 ? "convert" : "calc"
+                }
+                return launcher.mode === "web" ? "web" : "files"
+              }
               font.family: Theme.fontFamily
               font.pixelSize: 11
               color: Theme.accent
@@ -239,11 +362,12 @@ PanelWindow {
           color: resultsList.currentIndex === index ? Theme.accentAlpha(0.2) : "transparent"
           radius: 6
 
+          Behavior on color { ColorAnimation { duration: 80 } }
+
           RowLayout {
             anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
             spacing: 10
 
-            // calc/web prefix symbol (not for files or apps)
             Text {
               visible: modelData._t === "calc" || modelData._t === "calc_err" || modelData._t === "web"
               text: (modelData._t === "calc" || modelData._t === "calc_err") ? "=" : "?"
@@ -264,11 +388,10 @@ PanelWindow {
               fillMode: Image.PreserveAspectFit
             }
 
-            // Main label — for files shows the full shortened path
             Text {
               Layout.fillWidth: true
               text: {
-                if (modelData._t === "calc")     return modelData.expr + "  =  " + modelData.result
+                if (modelData._t === "calc")     return modelData.result
                 if (modelData._t === "calc_err") return "Invalid expression"
                 if (modelData._t === "web")      return "Search Google:  " + modelData.query
                 if (modelData._t === "file") {
@@ -306,7 +429,10 @@ PanelWindow {
       GlobalState.closeAll()
       item.entry.execute()
     } else if (item._t === "calc") {
-      searchInput.text = item.result
+      // For conversions, copy the result number; for math, copy the result
+      const parts = item.result.split(" = ")
+      const copyVal = parts.length > 1 ? parts[1] : item.result
+      searchInput.text = copyVal
       searchInput.selectAll()
     } else if (item._t === "web") {
       GlobalState.closeAll()

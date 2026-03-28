@@ -98,6 +98,12 @@ PanelWindow {
     border.width: 1
     radius: 6
 
+    opacity: clipPanel.showing ? 1 : 0
+    scale: clipPanel.showing ? 1 : 0.96
+    transformOrigin: Item.TopRight
+    Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
     ColumnLayout {
       id: panelCol
       anchors { top: parent.top; left: parent.left; right: parent.right; margins: 8 }

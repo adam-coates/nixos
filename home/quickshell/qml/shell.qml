@@ -34,6 +34,9 @@ ShellRoot {
   // ── Power menu ──
   PowerMenu {}
 
+  // ── Click-off backdrop for panel popups (must be before panels for z-order) ──
+  PopupBackdrop {}
+
   // ── Audio panel ──
   AudioPanel {}
 

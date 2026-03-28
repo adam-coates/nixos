@@ -2,8 +2,8 @@ import QtQuick 6.0
 import Quickshell.Io
 
 Item {
-  width: netText.width + 16
-  height: 26
+  implicitWidth: netText.width + 16
+  implicitHeight: 26
 
   property string status: ""
 
@@ -47,6 +47,7 @@ Item {
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
     color: Theme.fg
+    Behavior on color { ColorAnimation { duration: 120 } }
     text: status || "\u{f092e}"
   }
 

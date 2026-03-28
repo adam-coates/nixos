@@ -15,6 +15,7 @@ LockScreen LockScreen.qml
 Network Network.qml
 NetworkPanel NetworkPanel.qml
 NotifPanel NotifPanel.qml
+PopupBackdrop PopupBackdrop.qml
 NotifServer NotifServer.qml
 PowerMenu PowerMenu.qml
 TriggersPanel TriggersPanel.qml

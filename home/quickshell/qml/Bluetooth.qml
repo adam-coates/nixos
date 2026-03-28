@@ -2,8 +2,8 @@ import QtQuick 6.0
 import Quickshell.Bluetooth
 
 Item {
-  width: btText.width + 16
-  height: 26
+  implicitWidth: btText.width + 16
+  implicitHeight: 26
 
   property bool powered: {
     var adapters = Bluetooth.adapters
@@ -28,6 +28,7 @@ Item {
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
     color: Theme.fg
+    Behavior on color { ColorAnimation { duration: 120 } }
     text: {
       if (!powered) return "\u{f00b2}" // 󰂲 off
       if (connectedCount > 0) return "\u{f00b1}" // 󰂱 connected

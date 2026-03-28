@@ -23,14 +23,20 @@ PanelWindow {
   WlrLayershell.keyboardFocus: showing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
   exclusionMode: ExclusionMode.Ignore
 
-  color: Qt.rgba(0, 0, 0, 0.5)
+  color: "transparent"
 
   Keys.onEscapePressed: GlobalState.closeAll()
 
-  // Click backdrop to close
-  MouseArea {
+  // Dim backdrop
+  Rectangle {
     anchors.fill: parent
-    onClicked: GlobalState.closeAll()
+    color: Qt.rgba(0, 0, 0, showing ? 0.5 : 0)
+    Behavior on color { ColorAnimation { duration: 150 } }
+
+    MouseArea {
+      anchors.fill: parent
+      onClicked: GlobalState.closeAll()
+    }
   }
 
   // Centered menu
@@ -42,6 +48,11 @@ PanelWindow {
     border.color: Theme.accent
     border.width: 1
     radius: 12
+
+    opacity: showing ? 1 : 0
+    scale: showing ? 1 : 0.9
+    Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
     MouseArea { anchors.fill: parent } // prevent click-through
 
@@ -65,6 +76,8 @@ PanelWindow {
           color: hoverArea.containsMouse ? Theme.accentAlpha(0.15) : "transparent"
           radius: 8
 
+          Behavior on color { ColorAnimation { duration: 100 } }
+
           ColumnLayout {
             anchors.centerIn: parent
             spacing: 8
@@ -75,6 +88,7 @@ PanelWindow {
               font.family: Theme.fontFamily
               font.pixelSize: 28
               color: hoverArea.containsMouse ? Theme.accent : Theme.fg
+              Behavior on color { ColorAnimation { duration: 100 } }
             }
 
             Text {
@@ -83,6 +97,7 @@ PanelWindow {
               font.family: Theme.fontFamily
               font.pixelSize: 11
               color: hoverArea.containsMouse ? Theme.accent : Theme.gray
+              Behavior on color { ColorAnimation { duration: 100 } }
             }
           }
 

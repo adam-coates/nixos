@@ -64,6 +64,12 @@ PanelWindow {
     border.width: 1
     radius: 6
 
+    opacity: btPanel.showing ? 1 : 0
+    scale: btPanel.showing ? 1 : 0.96
+    transformOrigin: Item.TopRight
+    Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
     Flickable {
       id: panelFlick
       anchors.fill: parent

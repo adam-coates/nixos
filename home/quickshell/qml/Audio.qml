@@ -2,8 +2,8 @@ import QtQuick 6.0
 import Quickshell.Services.Pipewire
 
 Item {
-  width: audioText.width + 16
-  height: 26
+  implicitWidth: audioText.width + 16
+  implicitHeight: 26
 
   property var defaultSink: Pipewire.defaultAudioSink
   property real volume: defaultSink ? defaultSink.audio.volume : 0
@@ -15,6 +15,7 @@ Item {
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
     color: Theme.fg
+    Behavior on color { ColorAnimation { duration: 120 } }
     text: {
       if (muted) return "\u{f0581}" // 󰖁 muted
       if (volume > 0.66) return "\u{f057e}" // 󰕾 high

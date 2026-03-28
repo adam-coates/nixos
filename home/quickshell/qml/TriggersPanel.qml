@@ -36,6 +36,12 @@ PanelWindow {
     color: Theme.bgAlpha(0.97)
     border.color: Theme.accent
     border.width: 1
+
+    opacity: triggersPanel.showing ? 1 : 0
+    scale: triggersPanel.showing ? 1 : 0.96
+    transformOrigin: Item.TopRight
+    Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
     radius: 6
 
     ColumnLayout {
