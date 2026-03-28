@@ -424,7 +424,8 @@ PanelWindow {
               { label: "Bass Boost", preset: "BassBoost" },
               { label: "Rock", preset: "Rock" },
               { label: "Vocal", preset: "Vocal" },
-              { label: "Treble", preset: "Treble" }
+              { label: "Treble", preset: "Treble" },
+              { label: "Enhanced", preset: "Enhanced" }
             ]
 
             Rectangle {

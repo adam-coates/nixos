@@ -15,6 +15,7 @@
   xdg.configFile."easyeffects/output/Rock.json".source = ./easyeffects/Rock.json;
   xdg.configFile."easyeffects/output/Vocal.json".source = ./easyeffects/Vocal.json;
   xdg.configFile."easyeffects/output/Treble.json".source = ./easyeffects/Treble.json;
+  xdg.configFile."easyeffects/output/Enhanced.json".source = ./easyeffects/Enhanced.json;
 
   # App list helper script used by the launcher
   home.file.".local/bin/qs-list-apps" = {
