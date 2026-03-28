@@ -11,7 +11,7 @@
 
   # EasyEffects EQ presets
   xdg.configFile."easyeffects/output/Flat.json".source = ./easyeffects/Flat.json;
-  xdg.configFile."easyeffects/output/Bass Boost.json".source = ./easyeffects/Bass\ Boost.json;
+  xdg.configFile."easyeffects/output/Bass Boost.json".source = ./easyeffects/BassBoost.json;
   xdg.configFile."easyeffects/output/Rock.json".source = ./easyeffects/Rock.json;
   xdg.configFile."easyeffects/output/Vocal.json".source = ./easyeffects/Vocal.json;
   xdg.configFile."easyeffects/output/Treble.json".source = ./easyeffects/Treble.json;
