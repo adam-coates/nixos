@@ -419,32 +419,38 @@ PanelWindow {
           spacing: 4
 
           Repeater {
-            model: ["Flat", "Bass Boost", "Rock", "Vocal", "Treble"]
+            model: [
+              { label: "Flat", preset: "Flat" },
+              { label: "Bass Boost", preset: "BassBoost" },
+              { label: "Rock", preset: "Rock" },
+              { label: "Vocal", preset: "Vocal" },
+              { label: "Treble", preset: "Treble" }
+            ]
 
             Rectangle {
-              required property string modelData
+              required property var modelData
               required property int index
               width: presetLabel.implicitWidth + 14
               height: 24; radius: 4
-              color: audioPanel.activePreset === modelData ? Theme.accentAlpha(0.25) : Theme.bg2
+              color: audioPanel.activePreset === modelData.preset ? Theme.accentAlpha(0.25) : Theme.bg2
 
               Behavior on color { ColorAnimation { duration: 100 } }
 
               Text {
                 id: presetLabel
                 anchors.centerIn: parent
-                text: modelData
+                text: modelData.label
                 font.family: Theme.fontFamily
                 font.pixelSize: 10
-                color: audioPanel.activePreset === modelData ? Theme.accent : Theme.fg
+                color: audioPanel.activePreset === modelData.preset ? Theme.accent : Theme.fg
               }
 
               MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                  audioPanel.activePreset = modelData
-                  eqLoadProc.command = ["easyeffects", "-l", modelData]
+                  audioPanel.activePreset = modelData.preset
+                  eqLoadProc.command = ["easyeffects", "-l", modelData.preset]
                   eqLoadProc.running = false
                   eqLoadProc.running = true
                 }
