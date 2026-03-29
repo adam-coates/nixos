@@ -1,5 +1,10 @@
 { config, pkgs, ... }:
 
+{
+  xdg.configFile."solaar/config.yaml" = {
+    force = true;
+    source = ./solaar/config.yaml;
+  };
 
   xdg.configFile."solaar/rules.yaml" = {
     force = true;
