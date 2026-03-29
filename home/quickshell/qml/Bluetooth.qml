@@ -8,7 +8,7 @@ Item {
   property bool powered: {
     var adapters = Bluetooth.adapters
     for (var i = 0; i < adapters.length; i++) {
-      if (adapters[i].powered) return true
+      if (adapters[i].enabled) return true
     }
     return false
   }
@@ -27,7 +27,11 @@ Item {
     anchors.centerIn: parent
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: Theme.fg
+    color: {
+      if (!powered) return Theme.gray
+      if (connectedCount > 0) return Theme.green
+      return Theme.fg
+    }
     Behavior on color { ColorAnimation { duration: 120 } }
     text: {
       if (!powered) return "\u{f00b2}" // 󰂲 off

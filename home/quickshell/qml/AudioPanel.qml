@@ -23,14 +23,105 @@ PanelWindow {
   exclusionMode: ExclusionMode.Ignore
   color: "transparent"
 
-  property var defaultSink: Pipewire.defaultAudioSink
-  property var defaultSource: Pipewire.defaultAudioSource
+  // ── wpctl-based volume state ──
+  property real sinkVolume: 0
+  property bool sinkMuted: false
+  property real sourceVolume: 0
+  property bool sourceMuted: false
 
-  function safeVolume(node) {
-    if (!node || !node.audio) return 0
-    var v = node.audio.volume
-    return isNaN(v) ? 0 : v
+  // ── wpctl polling processes ──
+  Process {
+    id: sinkVolProc
+    command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
+    running: true
+    property string _output: ""
+    stdout: SplitParser {
+      onRead: line => sinkVolProc._output = line
+    }
+    onExited: {
+      var line = sinkVolProc._output
+      sinkVolProc._output = ""
+      var match = line.match(/Volume:\s+([\d.]+)/)
+      if (match) audioPanel.sinkVolume = parseFloat(match[1])
+      audioPanel.sinkMuted = line.indexOf("[MUTED]") >= 0
+    }
   }
+
+  Process {
+    id: sourceVolProc
+    command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SOURCE@"]
+    running: true
+    property string _output: ""
+    stdout: SplitParser {
+      onRead: line => sourceVolProc._output = line
+    }
+    onExited: {
+      var line = sourceVolProc._output
+      sourceVolProc._output = ""
+      var match = line.match(/Volume:\s+([\d.]+)/)
+      if (match) audioPanel.sourceVolume = parseFloat(match[1])
+      audioPanel.sourceMuted = line.indexOf("[MUTED]") >= 0
+    }
+  }
+
+  Timer {
+    interval: 500
+    running: audioPanel.showing
+    repeat: true
+    onTriggered: {
+      sinkVolProc.running = true
+      sourceVolProc.running = true
+    }
+  }
+
+  onShowingChanged: {
+    if (showing) {
+      sinkVolProc.running = true
+      sourceVolProc.running = true
+    }
+  }
+
+  // ── wpctl set commands ──
+  Process {
+    id: setSinkVolProc
+    running: false
+  }
+
+  Process {
+    id: setSourceVolProc
+    running: false
+  }
+
+  Process {
+    id: toggleSinkMuteProc
+    command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]
+    running: false
+  }
+
+  Process {
+    id: toggleSourceMuteProc
+    command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"]
+    running: false
+  }
+
+  function setSinkVol(v) {
+    v = Math.max(0, Math.min(1.5, v))
+    sinkVolume = v
+    setSinkVolProc.command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", v.toFixed(2)]
+    setSinkVolProc.running = false
+    setSinkVolProc.running = true
+  }
+
+  function setSourceVol(v) {
+    v = Math.max(0, Math.min(1, v))
+    sourceVolume = v
+    setSourceVolProc.command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", v.toFixed(2)]
+    setSourceVolProc.running = false
+    setSourceVolProc.running = true
+  }
+
+  // ── Pipewire module for device listing only ──
+  property var defaultSink: Pipewire.defaultAudioSink
 
   readonly property var sinkNodes: {
     if (!Pipewire.ready) return []
@@ -93,20 +184,22 @@ PanelWindow {
 
           Text {
             text: {
-              if (!audioPanel.defaultSink || !audioPanel.defaultSink.audio || audioPanel.defaultSink.audio.muted) return "\u{f0581}"
-              var v = audioPanel.safeVolume(audioPanel.defaultSink)
+              if (audioPanel.sinkMuted) return "\u{f0581}"
+              var v = audioPanel.sinkVolume
               if (v > 0.66) return "\u{f057e}"
               if (v > 0.33) return "\u{f0580}"
               return "\u{f057f}"
             }
             font.family: Theme.fontFamily
             font.pixelSize: 16
-            color: (audioPanel.defaultSink && audioPanel.defaultSink.audio && audioPanel.defaultSink.audio.muted) ? Theme.gray : Theme.accent
+            color: audioPanel.sinkMuted ? Theme.gray : Theme.accent
             MouseArea {
               anchors.fill: parent
               cursorShape: Qt.PointingHandCursor
               onClicked: {
-                if (audioPanel.defaultSink) audioPanel.defaultSink.audio.muted = !audioPanel.defaultSink.audio.muted
+                toggleSinkMuteProc.running = false
+                toggleSinkMuteProc.running = true
+                audioPanel.sinkMuted = !audioPanel.sinkMuted
               }
             }
           }
@@ -114,8 +207,6 @@ PanelWindow {
           Item {
             Layout.fillWidth: true
             height: 14
-
-            property real vol: audioPanel.safeVolume(audioPanel.defaultSink)
 
             Rectangle {
               anchors.verticalCenter: parent.verticalCenter
@@ -125,7 +216,7 @@ PanelWindow {
               color: Theme.bg2
 
               Rectangle {
-                width: Math.min(1, parent.parent.vol) * parent.width
+                width: Math.min(1, audioPanel.sinkVolume) * parent.width
                 height: parent.height
                 radius: 2
                 color: Theme.accent
@@ -133,7 +224,7 @@ PanelWindow {
             }
 
             Rectangle {
-              x: Math.min(1, parent.vol) * (parent.width - 12)
+              x: Math.min(1, audioPanel.sinkVolume) * (parent.width - 12)
               anchors.verticalCenter: parent.verticalCenter
               width: 12; height: 12; radius: 6
               color: Theme.accent
@@ -145,14 +236,13 @@ PanelWindow {
               onPressed: (mouse) => setVol(mouse)
               onPositionChanged: (mouse) => setVol(mouse)
               function setVol(mouse) {
-                if (!audioPanel.defaultSink || !audioPanel.defaultSink.audio) return
-                audioPanel.defaultSink.audio.volume = Math.max(0, Math.min(1.5, mouse.x / width))
+                audioPanel.setSinkVol(mouse.x / width)
               }
             }
           }
 
           Text {
-            text: audioPanel.defaultSink && audioPanel.defaultSink.audio ? Math.round(audioPanel.safeVolume(audioPanel.defaultSink) * 100) + "%" : "--"
+            text: Math.round(audioPanel.sinkVolume * 100) + "%"
             font.family: Theme.fontFamily
             font.pixelSize: 11
             color: Theme.gray
@@ -219,15 +309,17 @@ PanelWindow {
           spacing: 8
 
           Text {
-            text: (audioPanel.defaultSource && audioPanel.defaultSource.audio && audioPanel.defaultSource.audio.muted) ? "\u{f036e}" : "\u{f036c}"
+            text: audioPanel.sourceMuted ? "\u{f036e}" : "\u{f036c}"
             font.family: Theme.fontFamily
             font.pixelSize: 14
-            color: (audioPanel.defaultSource && audioPanel.defaultSource.audio && audioPanel.defaultSource.audio.muted) ? Theme.red : Theme.accent
+            color: audioPanel.sourceMuted ? Theme.red : Theme.accent
             MouseArea {
               anchors.fill: parent
               cursorShape: Qt.PointingHandCursor
               onClicked: {
-                if (audioPanel.defaultSource && audioPanel.defaultSource.audio) audioPanel.defaultSource.audio.muted = !audioPanel.defaultSource.audio.muted
+                toggleSourceMuteProc.running = false
+                toggleSourceMuteProc.running = true
+                audioPanel.sourceMuted = !audioPanel.sourceMuted
               }
             }
           }
@@ -241,7 +333,7 @@ PanelWindow {
           }
 
           Text {
-            text: audioPanel.defaultSource && audioPanel.defaultSource.audio ? Math.round(audioPanel.safeVolume(audioPanel.defaultSource) * 100) + "%" : "--"
+            text: Math.round(audioPanel.sourceVolume * 100) + "%"
             font.family: Theme.fontFamily
             font.pixelSize: 11
             color: Theme.gray
@@ -251,9 +343,6 @@ PanelWindow {
         Item {
           Layout.fillWidth: true
           height: 14
-          visible: audioPanel.defaultSource != null
-
-          property real vol: audioPanel.safeVolume(audioPanel.defaultSource)
 
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
@@ -263,7 +352,7 @@ PanelWindow {
             color: Theme.bg2
 
             Rectangle {
-              width: Math.min(1, parent.parent.vol) * parent.width
+              width: Math.min(1, audioPanel.sourceVolume) * parent.width
               height: parent.height
               radius: 2
               color: Theme.accent
@@ -271,7 +360,7 @@ PanelWindow {
           }
 
           Rectangle {
-            x: Math.min(1, parent.vol) * (parent.width - 12)
+            x: Math.min(1, audioPanel.sourceVolume) * (parent.width - 12)
             anchors.verticalCenter: parent.verticalCenter
             width: 12; height: 12; radius: 6
             color: Theme.accent
@@ -283,8 +372,7 @@ PanelWindow {
             onPressed: (mouse) => setMicVol(mouse)
             onPositionChanged: (mouse) => setMicVol(mouse)
             function setMicVol(mouse) {
-              if (!audioPanel.defaultSource || !audioPanel.defaultSource.audio) return
-              audioPanel.defaultSource.audio.volume = Math.max(0, Math.min(1, mouse.x / width))
+              audioPanel.setSourceVol(mouse.x / width)
             }
           }
         }
@@ -358,7 +446,7 @@ PanelWindow {
                 color: Theme.bg2
 
                 Rectangle {
-                  width: (parent.parent.node.audio ? Math.min(1, parent.parent.node.audio.volume) : 0) * parent.width
+                  width: (parent.parent.node.audio && !isNaN(parent.parent.node.audio.volume) ? Math.min(1, parent.parent.node.audio.volume) : 0) * parent.width
                   height: parent.height
                   radius: 1.5
                   color: Theme.accent
@@ -366,7 +454,7 @@ PanelWindow {
               }
 
               Rectangle {
-                x: (parent.node.audio ? Math.min(1, parent.node.audio.volume) : 0) * (parent.width - 8)
+                x: (parent.node.audio && !isNaN(parent.node.audio.volume) ? Math.min(1, parent.node.audio.volume) : 0) * (parent.width - 8)
                 anchors.verticalCenter: parent.verticalCenter
                 width: 8; height: 8; radius: 4
                 color: Theme.accent

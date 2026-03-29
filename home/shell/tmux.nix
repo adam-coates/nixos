@@ -95,11 +95,11 @@ in
       # Pomodoro
       set -g @pomodoro_granularity 'on'
       set -g status-interval 1
-      set -g @pomodoro_on "#[fg=magenta]  "
-      set -g @pomodoro_complete "#[fg=green] "
-      set -g @pomodoro_pause "#[fg=yellow] ⏸︎ "
-      set -g @pomodoro_prompt_break "#[fg=cyan]🕤 ? "
-      set -g @pomodoro_prompt_pomodoro "#[fg=brightblack]🕤 ? "
+      set -g @pomodoro_on "#[fg=colour208]  "
+      set -g @pomodoro_complete "#[fg=colour142] "
+      set -g @pomodoro_pause "#[fg=colour214] ⏸︎ "
+      set -g @pomodoro_prompt_break "#[fg=colour109]🕤 ? "
+      set -g @pomodoro_prompt_pomodoro "#[fg=colour223]🕤 ? "
 
       # ── Status line ────────────────────────────────────────────────────
       set-option -g status "on"

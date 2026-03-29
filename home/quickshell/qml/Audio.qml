@@ -1,24 +1,54 @@
 import QtQuick 6.0
-import Quickshell.Services.Pipewire
+import Quickshell.Io
 
 Item {
   implicitWidth: audioText.width + 16
   implicitHeight: 26
 
-  property var defaultSink: Pipewire.defaultAudioSink
-  property real volume: {
-    if (!defaultSink || !defaultSink.audio) return 0
-    var v = defaultSink.audio.volume
-    return isNaN(v) ? 0 : v
+  property real volume: 0
+  property bool muted: false
+
+  Process {
+    id: volCheck
+    command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
+    running: true
+    property string _output: ""
+    stdout: SplitParser {
+      onRead: line => volCheck._output = line
+    }
+    onExited: {
+      var line = volCheck._output
+      volCheck._output = ""
+      var match = line.match(/Volume:\s+([\d.]+)/)
+      if (match) volume = parseFloat(match[1])
+      muted = line.indexOf("[MUTED]") >= 0
+    }
   }
-  property bool muted: defaultSink && defaultSink.audio ? defaultSink.audio.muted : true
+
+  Timer {
+    interval: 2000
+    running: true
+    repeat: true
+    onTriggered: volCheck.running = true
+  }
+
+  Process {
+    id: setVolProc
+    running: false
+  }
+
+  Process {
+    id: toggleMuteProc
+    command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]
+    running: false
+  }
 
   Text {
     id: audioText
     anchors.centerIn: parent
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: Theme.fg
+    color: muted ? Theme.gray : Theme.fg
     Behavior on color { ColorAnimation { duration: 120 } }
     text: {
       if (muted) return "\u{f0581}" // 󰖁 muted
@@ -33,15 +63,20 @@ Item {
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: (mouse) => {
       if (mouse.button === Qt.RightButton) {
-        if (defaultSink && defaultSink.audio) defaultSink.audio.muted = !defaultSink.audio.muted
+        toggleMuteProc.running = false
+        toggleMuteProc.running = true
+        muted = !muted
       } else {
         GlobalState.toggle("audio")
       }
     }
     onWheel: (wheel) => {
-      if (!defaultSink || !defaultSink.audio) return
       var delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
-      defaultSink.audio.volume = Math.max(0, Math.min(1.5, volume + delta))
+      var newVol = Math.max(0, Math.min(1.5, volume + delta))
+      volume = newVol
+      setVolProc.command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", newVol.toFixed(2)]
+      setVolProc.running = false
+      setVolProc.running = true
     }
     hoverEnabled: true
   }

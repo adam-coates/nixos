@@ -6,6 +6,7 @@ Item {
   implicitHeight: 26
 
   property string status: ""
+  property bool connected: false
 
   Process {
     id: nmcliCheck
@@ -26,10 +27,13 @@ Item {
       }
       if (ethLine.indexOf("connected") >= 0) {
         status = "\u{f0200}" // 󰀂 ethernet
+        connected = true
       } else if (wifiLine.indexOf("connected") >= 0) {
         status = "\u{f05a9}" // 󰖩 wifi
+        connected = true
       } else {
         status = "\u{f092e}" // 󰤮 disconnected
+        connected = false
       }
     }
   }
@@ -46,7 +50,7 @@ Item {
     anchors.centerIn: parent
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: Theme.fg
+    color: connected ? Theme.green : Theme.red
     Behavior on color { ColorAnimation { duration: 120 } }
     text: status || "\u{f092e}"
   }
