@@ -12,6 +12,7 @@ in
     ./shell
     inputs.nixvim.homeModules.nixvim
     ../nixvim
+    ./hardware
   ];
 
   options.theme = {
