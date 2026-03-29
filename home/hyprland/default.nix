@@ -146,8 +146,8 @@
         "$mod SHIFT, 9, movetoworkspace, 9"
         "$mod SHIFT, 0, movetoworkspace, 10"
 
-        "bind = $mainMod, mouse_down, workspace, e+1"
-        "bind = $mainMod, mouse_up, workspace, e-1"
+        "$mod, mouse_down, workspace, e+1"
+        "$mod, mouse_up, workspace, e-1"
 
         # Screenshot
         ", Print, exec, grim -g \"$(slurp)\" - | swappy -f -"
