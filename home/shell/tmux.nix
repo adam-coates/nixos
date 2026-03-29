@@ -156,6 +156,11 @@ in
       set -g message-command-style "bg=default,fg=blue"
       set -g mode-style "bg=blue,fg=black"
       setw -g clock-mode-colour blue
+      set -g @plugin 'tmux-plugins/tpm'
+      set -g @plugin 'tmux-plugins/tmux-sensible'
+      
+      # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+      run '~/.config/tmux/plugins/tpm/tpm'
     '';
   };
 }
