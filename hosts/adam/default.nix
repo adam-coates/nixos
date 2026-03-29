@@ -66,6 +66,27 @@
   services.gvfs.enable = true;
   programs.xfconf.enable = true;
 
+
+  # Make sleep work
+  systemd.services.toggle-acpi-fix = {
+    description = "Disable GPP0 and PTXH to fix suspend issue";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "toggle-acpi-fix" ''
+        while read -r device _ status _; do
+          case "$device" in
+            GPP0|PTXH)
+              if [[ "$status" == *enabled* ]]; then
+                echo "$device" > /proc/acpi/wakeup
+              fi
+              ;;
+          esac
+        done < /proc/acpi/wakeup
+      '';
+    };
+  };
+
   # Fonts
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
