@@ -14,6 +14,8 @@
         "nm-applet --indicator"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
+        "solaar --window=hide"
+        "voxtype daemon"
       ];
 
       # Environment variables
@@ -155,6 +157,14 @@
 
         # Clipboard
         "$mod, C, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+
+        # Emoji picker
+        "$mod, period, exec, qs ipc call shell toggleEmoji"
+      ];
+
+      bindd = [
+        # Dictation toggle
+        "$mod SHIFT, X, Toggle dictation, exec, voxtype record toggle"
       ];
 
       bindm = [

@@ -92,6 +92,9 @@ in
       qt6.qtimageformats
 
       claude-code
+
+      # Voice dictation
+      voxtype-vulkan
     ];
 
     # --- Wallpapers ---
@@ -162,6 +165,34 @@ in
         <property name="last-view" type="string" value="ThunarDetailsView"/>
         <property name="last-show-hidden" type="bool" value="true"/>
       </channel>
+    '';
+
+    # --- Voxtype dictation config ---
+    xdg.configFile."voxtype/config.toml".text = ''
+      state_file = "auto"
+
+      [hotkey]
+      enabled = false
+
+      [audio]
+      device = "default"
+      sample_rate = 16000
+      max_duration_secs = 60
+
+      [whisper]
+      model = "base.en"
+      language = "en"
+      translate = false
+
+      [output]
+      mode = "type"
+      fallback_to_clipboard = true
+      type_delay_ms = 1
+
+      [output.notification]
+      on_recording_start = false
+      on_recording_stop = false
+      on_transcription = false
     '';
 
     xdg.enable = true;

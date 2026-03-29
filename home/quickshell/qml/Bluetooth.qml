@@ -27,17 +27,9 @@ Item {
     anchors.centerIn: parent
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: {
-      if (!powered) return Theme.gray
-      if (connectedCount > 0) return Theme.green
-      return Theme.fg
-    }
+    color: connectedCount > 0 ? Theme.green : Theme.red
     Behavior on color { ColorAnimation { duration: 120 } }
-    text: {
-      if (!powered) return "\u{f00b2}" // 󰂲 off
-      if (connectedCount > 0) return "\u{f00b1}" // 󰂱 connected
-      return "\u{f00af}" // 󰂯 on
-    }
+    text: "\u{f00af}" // 󰂯 always the same symbol, no strikethrough
   }
 
   MouseArea {

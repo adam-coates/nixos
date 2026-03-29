@@ -1,5 +1,13 @@
 { pkgs, inputs, ... }:
 
+let
+  emojiData = pkgs.runCommand "emoji-data" {} ''
+    ${pkgs.gnugrep}/bin/grep "; fully-qualified" \
+      ${pkgs.unicode-emoji}/share/unicode/emoji/emoji-test.txt | \
+      ${pkgs.gnused}/bin/sed 's/.*# //' | \
+      ${pkgs.gnused}/bin/sed 's/ E[0-9.]* /\t/' > $out
+  '';
+in
 {
   home.packages = [
     pkgs.quickshell
@@ -8,6 +16,9 @@
   # Deploy the entire qml directory as one unit so all files share
   # the same Nix store path and QML can resolve sibling types.
   xdg.configFile."quickshell".source = ./qml;
+
+  # Emoji data for the emoji picker
+  xdg.dataFile."quickshell/emojis.txt".source = emojiData;
 
   # EasyEffects EQ presets (XDG data dir, not config)
   xdg.dataFile."easyeffects/output/Flat.json".source = ./easyeffects/Flat.json;

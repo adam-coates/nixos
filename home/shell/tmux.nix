@@ -124,8 +124,9 @@ in
       git_status="#(${git-status-script} #{pane_current_path})"
       wb_git_status="#(${wb-git-status-script} #{pane_current_path} &)"
 
-      # Right section
-      set-option -g status-right "#{pomodoro_status}$git_status$wb_git_status"
+      # Right section (inline pomodoro script — plugin interpolation runs before extraConfig)
+      pomodoro_status="#(${tmux-pomodoro-plus}/share/tmux-plugins/tmux-pomodoro-plus/scripts/pomodoro.sh)"
+      set-option -g status-right "$pomodoro_status$git_status$wb_git_status"
 
       set-option -g status-left-length 100
       set-option -g status-right-length 150

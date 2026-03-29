@@ -43,13 +43,14 @@ PanelWindow {
 
     Item { Layout.fillWidth: true }
 
-    // ── Center: Clock + Idle ──
+    // ── Center: Clock + status indicators ──
     RowLayout {
       Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
       spacing: 8
 
       Clock {}
       IdleIndicator {}
+      DictationIndicator {}
     }
 
     Item { Layout.fillWidth: true }

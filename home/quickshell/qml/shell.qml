@@ -49,6 +49,9 @@ ShellRoot {
   // ── Notification history panel ──
   NotifPanel {}
 
+  // ── Emoji picker ──
+  EmojiPicker {}
+
   // ── Clipboard manager ──
   ClipboardPanel {}
 
@@ -71,6 +74,7 @@ ShellRoot {
     function toggleBluetooth(): void { GlobalState.toggle("bluetooth") }
     function toggleNetwork(): void { GlobalState.toggle("network") }
     function toggleTriggers(): void { GlobalState.toggle("triggers") }
+    function toggleEmoji(): void { GlobalState.toggle("emoji") }
     function lock(): void { GlobalState.requestLock() }
     function closeAll(): void { GlobalState.closeAll() }
   }
