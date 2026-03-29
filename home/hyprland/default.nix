@@ -146,6 +146,9 @@
         "$mod SHIFT, 9, movetoworkspace, 9"
         "$mod SHIFT, 0, movetoworkspace, 10"
 
+        "bind = $mainMod, mouse_down, workspace, e+1"
+        "bind = $mainMod, mouse_up, workspace, e-1"
+
         # Screenshot
         ", Print, exec, grim -g \"$(slurp)\" - | swappy -f -"
         "$mod SHIFT, S, exec, mkdir -p ~/Pictures/screenshots && grim -g \"$(slurp)\" ~/Pictures/screenshots/screenshot_$(date +%Y%m%d_%H%M%S).png && notify-send \"Screenshot saved\" \"~/Pictures/screenshots\" -t 2000"
