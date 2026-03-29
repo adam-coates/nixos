@@ -27,35 +27,9 @@ PanelWindow {
   readonly property bool powered: adapter ? adapter.enabled : false
   readonly property bool scanning: adapter ? adapter.discovering : false
 
-  readonly property var connectedDevices: {
-    if (!adapter) return []
-    var result = []
-    for (var i = 0; i < adapter.devices.length; i++) {
-      var d = adapter.devices[i]
-      if (d.connected) result.push(d)
-    }
-    return result
-  }
-
-  readonly property var pairedDevices: {
-    if (!adapter) return []
-    var result = []
-    for (var i = 0; i < adapter.devices.length; i++) {
-      var d = adapter.devices[i]
-      if (d.paired && !d.connected) result.push(d)
-    }
-    return result
-  }
-
-  readonly property var availableDevices: {
-    if (!adapter) return []
-    var result = []
-    for (var i = 0; i < adapter.devices.length; i++) {
-      var d = adapter.devices[i]
-      if (!d.paired && !d.connected && d.deviceName) result.push(d)
-    }
-    return result
-  }
+  function isConnected(d) { return d && d.connected }
+  function isPaired(d) { return d && d.paired && !d.connected }
+  function isAvailable(d) { return d && !d.paired && !d.connected && (d.name || d.deviceName) }
 
   Rectangle {
     anchors.fill: parent
@@ -131,7 +105,7 @@ PanelWindow {
 
         // ── Connected Devices ──
         Text {
-          visible: btPanel.powered && btPanel.connectedDevices.length > 0
+          visible: btPanel.powered
           text: "Connected"
           font.family: Theme.fontFamily
           font.pixelSize: 11
@@ -139,17 +113,21 @@ PanelWindow {
         }
 
         Repeater {
-          model: btPanel.connectedDevices
+          id: connectedRepeater
+          model: btPanel.adapter ? btPanel.adapter.devices : []
 
           Rectangle {
             required property var modelData
             Layout.fillWidth: true
-            height: 36; radius: 4
+            visible: btPanel.isConnected(modelData)
+            height: visible ? 36 : 0
+            radius: 4
             color: Theme.accentAlpha(0.1)
 
             RowLayout {
               anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
               spacing: 6
+              visible: parent.visible
 
               Text {
                 text: "\u{f00af}" // 󰂯
@@ -197,7 +175,7 @@ PanelWindow {
 
         // ── Paired Devices ──
         Text {
-          visible: btPanel.powered && btPanel.pairedDevices.length > 0
+          visible: btPanel.powered
           text: "Paired"
           font.family: Theme.fontFamily
           font.pixelSize: 11
@@ -205,17 +183,21 @@ PanelWindow {
         }
 
         Repeater {
-          model: btPanel.pairedDevices
+          id: pairedRepeater
+          model: btPanel.adapter ? btPanel.adapter.devices : []
 
           Rectangle {
             required property var modelData
             Layout.fillWidth: true
-            height: 36; radius: 4
+            visible: btPanel.isPaired(modelData)
+            height: visible ? 36 : 0
+            radius: 4
             color: "transparent"
 
             RowLayout {
               anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
               spacing: 6
+              visible: parent.visible
 
               Text {
                 text: "\u{f00af}" // 󰂯
@@ -279,7 +261,8 @@ PanelWindow {
           Item { Layout.fillWidth: true }
 
           Rectangle {
-            width: scanLabel.implicitWidth + 16
+            implicitWidth: scanLabel.implicitWidth + 16
+            Layout.preferredWidth: scanLabel.implicitWidth + 16
             height: 22; radius: 4
             color: btPanel.scanning ? Theme.accentAlpha(0.2) : Theme.bg2
 
@@ -304,17 +287,21 @@ PanelWindow {
         }
 
         Repeater {
-          model: btPanel.availableDevices
+          id: availableRepeater
+          model: btPanel.adapter ? btPanel.adapter.devices : []
 
           Rectangle {
             required property var modelData
             Layout.fillWidth: true
-            height: 36; radius: 4
+            visible: btPanel.isAvailable(modelData)
+            height: visible ? 36 : 0
+            radius: 4
             color: "transparent"
 
             RowLayout {
               anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
               spacing: 6
+              visible: parent.visible
 
               Text {
                 text: "\u{f00af}" // 󰂯
@@ -328,7 +315,7 @@ PanelWindow {
                 spacing: 0
 
                 Text {
-                  text: modelData.deviceName || modelData.address
+                  text: modelData.name || modelData.deviceName || modelData.address
                   font.family: Theme.fontFamily
                   font.pixelSize: 11
                   color: Theme.fg
@@ -365,7 +352,7 @@ PanelWindow {
         }
 
         Text {
-          visible: btPanel.powered && btPanel.scanning && btPanel.availableDevices.length === 0
+          visible: btPanel.powered && btPanel.scanning
           text: "Searching for devices..."
           font.family: Theme.fontFamily
           font.pixelSize: 11

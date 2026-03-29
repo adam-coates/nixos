@@ -89,6 +89,8 @@ in
 
       # WebP/AVIF/TIFF support for Qt image viewer (Quickshell file preview)
       qt6.qtimageformats
+
+      claude-code
     ];
 
     # --- Wallpapers ---

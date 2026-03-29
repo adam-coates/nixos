@@ -6,8 +6,12 @@ Item {
   implicitHeight: 26
 
   property var defaultSink: Pipewire.defaultAudioSink
-  property real volume: defaultSink ? defaultSink.audio.volume : 0
-  property bool muted: defaultSink ? defaultSink.audio.muted : true
+  property real volume: {
+    if (!defaultSink || !defaultSink.audio) return 0
+    var v = defaultSink.audio.volume
+    return isNaN(v) ? 0 : v
+  }
+  property bool muted: defaultSink && defaultSink.audio ? defaultSink.audio.muted : true
 
   Text {
     id: audioText
@@ -29,13 +33,13 @@ Item {
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: (mouse) => {
       if (mouse.button === Qt.RightButton) {
-        if (defaultSink) defaultSink.audio.muted = !defaultSink.audio.muted
+        if (defaultSink && defaultSink.audio) defaultSink.audio.muted = !defaultSink.audio.muted
       } else {
         GlobalState.toggle("audio")
       }
     }
     onWheel: (wheel) => {
-      if (!defaultSink) return
+      if (!defaultSink || !defaultSink.audio) return
       var delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
       defaultSink.audio.volume = Math.max(0, Math.min(1.5, volume + delta))
     }
