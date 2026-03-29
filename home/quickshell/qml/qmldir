@@ -21,3 +21,5 @@ PowerMenu PowerMenu.qml
 TriggersPanel TriggersPanel.qml
 Wallpaper Wallpaper.qml
 Workspaces Workspaces.qml
+DictationIndicator DictationIndicator.qml
+EmojiPicker EmojiPicker.qml
