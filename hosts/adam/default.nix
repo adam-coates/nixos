@@ -66,6 +66,12 @@
   services.gvfs.enable = true;
   programs.xfconf.enable = true;
 
+  # logitech mouse
+  hardware.logitech.wireless = {
+    enable = true;
+    enableGraphical = true;
+  };
+
 
   # Make sleep work
   systemd.services.toggle-acpi-fix = {
