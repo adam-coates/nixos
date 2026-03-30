@@ -8,9 +8,15 @@ let
       ${pkgs.gnused}/bin/sed 's/ E[0-9.]* /\t/' > $out
   '';
 
+  listAudioProfiles = pkgs.runCommand "qs-list-audio-profiles" {} ''
+    substitute ${./list-audio-profiles.sh} $out \
+      --replace-fail "@jq@" "${pkgs.jq}/bin/jq"
+    chmod +x $out
+  '';
+
   whisperModel = pkgs.fetchurl {
-    url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin";
-    hash = "sha256-oDd5yG3zMjB19eeWyyzlAp8A7Ihp7uP9+4l6/jbG0AI=";
+    url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin";
+    hash = "sha256-xhONbVjsyDIgl+D5h8MvG+i7ChhTKj+I9zTRu/nEHl0=";
   };
 in
 {
@@ -26,7 +32,7 @@ in
   xdg.dataFile."quickshell/emojis.txt".source = emojiData;
 
   # Whisper model for voxtype dictation
-  xdg.dataFile."voxtype/models/ggml-base.en.bin".source = whisperModel;
+  xdg.dataFile."voxtype/models/ggml-small.en.bin".source = whisperModel;
 
   # EasyEffects EQ presets (XDG data dir, not config)
   xdg.dataFile."easyeffects/output/Flat.json".source = ./easyeffects/Flat.json;
@@ -39,6 +45,12 @@ in
   # App list helper script used by the launcher
   home.file.".local/bin/qs-list-apps" = {
     source = ./list-apps.sh;
+    executable = true;
+  };
+
+  # Audio profile listing script
+  home.file.".local/bin/qs-list-audio-profiles" = {
+    source = listAudioProfiles;
     executable = true;
   };
 }

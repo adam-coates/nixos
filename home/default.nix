@@ -180,7 +180,7 @@ in
       max_duration_secs = 60
 
       [whisper]
-      model = "base.en"
+      model = "small.en"
       language = "en"
       translate = false
 

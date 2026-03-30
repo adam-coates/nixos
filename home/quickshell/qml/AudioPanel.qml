@@ -15,7 +15,7 @@ PanelWindow {
   anchors.right: true
   margins { top: 30; right: 4 }
   width: 320
-  height: Math.min(panelFlick.contentHeight + 24, 520)
+  height: Math.min(panelFlick.contentHeight + 24, 680)
 
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.namespace: "quickshell-audio"
@@ -78,6 +78,7 @@ PanelWindow {
     if (showing) {
       sinkVolProc.running = true
       sourceVolProc.running = true
+      profileProc.running = true
     }
   }
 
@@ -118,6 +119,54 @@ PanelWindow {
     setSourceVolProc.command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", v.toFixed(2)]
     setSourceVolProc.running = false
     setSourceVolProc.running = true
+  }
+
+  // ── Device profiles state ──
+  property var audioDevices: []  // [{id, name, description, api, profiles: [{index, name, description, available, active}]}]
+
+  Process {
+    id: profileProc
+    command: ["sh", "-c", "~/.local/bin/qs-list-audio-profiles"]
+    running: true
+    property var _lines: []
+    stdout: SplitParser {
+      onRead: line => profileProc._lines.push(line)
+    }
+    onExited: {
+      var lines = profileProc._lines
+      profileProc._lines = []
+      var devices = []
+      var deviceMap = {}
+      for (var i = 0; i < lines.length; i++) {
+        var parts = lines[i].split("\t")
+        if (parts[0] === "DEVICE") {
+          var dev = { id: parts[1], name: parts[2], description: parts[3], api: parts[4], profiles: [] }
+          devices.push(dev)
+          deviceMap[parts[1]] = dev
+        } else if (parts[0] === "PROFILE" && deviceMap[parts[1]]) {
+          deviceMap[parts[1]].profiles.push({
+            index: parseInt(parts[2]),
+            name: parts[3],
+            description: parts[4],
+            available: parts[5],
+            active: parts[6] === "active"
+          })
+        }
+      }
+      audioPanel.audioDevices = devices
+    }
+  }
+
+  Process {
+    id: setProfileProc
+    running: false
+    onExited: profileProc.running = true
+  }
+
+  function setDeviceProfile(deviceId, profileIndex) {
+    setProfileProc.command = ["wpctl", "set-profile", deviceId, profileIndex.toString()]
+    setProfileProc.running = false
+    setProfileProc.running = true
   }
 
   // ── Pipewire module for device listing only ──
@@ -297,6 +346,106 @@ PanelWindow {
               anchors.fill: parent
               cursorShape: Qt.PointingHandCursor
               onClicked: Pipewire.preferredDefaultAudioSink = modelData
+            }
+          }
+        }
+
+        // ── Device Profiles ──
+        Rectangle {
+          Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3)
+          visible: audioPanel.audioDevices.length > 0
+        }
+
+        Text {
+          text: "Device Profiles"
+          font.family: Theme.fontFamily
+          font.pixelSize: 11
+          color: Theme.gray
+          visible: audioPanel.audioDevices.length > 0
+        }
+
+        Repeater {
+          model: audioPanel.audioDevices
+
+          ColumnLayout {
+            required property var modelData
+            required property int index
+            Layout.fillWidth: true
+            spacing: 4
+
+            RowLayout {
+              Layout.fillWidth: true
+              spacing: 6
+
+              Text {
+                text: modelData.api === "bluez5" ? "\u{f00af}" : "\u{f0f7f}" // 󰂯 BT or 󰽿 soundcard
+                font.family: Theme.fontFamily
+                font.pixelSize: 12
+                color: Theme.accent
+              }
+
+              Text {
+                text: modelData.description
+                font.family: Theme.fontFamily
+                font.pixelSize: 11
+                font.bold: true
+                color: Theme.fg
+                Layout.fillWidth: true
+                elide: Text.ElideRight
+              }
+            }
+
+            Flow {
+              id: profileFlow
+              Layout.fillWidth: true
+              spacing: 4
+              property var deviceInfo: modelData
+
+              Repeater {
+                model: profileFlow.deviceInfo.profiles
+
+                Rectangle {
+                  required property var modelData
+                  required property int index
+                  width: profLabel.implicitWidth + 12
+                  height: 22; radius: 4
+                  color: modelData.active ? Theme.accentAlpha(0.25) : Theme.bg2
+                  opacity: modelData.available === "yes" ? 1.0 : 0.4
+
+                  Behavior on color { ColorAnimation { duration: 100 } }
+
+                  Text {
+                    id: profLabel
+                    anchors.centerIn: parent
+                    text: {
+                      var d = modelData.description
+                      // Shorten common long descriptions
+                      d = d.replace("High Fidelity Playback (A2DP Sink, codec ", "A2DP ")
+                      d = d.replace("Headset Head Unit (HSP/HFP, codec ", "HSP/HFP ")
+                      d = d.replace(")", "")
+                      d = d.replace("Digital Stereo", "Digital")
+                      d = d.replace("Analog Stereo", "Analog")
+                      d = d.replace("+input:analog-stereo", " +Mic")
+                      d = d.replace("output:", "")
+                      d = d.replace("input:", "In: ")
+                      return d
+                    }
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 9
+                    color: modelData.active ? Theme.accent : Theme.fg
+                  }
+
+                  MouseArea {
+                    anchors.fill: parent
+                    cursorShape: modelData.available === "yes" ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: {
+                      if (modelData.available === "yes" && profileFlow.deviceInfo) {
+                        audioPanel.setDeviceProfile(profileFlow.deviceInfo.id, modelData.index)
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
