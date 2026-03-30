@@ -72,6 +72,6 @@ Singleton {
   function bgAlpha(a) { return Qt.rgba(bg.r, bg.g, bg.b, a) }
   function accentAlpha(a) { return Qt.rgba(accent.r, accent.g, accent.b, a) }
 
-  readonly property string fontFamily: "TX02 Nerd Font"
+  readonly property string fontFamily: "JetBrainsMono Nerd Font"
   readonly property int fontSize: 13
 }

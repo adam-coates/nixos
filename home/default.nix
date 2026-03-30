@@ -26,6 +26,11 @@ in
       description = "Whether the active theme is dark.";
       default = true;
     };
+    font = lib.mkOption {
+      type = lib.types.str;
+      description = "Primary font family used across the system.";
+      default = "JetBrainsMono Nerd Font";
+    };
   };
 
   config = {

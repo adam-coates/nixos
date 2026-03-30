@@ -3,6 +3,7 @@
 let
   gruvbox = import ../../modules/colorscheme/gruvbox.nix;
 
+  font = config.theme.font;
   mkCSS = c: ''
     @define-color base #${c.bg};
     @define-color text #${c.fg};
@@ -16,7 +17,7 @@ let
     }
 
     * {
-      font-family: "TX02 Nerd Font";
+      font-family: "${font}";
       font-size: 14px;
       color: @text;
     }

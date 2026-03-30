@@ -144,7 +144,7 @@
       @define-color gray #${c.gray};
 
       * {
-        font-family: "TX02 Nerd Font";
+        font-family: "${config.theme.font}";
         font-size: 13px;
         min-height: 0;
         border: none;
