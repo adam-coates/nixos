@@ -7,6 +7,11 @@ let
       ${pkgs.gnused}/bin/sed 's/.*# //' | \
       ${pkgs.gnused}/bin/sed 's/ E[0-9.]* /\t/' > $out
   '';
+
+  whisperModel = pkgs.fetchurl {
+    url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin";
+    hash = "sha256-oDd5yG3zMjB19eeWyyzlAp8A7Ihp7uP9+4l6/jbG0AI=";
+  };
 in
 {
   home.packages = [
@@ -19,6 +24,9 @@ in
 
   # Emoji data for the emoji picker
   xdg.dataFile."quickshell/emojis.txt".source = emojiData;
+
+  # Whisper model for voxtype dictation
+  xdg.dataFile."voxtype/models/ggml-base.en.bin".source = whisperModel;
 
   # EasyEffects EQ presets (XDG data dir, not config)
   xdg.dataFile."easyeffects/output/Flat.json".source = ./easyeffects/Flat.json;

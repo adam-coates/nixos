@@ -1,25 +1,31 @@
 import QtQuick 6.0
-import Quickshell.Bluetooth
+import Quickshell.Io
 
 Item {
   implicitWidth: btText.width + 16
   implicitHeight: 26
 
-  property bool powered: {
-    var adapters = Bluetooth.adapters
-    for (var i = 0; i < adapters.length; i++) {
-      if (adapters[i].enabled) return true
+  property bool connected: false
+
+  Process {
+    id: btCheck
+    command: ["bluetoothctl", "info"]
+    running: true
+    property string _output: ""
+    stdout: SplitParser {
+      onRead: line => btCheck._output += line + "\n"
     }
-    return false
+    onExited: {
+      connected = btCheck._output.indexOf("Connected: yes") >= 0
+      btCheck._output = ""
+    }
   }
 
-  property int connectedCount: {
-    var count = 0
-    var devices = Bluetooth.devices
-    for (var i = 0; i < devices.length; i++) {
-      if (devices[i].connected) count++
-    }
-    return count
+  Timer {
+    interval: 3000
+    running: true
+    repeat: true
+    onTriggered: btCheck.running = true
   }
 
   Text {
@@ -27,9 +33,9 @@ Item {
     anchors.centerIn: parent
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: connectedCount > 0 ? Theme.green : Theme.red
+    color: connected ? Theme.green : Theme.red
     Behavior on color { ColorAnimation { duration: 120 } }
-    text: "\u{f00af}" // 󰂯 always the same symbol, no strikethrough
+    text: "\u{f00af}" // 󰂯
   }
 
   MouseArea {
