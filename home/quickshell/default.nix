@@ -14,6 +14,37 @@ let
     chmod +x $out
   '';
 
+  magicpodscore = pkgs.stdenv.mkDerivation {
+    pname = "magicpodscore";
+    version = "2.0.7";
+    src = pkgs.fetchurl {
+      url = "https://github.com/steam3d/MagicPodsCore/releases/download/2.0.7/magicpodscore_2.0.7.zip";
+      hash = "sha256-XiobmMWYw6cY/UFRnzubk5lyBIZKbRFJGg8+tzbVu2g=";
+    };
+    nativeBuildInputs = [ pkgs.unzip pkgs.autoPatchelfHook ];
+    buildInputs = [
+      pkgs.bluez
+      pkgs.openssl
+      pkgs.libpulseaudio
+      pkgs.systemd
+      pkgs.zlib
+      pkgs.stdenv.cc.cc.lib
+    ];
+    sourceRoot = ".";
+    unpackPhase = ''
+      unzip $src
+    '';
+    installPhase = ''
+      install -Dm755 magicpodscore $out/bin/magicpodscore
+    '';
+  };
+
+  getBudsBattery = pkgs.runCommand "qs-get-buds-battery" {} ''
+    substitute ${./get-buds-battery.sh} $out \
+      --replace-fail "@websocat@" "${pkgs.websocat}/bin/websocat"
+    chmod +x $out
+  '';
+
   whisperModel = pkgs.fetchurl {
     url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin";
     hash = "sha256-xhONbVjsyDIgl+D5h8MvG+i7ChhTKj+I9zTRu/nEHl0=";
@@ -22,6 +53,7 @@ in
 {
   home.packages = [
     pkgs.quickshell
+    magicpodscore
   ];
 
   # Deploy the entire qml directory as one unit so all files share
@@ -51,6 +83,12 @@ in
   # Audio profile listing script
   home.file.".local/bin/qs-list-audio-profiles" = {
     source = listAudioProfiles;
+    executable = true;
+  };
+
+  # Bluetooth earbuds battery query script
+  home.file.".local/bin/qs-get-buds-battery" = {
+    source = getBudsBattery;
     executable = true;
   };
 }

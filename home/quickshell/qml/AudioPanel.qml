@@ -15,7 +15,7 @@ PanelWindow {
   anchors.right: true
   margins { top: 30; right: 4 }
   width: 320
-  height: Math.min(panelFlick.contentHeight + 24, 680)
+  height: Math.min(panelFlick.contentHeight + 24, 580)
 
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.namespace: "quickshell-audio"
@@ -350,20 +350,7 @@ PanelWindow {
           }
         }
 
-        // ── Device Profiles ──
-        Rectangle {
-          Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3)
-          visible: audioPanel.audioDevices.length > 0
-        }
-
-        Text {
-          text: "Device Profiles"
-          font.family: Theme.fontFamily
-          font.pixelSize: 11
-          color: Theme.gray
-          visible: audioPanel.audioDevices.length > 0
-        }
-
+        // ── Bluetooth Profiles ──
         Repeater {
           model: audioPanel.audioDevices
 
@@ -373,74 +360,136 @@ PanelWindow {
             Layout.fillWidth: true
             spacing: 4
 
-            RowLayout {
-              Layout.fillWidth: true
-              spacing: 6
+            property bool expanded: false
 
-              Text {
-                text: modelData.api === "bluez5" ? "\u{f00af}" : "\u{f0f7f}" // 󰂯 BT or 󰽿 soundcard
-                font.family: Theme.fontFamily
-                font.pixelSize: 12
-                color: Theme.accent
+            function activeProfile() {
+              for (var i = 0; i < modelData.profiles.length; i++) {
+                if (modelData.profiles[i].active) return modelData.profiles[i]
+              }
+              return null
+            }
+
+            function shortName(d) {
+              d = d.replace("High Fidelity Playback (A2DP Sink, codec ", "A2DP ")
+              d = d.replace("Headset Head Unit (HSP/HFP, codec ", "HSP/HFP ")
+              d = d.replace(")", "")
+              return d
+            }
+
+            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3) }
+
+            // Collapsed: device name + current profile as a clickable row
+            Rectangle {
+              Layout.fillWidth: true
+              height: 28; radius: 4
+              color: expanded ? Theme.accentAlpha(0.1) : "transparent"
+
+              RowLayout {
+                anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
+                spacing: 6
+
+                Text {
+                  text: "\u{f00af}" // 󰂯
+                  font.family: Theme.fontFamily
+                  font.pixelSize: 12
+                  color: Theme.accent
+                }
+
+                Text {
+                  text: modelData.description
+                  font.family: Theme.fontFamily
+                  font.pixelSize: 11
+                  color: Theme.fg
+                  Layout.fillWidth: true
+                  elide: Text.ElideRight
+                }
+
+                Text {
+                  text: {
+                    var p = activeProfile()
+                    return p ? shortName(p.description) : "Off"
+                  }
+                  font.family: Theme.fontFamily
+                  font.pixelSize: 10
+                  color: Theme.accent
+                }
+
+                Text {
+                  text: expanded ? "\u{f0143}" : "\u{f0140}" // 󰅃 up / 󰅀 down
+                  font.family: Theme.fontFamily
+                  font.pixelSize: 10
+                  color: Theme.gray
+                }
               }
 
-              Text {
-                text: modelData.description
-                font.family: Theme.fontFamily
-                font.pixelSize: 11
-                font.bold: true
-                color: Theme.fg
-                Layout.fillWidth: true
-                elide: Text.ElideRight
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: expanded = !expanded
               }
             }
 
-            Flow {
-              id: profileFlow
+            // Expanded: profile list
+            ColumnLayout {
               Layout.fillWidth: true
-              spacing: 4
-              property var deviceInfo: modelData
+              Layout.leftMargin: 16
+              spacing: 2
+              visible: expanded
+              property string deviceId: modelData.id
 
               Repeater {
-                model: profileFlow.deviceInfo.profiles
+                model: expanded ? modelData.profiles : []
 
                 Rectangle {
                   required property var modelData
                   required property int index
-                  width: profLabel.implicitWidth + 12
-                  height: 22; radius: 4
-                  color: modelData.active ? Theme.accentAlpha(0.25) : Theme.bg2
+                  Layout.fillWidth: true
+                  height: 26; radius: 4
+                  color: modelData.active ? Theme.accentAlpha(0.15) : (profMouse.containsMouse ? Theme.bg2 : "transparent")
                   opacity: modelData.available === "yes" ? 1.0 : 0.4
 
-                  Behavior on color { ColorAnimation { duration: 100 } }
+                  RowLayout {
+                    anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
+                    spacing: 6
 
-                  Text {
-                    id: profLabel
-                    anchors.centerIn: parent
-                    text: {
-                      var d = modelData.description
-                      // Shorten common long descriptions
-                      d = d.replace("High Fidelity Playback (A2DP Sink, codec ", "A2DP ")
-                      d = d.replace("Headset Head Unit (HSP/HFP, codec ", "HSP/HFP ")
-                      d = d.replace(")", "")
-                      d = d.replace("Digital Stereo", "Digital")
-                      d = d.replace("Analog Stereo", "Analog")
-                      d = d.replace("+input:analog-stereo", " +Mic")
-                      d = d.replace("output:", "")
-                      d = d.replace("input:", "In: ")
-                      return d
+                    Text {
+                      text: modelData.active ? "●" : "○"
+                      font.pixelSize: 8
+                      color: modelData.active ? Theme.accent : Theme.gray
                     }
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 9
-                    color: modelData.active ? Theme.accent : Theme.fg
+
+                    Text {
+                      Layout.fillWidth: true
+                      text: {
+                        var d = modelData.description
+                        d = d.replace("High Fidelity Playback (A2DP Sink, codec ", "A2DP ")
+                        d = d.replace("Headset Head Unit (HSP/HFP, codec ", "HSP/HFP ")
+                        d = d.replace(")", "")
+                        return d
+                      }
+                      font.family: Theme.fontFamily
+                      font.pixelSize: 10
+                      color: modelData.active ? Theme.accent : Theme.fg
+                      elide: Text.ElideRight
+                    }
+
+                    Text {
+                      visible: modelData.name.indexOf("headset") >= 0
+                      text: "\u{f036c}" // 󰍬 mic icon
+                      font.family: Theme.fontFamily
+                      font.pixelSize: 10
+                      color: Theme.gray
+                    }
                   }
 
                   MouseArea {
+                    id: profMouse
                     anchors.fill: parent
+                    hoverEnabled: true
                     cursorShape: modelData.available === "yes" ? Qt.PointingHandCursor : Qt.ArrowCursor
                     onClicked: {
-                      if (modelData.available === "yes" && profileFlow.deviceInfo) {
-                        audioPanel.setDeviceProfile(profileFlow.deviceInfo.id, modelData.index)
+                      if (modelData.available === "yes") {
+                        audioPanel.setDeviceProfile(parent.parent.deviceId, modelData.index)
                       }
                     }
                   }
@@ -448,6 +497,11 @@ PanelWindow {
               }
             }
           }
+        }
+
+        // ── Earbuds Battery ──
+        BudsBattery {
+          Layout.fillWidth: true
         }
 
         Rectangle { Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3) }

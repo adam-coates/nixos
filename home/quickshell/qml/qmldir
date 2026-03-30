@@ -23,3 +23,5 @@ Wallpaper Wallpaper.qml
 Workspaces Workspaces.qml
 DictationIndicator DictationIndicator.qml
 EmojiPicker EmojiPicker.qml
+BatteryGauge BatteryGauge.qml
+BudsBattery BudsBattery.qml

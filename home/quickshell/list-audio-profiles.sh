@@ -6,7 +6,7 @@
 # Only includes devices with >1 profile (excludes "off"-only devices).
 
 pw-dump 2>/dev/null | @jq@ -r '
-  [.[] | select(.type == "PipeWire:Interface:Device" and .info.params.EnumProfile != null)]
+  [.[] | select(.type == "PipeWire:Interface:Device" and .info.params.EnumProfile != null and .info.props."device.api" == "bluez5")]
   | map(
       select([.info.params.EnumProfile[] | select(.name != "off")] | length > 0)
     )

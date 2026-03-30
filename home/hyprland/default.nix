@@ -16,6 +16,7 @@
         "wl-paste --type image --watch cliphist store"
         "solaar --window=hide"
         "voxtype daemon"
+        "magicpodscore"
       ];
 
       # Environment variables
