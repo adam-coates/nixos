@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # Toggle between dark (base) and light (specialisation) themes.
 #
-# $HOME/.local/state/hm-generation is a symlink written by the
-# home.activation.saveThemeProfile step on every nixos-rebuild switch.
-# It always points to the BASE home-manager generation (never a specialisation),
-# so both activate scripts are always reachable from it.
+# Quickshell handles its own theme switching by watching ~/.local/state/current-theme.
+# This script activates the home-manager specialisation (for Ghostty, Firefox, etc.)
+# and reloads non-Quickshell apps.
 
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
 export PATH="/run/current-system/sw/bin:$HOME/.nix-profile/bin:$PATH"
@@ -29,21 +28,17 @@ reload_apps() {
 
   hyprctl reload 2>/dev/null || true
 
-  local wallpaper="$HOME/Pictures/wallpapers/gruvbox_${nvim_bg}.png"
-  hyprctl hyprpaper wallpaper ",${wallpaper}" 2>/dev/null || true
-
-  pkill waybar; sleep 0.2; waybar &
-  pkill mako;   sleep 0.2; mako &
-  systemctl --user restart walker 2>/dev/null || true
-
+  # Ghostty
   pkill -USR2 ghostty 2>/dev/null || true
 
+  # Firefox
   if pgrep firefox > /dev/null; then
     pkill firefox
     sleep 0.5
     firefox &
   fi
 
+  # Zathura
   if pgrep -f zathura >/dev/null; then
     for svc in $(dbus-send --session --dest=org.freedesktop.DBus \
         --type=method_call --print-reply \
@@ -54,6 +49,7 @@ reload_apps() {
     done
   fi
 
+  # Neovim
   for socket in /run/user/$(id -u)/nvim.*.0 "$HOME/.local/state/nvim/"*.sock; do
     [ -S "$socket" ] && nvim --server "$socket" --remote-send \
       ":set background=${nvim_bg}<CR>:colorscheme gruvbox-material<CR>" 2>/dev/null || true

@@ -67,7 +67,7 @@
         notes_subdir = "00 - Inbox";
         attachments.folder = "999-extra/images";
         new_notes_location = "notes_subdir";
-        preferred_link_style = "markdown";
+        link.style = "markdown";
         frontmatter.enabled = false;
         note_id_func.__raw = ''
           function(title)

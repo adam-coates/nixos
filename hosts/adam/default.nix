@@ -35,11 +35,12 @@
     xwayland.enable = true;
   };
 
-  # Hyprlock - needed for PAM authentication
-  programs.hyprlock.enable = true;
-
   # Hypridle
   services.hypridle.enable = true;
+
+  # PAM service for quickshell lock screen
+  security.pam.services.login.enableGnomeKeyring = true;
+  security.pam.services.quickshell = {};
 
   # Display manager - ly
   services.displayManager.ly.enable = true;
@@ -51,15 +52,51 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+    wireplumber.extraConfig."11-bluetooth-policy" = {
+      "wireplumber.settings" = {
+        "bluetooth.autoswitch-to-headset-profile" = false;
+      };
+    };
   };
 
   # Bluetooth
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
+  # Power management (required by quickshell widgets)
+  services.power-profiles-daemon.enable = true;
+  services.upower.enable = true;
+
   # Thunar
   services.gvfs.enable = true;
   programs.xfconf.enable = true;
+
+  # logitech mouse
+  hardware.logitech.wireless = {
+    enable = true;
+    enableGraphical = true;
+  };
+
+
+  # Make sleep work
+  systemd.services.toggle-acpi-fix = {
+    description = "Disable GPP0 and PTXH to fix suspend issue";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "toggle-acpi-fix" ''
+        while read -r device _ status _; do
+          case "$device" in
+            GPP0|PTXH)
+              if [[ "$status" == *enabled* ]]; then
+                echo "$device" > /proc/acpi/wakeup
+              fi
+              ;;
+          esac
+        done < /proc/acpi/wakeup
+      '';
+    };
+  };
 
   # Fonts
   fonts.packages = with pkgs; [

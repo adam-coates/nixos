@@ -1,0 +1,27 @@
+singleton Theme Theme.qml
+singleton GlobalState GlobalState.qml
+singleton NotifState NotifState.qml
+ClipboardPanel ClipboardPanel.qml
+FilePreview FilePreview.qml
+Audio Audio.qml
+AudioPanel AudioPanel.qml
+Bar Bar.qml
+Bluetooth Bluetooth.qml
+BluetoothPanel BluetoothPanel.qml
+Clock Clock.qml
+IdleIndicator IdleIndicator.qml
+Launcher Launcher.qml
+LockScreen LockScreen.qml
+Network Network.qml
+NetworkPanel NetworkPanel.qml
+NotifPanel NotifPanel.qml
+PopupBackdrop PopupBackdrop.qml
+NotifServer NotifServer.qml
+PowerMenu PowerMenu.qml
+TriggersPanel TriggersPanel.qml
+Wallpaper Wallpaper.qml
+Workspaces Workspaces.qml
+DictationIndicator DictationIndicator.qml
+EmojiPicker EmojiPicker.qml
+BatteryGauge BatteryGauge.qml
+BudsBattery BudsBattery.qml

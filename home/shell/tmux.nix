@@ -6,6 +6,7 @@ let
 
   tmux-pomodoro-plus = pkgs.tmuxPlugins.mkTmuxPlugin {
     pluginName = "tmux-pomodoro-plus";
+    rtpFilePath = "pomodoro.tmux";
     version = "unstable";
     src = pkgs.fetchFromGitHub {
       owner = "olimorris";
@@ -94,11 +95,11 @@ in
       # Pomodoro
       set -g @pomodoro_granularity 'on'
       set -g status-interval 1
-      set -g @pomodoro_on "#[fg=magenta]  "
-      set -g @pomodoro_complete "#[fg=green] "
-      set -g @pomodoro_pause "#[fg=yellow] ⏸︎ "
-      set -g @pomodoro_prompt_break "#[fg=cyan]🕤 ? "
-      set -g @pomodoro_prompt_pomodoro "#[fg=brightblack]🕤 ? "
+      set -g @pomodoro_on "#[fg=colour208]  "
+      set -g @pomodoro_complete "#[fg=colour142] "
+      set -g @pomodoro_pause "#[fg=colour214] ⏸︎ "
+      set -g @pomodoro_prompt_break "#[fg=colour109]🕤 ? "
+      set -g @pomodoro_prompt_pomodoro "#[fg=colour223]🕤 ? "
 
       # ── Status line ────────────────────────────────────────────────────
       set-option -g status "on"
@@ -123,8 +124,9 @@ in
       git_status="#(${git-status-script} #{pane_current_path})"
       wb_git_status="#(${wb-git-status-script} #{pane_current_path} &)"
 
-      # Right section
-      set-option -g status-right "#{pomodoro_status}$git_status$wb_git_status"
+      # Right section (inline pomodoro script — plugin interpolation runs before extraConfig)
+      pomodoro_status="#(${tmux-pomodoro-plus}/share/tmux-plugins/tmux-pomodoro-plus/scripts/pomodoro.sh)"
+      set-option -g status-right "$pomodoro_status$git_status$wb_git_status"
 
       set-option -g status-left-length 100
       set-option -g status-right-length 150

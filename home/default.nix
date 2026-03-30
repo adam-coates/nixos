@@ -7,13 +7,12 @@ in
 {
   imports = [
     ./hyprland
-    ./waybar
-    ./walker
-    ./mako
+    ./quickshell
     ./programs
     ./shell
     inputs.nixvim.homeModules.nixvim
     ../nixvim
+    ./hardware
   ];
 
   options.theme = {
@@ -26,6 +25,11 @@ in
       type = lib.types.bool;
       description = "Whether the active theme is dark.";
       default = true;
+    };
+    font = lib.mkOption {
+      type = lib.types.str;
+      description = "Primary font family used across the system.";
+      default = "JetBrainsMono Nerd Font";
     };
   };
 
@@ -55,6 +59,9 @@ in
 
     programs.home-manager.enable = true;
 
+    # Audio effects / equalizer
+    services.easyeffects.enable = true;
+
     home.packages = with pkgs; [
       # File manager
       thunar
@@ -62,10 +69,7 @@ in
       thunar-volman
       gvfs
 
-      # Wallpaper
-      hyprpaper
-
-      # Notifications (mako managed by services.mako)
+      # Notifications (for notify-send CLI tool)
       libnotify
 
       # Utilities
@@ -75,17 +79,27 @@ in
       slurp
       swappy
       playerctl
-      pavucontrol
       btop
       bat
       eza
       zoxide
 
-      # Hyprlock (hyprlock managed by programs.hyprlock)
+      # Idle management
       hypridle
 
       # PDF reader (zathura managed by programs.zathura)
       dbus
+
+      # File preview (pdftoppm for PDF thumbnails in launcher)
+      poppler-utils
+
+      # WebP/AVIF/TIFF support for Qt image viewer (Quickshell file preview)
+      qt6.qtimageformats
+
+      claude-code
+
+      # Voice dictation
+      voxtype-vulkan
     ];
 
     # --- Wallpapers ---
@@ -105,18 +119,8 @@ in
       executable = true;
     };
 
-    home.file.".config/scripts/idle-status.sh" = {
-      source = ./scripts/idle-status.sh;
-      executable = true;
-    };
-
     home.file.".config/scripts/lock.sh" = {
       source = ./scripts/lock.sh;
-      executable = true;
-    };
-
-    home.file.".config/scripts/power-menu.sh" = {
-      source = ./scripts/power-menu.sh;
       executable = true;
     };
 
@@ -151,6 +155,14 @@ in
       };
     };
 
+    # --- swappy screenshot editor ---
+    xdg.configFile."swappy/config".text = ''
+      [Default]
+      save_dir=${config.home.homeDirectory}/Pictures/screenshots
+      save_filename_format=screenshot_%Y%m%d_%H%M%S.png
+      show_panel=true
+    '';
+
     xdg.configFile."xfce4/xfconf/xfce-perchannel-xml/thunar.xml".force = true;
     xdg.configFile."xfce4/xfconf/xfce-perchannel-xml/thunar.xml".text = ''
       <?xml version="1.0" encoding="UTF-8"?>
@@ -158,6 +170,34 @@ in
         <property name="last-view" type="string" value="ThunarDetailsView"/>
         <property name="last-show-hidden" type="bool" value="true"/>
       </channel>
+    '';
+
+    # --- Voxtype dictation config ---
+    xdg.configFile."voxtype/config.toml".text = ''
+      state_file = "auto"
+
+      [hotkey]
+      enabled = false
+
+      [audio]
+      device = "default"
+      sample_rate = 16000
+      max_duration_secs = 60
+
+      [whisper]
+      model = "small.en"
+      language = "en"
+      translate = false
+
+      [output]
+      mode = "type"
+      fallback_to_clipboard = true
+      type_delay_ms = 1
+
+      [output.notification]
+      on_recording_start = false
+      on_recording_stop = false
+      on_transcription = false
     '';
 
     xdg.enable = true;

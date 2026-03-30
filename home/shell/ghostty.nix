@@ -5,7 +5,7 @@
     enable = true;
     enableBashIntegration = true;
     settings = {
-      font-family = "TX02 Nerd Font";
+      font-family = config.theme.font;
       font-size = 13;
       window-padding-x = 10;
       window-padding-y = 10;

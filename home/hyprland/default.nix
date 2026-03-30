@@ -1,11 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ./hyprpaper.nix
-    ./hyprlock.nix
-  ];
-
   wayland.windowManager.hyprland = {
     enable = true;
     settings = {
@@ -14,13 +9,14 @@
 
       # Autostart
       exec-once = [
-        "hyprpaper"
-        "waybar"
-        "mako"
+        "quickshell"
         "hypridle"
         "nm-applet --indicator"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
+        "solaar --window=hide"
+        "voxtype daemon"
+        "magicpodscore"
       ];
 
       # Environment variables
@@ -102,10 +98,11 @@
       "$mod" = "SUPER";
       "$terminal" = "ghostty";
       "$fileManager" = "thunar";
-      "$menu" = "walker";
+      "$menu" = "qs ipc call shell toggleLauncher";
       "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
-      "$powerMenu" = "bash ~/.config/scripts/power-menu.sh";
-      "$lock" = "bash ~/.config/scripts/lock.sh";
+      "$powerMenu" = "qs ipc call shell togglePowermenu";
+      "$lock" = "qs ipc call shell lock";
+      "$triggers" = "qs ipc call shell toggleTriggers";
 
       bind = [
         "$mod, Return, exec, $terminal"
@@ -120,6 +117,7 @@
         "$mod SHIFT, T, exec, $themeSwitcher"
         "$mod SHIFT, P, exec, $powerMenu"
         "$mod SHIFT, L, exec, $lock"
+        "$mod, grave, exec, $triggers"
 
         # Move focus
         "$mod, left, movefocus, l"
@@ -151,12 +149,23 @@
         "$mod SHIFT, 9, movetoworkspace, 9"
         "$mod SHIFT, 0, movetoworkspace, 10"
 
+        "$mod, mouse_down, workspace, e+1"
+        "$mod, mouse_up, workspace, e-1"
+
         # Screenshot
         ", Print, exec, grim -g \"$(slurp)\" - | swappy -f -"
         "$mod SHIFT, S, exec, mkdir -p ~/Pictures/screenshots && grim -g \"$(slurp)\" ~/Pictures/screenshots/screenshot_$(date +%Y%m%d_%H%M%S).png && notify-send \"Screenshot saved\" \"~/Pictures/screenshots\" -t 2000"
 
         # Clipboard
-        "$mod, C, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+        "$mod, C, exec, qs ipc call shell toggleClipboard"
+
+        # Emoji picker
+        "$mod, period, exec, qs ipc call shell toggleEmoji"
+      ];
+
+      bindd = [
+        # Dictation toggle
+        "$mod SHIFT, X, Toggle dictation, exec, voxtype record toggle"
       ];
 
       bindm = [
