@@ -75,6 +75,7 @@ ShellRoot {
     function toggleNetwork(): void { GlobalState.toggle("network") }
     function toggleTriggers(): void { GlobalState.toggle("triggers") }
     function toggleEmoji(): void { GlobalState.toggle("emoji") }
+    function toggleClipboard(): void { GlobalState.toggle("clipboard") }
     function lock(): void { GlobalState.requestLock() }
     function closeAll(): void { GlobalState.closeAll() }
   }

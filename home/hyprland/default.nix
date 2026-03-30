@@ -157,7 +157,7 @@
         "$mod SHIFT, S, exec, mkdir -p ~/Pictures/screenshots && grim -g \"$(slurp)\" ~/Pictures/screenshots/screenshot_$(date +%Y%m%d_%H%M%S).png && notify-send \"Screenshot saved\" \"~/Pictures/screenshots\" -t 2000"
 
         # Clipboard
-        "$mod, C, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+        "$mod, C, exec, qs ipc call shell toggleClipboard"
 
         # Emoji picker
         "$mod, period, exec, qs ipc call shell toggleEmoji"

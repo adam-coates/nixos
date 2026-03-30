@@ -82,7 +82,7 @@ Item {
     Text {
       visible: gauge.charging
       anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 2 }
-      text: "\u{f0e7b}" // 󰹻 bolt
+      text: "\u{f140b}" // 󰹻 bolt
       font.family: Theme.fontFamily
       font.pixelSize: 8
       color: Theme.green

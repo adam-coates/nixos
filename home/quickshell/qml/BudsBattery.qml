@@ -81,7 +81,7 @@ Item {
         available: root.leftStatus >= 2
         charging: root.leftCharging
         label: "L"
-        icon: "\u{f0590}" // 󰖐 headphones
+        icon: "\u{f025}" 
       }
 
       // Right earbud
@@ -90,7 +90,7 @@ Item {
         available: root.rightStatus >= 2
         charging: root.rightCharging
         label: "R"
-        icon: "\u{f0590}" // 󰖐 headphones
+        icon: "\u{f025}" 
       }
 
       // Case
@@ -99,7 +99,7 @@ Item {
         available: root.caseStatus >= 2
         charging: root.caseCharging
         label: ""
-        icon: "\u{f00f1}" // 󰃱 briefcase
+        icon: "\u{f0f2}" 
       }
     }
   }
