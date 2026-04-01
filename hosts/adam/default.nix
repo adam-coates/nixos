@@ -1,4 +1,133 @@
 { config, pkgs, inputs, ... }:
+
+let
+  # OpenConnect SSO — handles SAML/MFA via embedded Qt WebEngine browser
+  openconnect-sso = pkgs.python3Packages.buildPythonApplication rec {
+    pname = "openconnect-sso";
+    version = "0.8.1";
+    pyproject = true;
+
+    src = pkgs.fetchFromGitHub {
+      owner = "vlaci";
+      repo = "openconnect-sso";
+      rev = "master";
+      hash = "sha256-JFVvTw11KFnrd/A5z3QCh30ac9MZG+ojDY3udAFpmCE=";
+    };
+
+    nativeBuildInputs = with pkgs.python3Packages; [ poetry-core ];
+
+    # Relax version constraints for nixpkgs compatibility
+    postPatch = ''
+      substituteInPlace pyproject.toml \
+        --replace-fail 'requires = ["poetry>=0.12"]' 'requires = ["poetry-core>=1.0.0"]' \
+        --replace-fail 'build-backend = "poetry.masonry.api"' 'build-backend = "poetry.core.masonry.api"' \
+        --replace-fail 'lxml = "^4.3"' 'lxml = ">=4.3"' \
+        --replace-fail 'keyring = ">=21.1, <24.0.0"' 'keyring = ">=21.1"' \
+        --replace-fail 'colorama = "^0.4"' 'colorama = ">=0.4"' \
+        --replace-fail 'pyxdg = ">=0.26, <0.29"' 'pyxdg = ">=0.26"'
+    '';
+
+    propagatedBuildInputs = with pkgs.python3Packages; [
+      attrs colorama lxml keyring prompt-toolkit pyxdg requests
+      structlog toml setuptools pysocks pyqt6 pyqt6-webengine pyotp
+    ];
+
+    doCheck = false;
+  };
+
+  # Script to cleanly kill openconnect (used with NOPASSWD sudo)
+  vpnDisconnect = pkgs.writeShellScript "vpn-disconnect-oc" ''
+    if [ -f /tmp/openconnect-vpn.pid ]; then
+      kill -INT "$(cat /tmp/openconnect-vpn.pid)" 2>/dev/null
+      rm -f /tmp/openconnect-vpn.pid
+    else
+      ${pkgs.procps}/bin/pkill -INT openconnect 2>/dev/null || true
+    fi
+  '';
+
+  # Main VPN helper script called by QuickShell
+  vpnHelper = pkgs.writeShellScriptBin "qs-vpn" ''
+    # Ensure display environment is set (needed when launched from QuickShell)
+    export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    export WAYLAND_DISPLAY="''${WAYLAND_DISPLAY:-wayland-1}"
+    export DISPLAY="''${DISPLAY:-:0}"
+
+    case "$1" in
+      oc-connect)
+        GATEWAY="$2"
+        AUTHGROUP="''${3:-}"
+
+        GROUPFLAG=""
+        if [ -n "$AUTHGROUP" ]; then
+          GROUPFLAG="--authgroup=$AUTHGROUP"
+        fi
+
+        # Step 1: Authenticate via SAML (opens Qt WebEngine browser window)
+        # --authenticate shell outputs COOKIE, HOST, FINGERPRINT as shell vars
+        AUTH=$(${openconnect-sso}/bin/openconnect-sso \
+          --server "$GATEWAY" \
+          $GROUPFLAG \
+          --authenticate shell \
+          2>/tmp/openconnect-auth.log)
+
+        if [ $? -ne 0 ] || [ -z "$AUTH" ]; then
+          echo "FAILED"
+          exit 1
+        fi
+
+        # Parse auth output (sets COOKIE, HOST, FINGERPRINT, etc.)
+        eval "$AUTH"
+
+        if [ -z "$COOKIE" ]; then
+          echo "FAILED"
+          exit 1
+        fi
+
+        # Step 2: Connect tunnel as root, daemonized in background
+        echo "$COOKIE" | sudo ${pkgs.openconnect}/bin/openconnect \
+          --protocol=anyconnect \
+          --cookie-on-stdin \
+          --servercert="$FINGERPRINT" \
+          --background \
+          --pid-file=/tmp/openconnect-vpn.pid \
+          --quiet \
+          "$HOST"
+
+        if [ $? -eq 0 ]; then
+          echo "CONNECTED"
+        else
+          echo "FAILED"
+          exit 1
+        fi
+        ;;
+
+      oc-disconnect)
+        sudo ${vpnDisconnect}
+        echo "DISCONNECTED"
+        ;;
+
+      oc-status)
+        if ${pkgs.procps}/bin/pgrep -f "${pkgs.openconnect}/bin/openconnect" > /dev/null 2>&1; then
+          echo "CONNECTED"
+        else
+          echo "DISCONNECTED"
+        fi
+        ;;
+
+      wg-connect)
+        ${pkgs.networkmanager}/bin/nmcli connection up "$2"
+        ;;
+
+      wg-disconnect)
+        ${pkgs.networkmanager}/bin/nmcli connection down "$2"
+        ;;
+
+      wg-import)
+        ${pkgs.networkmanager}/bin/nmcli connection import type wireguard file "$2"
+        ;;
+    esac
+  '';
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -11,6 +140,11 @@
 
   networking.hostName = "adam";
   networking.networkmanager.enable = true;
+
+  # VPN plugins for NetworkManager (WireGuard + OpenConnect)
+  networking.networkmanager.plugins = [
+    pkgs.networkmanager-openconnect
+  ];
 
   time.timeZone = "Europe/Vienna";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -121,6 +255,9 @@
     fzf
     brightnessctl
     pamixer
+    openconnect
+    wireguard-tools
+    vpnHelper
     networkmanagerapplet
     nodejs
     yarn
@@ -141,6 +278,18 @@
       pkgs.xdg-desktop-portal-gtk
     ];
   };
+
+  # Sudo rules for VPN (openconnect needs root for tun device)
+  security.sudo.extraRules = [
+    {
+      users = [ "adam" ];
+      commands = [
+        { command = "${pkgs.openconnect}/bin/openconnect"; options = [ "NOPASSWD" ]; }
+        { command = "${openconnect-sso}/bin/openconnect-sso"; options = [ "NOPASSWD" ]; }
+        { command = "${vpnDisconnect}"; options = [ "NOPASSWD" ]; }
+      ];
+    }
+  ];
 
   system.stateVersion = "25.11";
 }

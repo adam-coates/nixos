@@ -29,7 +29,7 @@ in
     font = lib.mkOption {
       type = lib.types.str;
       description = "Primary font family used across the system.";
-      default = "JetBrainsMono Nerd Font";
+      default = "TX02 Nerd Font";
     };
   };
 

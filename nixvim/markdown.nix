@@ -64,11 +64,38 @@
           folder = "999-extra/Templates";
           date_format = "%Y-%m-%d";
         };
+        legacy_commands = false;
         notes_subdir = "00 - Inbox";
         attachments.folder = "999-extra/images";
         new_notes_location = "notes_subdir";
         link.style = "markdown";
-        frontmatter.enabled = false;
+        frontmatter = {
+          enabled = true;
+          sort = [ "title" "tags" "date" "location" ];
+          func.__raw = ''
+            function(note)
+              local out = {}
+        
+              -- Always keep title in YAML.
+              -- Prefer explicit metadata title from the template, otherwise fall back to note.title.
+              out.title = (note.metadata and note.metadata.title) or note.title or note.id
+        
+              -- Always keep tags in YAML, even if empty.
+              out.tags = note.tags or {}
+        
+              -- Preserve any other metadata fields from the template/manual YAML.
+              if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
+                for k, v in pairs(note.metadata) do
+                  if k ~= "title" then
+                    out[k] = v
+                  end
+                end
+              end
+        
+              return out
+            end
+          '';
+        };
         note_id_func.__raw = ''
           function(title)
             if title then
