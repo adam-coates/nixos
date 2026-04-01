@@ -60,6 +60,9 @@ PanelWindow {
       Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
       spacing: 0
 
+      // System tray (collapsed by default, expands on hover)
+      SysTray {}
+
       // Clipboard
       Item {
         width: 28; height: 26

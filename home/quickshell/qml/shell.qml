@@ -1,3 +1,4 @@
+//@ pragma UseQApplication
 import QtQuick 6.0
 import Quickshell
 import Quickshell.Io
@@ -51,6 +52,9 @@ ShellRoot {
 
   // ── Emoji picker ──
   EmojiPicker {}
+
+  // ── System tray panel ──
+  SysTrayPanel {}
 
   // ── Clipboard manager ──
   ClipboardPanel {}

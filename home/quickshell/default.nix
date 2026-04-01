@@ -91,4 +91,38 @@ in
     source = getBudsBattery;
     executable = true;
   };
+
+  # Quickshell as a systemd user service (restarts reliably after sleep)
+  systemd.user.services.quickshell = {
+    Unit = {
+      Description = "Quickshell - custom shell UI";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.quickshell}/bin/quickshell";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
+
+  # MagicPodsCore as a systemd user service (persists after sleep)
+  systemd.user.services.magicpodscore = {
+    Unit = {
+      Description = "MagicPodsCore - AirPods integration";
+      After = [ "bluetooth.target" "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${magicpodscore}/bin/magicpodscore";
+      Restart = "always";
+      RestartSec = 3;
+    };
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
 }

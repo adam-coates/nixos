@@ -2,6 +2,15 @@
 
 let
   gruvbox = import ../modules/colorscheme/gruvbox.nix;
+
+  todoist = pkgs.appimageTools.wrapType2 {
+    pname = "todoist";
+    version = "9.26.4";
+    src = pkgs.fetchurl {
+      url = "https://electron-dl.todoist.net/linux/Todoist-linux-9.26.4-x86_64-latest.AppImage";
+      hash = "sha256-zzRUU/ZLwoBRILFEHShjy8GOpww/spDVQM/EehjRNwY=";
+    };
+  };
 in
 
 {
@@ -97,6 +106,11 @@ in
       qt6.qtimageformats
 
       claude-code
+
+      # Productivity
+      nextcloud-client
+      todoist
+      libreoffice-qt6
 
       # Voice dictation
       voxtype-vulkan

@@ -9,14 +9,13 @@
 
       # Autostart
       exec-once = [
-        "quickshell"
         "hypridle"
         "nm-applet --indicator"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
         "solaar --window=hide"
         "voxtype daemon"
-        "magicpodscore"
+        "nextcloud --background"
       ];
 
       # Environment variables

@@ -25,3 +25,5 @@ DictationIndicator DictationIndicator.qml
 EmojiPicker EmojiPicker.qml
 BatteryGauge BatteryGauge.qml
 BudsBattery BudsBattery.qml
+SysTray SysTray.qml
+SysTrayPanel SysTrayPanel.qml
