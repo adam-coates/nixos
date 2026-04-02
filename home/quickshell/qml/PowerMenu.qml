@@ -121,7 +121,7 @@ PanelWindow {
         break
       case "sleep":
         GlobalState.requestLock()
-        suspendProc.running = true
+        suspendTimer.start()
         break
       case "restart":
         rebootProc.running = true
@@ -135,6 +135,12 @@ PanelWindow {
     }
   }
 
+  Timer {
+    id: suspendTimer
+    interval: 500
+    repeat: false
+    onTriggered: suspendProc.running = true
+  }
   Process { id: suspendProc;  command: ["systemctl", "suspend"] }
   Process { id: rebootProc;   command: ["systemctl", "reboot"] }
   Process { id: poweroffProc; command: ["systemctl", "poweroff"] }

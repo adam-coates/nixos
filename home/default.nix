@@ -76,7 +76,6 @@ in
       thunar
       thunar-archive-plugin
       thunar-volman
-      gvfs
 
       # Notifications (for notify-send CLI tool)
       libnotify
@@ -92,9 +91,6 @@ in
       bat
       eza
       zoxide
-
-      # Idle management
-      hypridle
 
       # PDF reader (zathura managed by programs.zathura)
       dbus
@@ -135,6 +131,11 @@ in
 
     home.file.".config/scripts/lock.sh" = {
       source = ./scripts/lock.sh;
+      executable = true;
+    };
+
+    home.file.".config/scripts/resume.sh" = {
+      source = ./scripts/resume.sh;
       executable = true;
     };
 
@@ -213,6 +214,15 @@ in
       on_recording_stop = false
       on_transcription = false
     '';
+
+    xdg.desktopEntries.todoist = {
+      name = "Todoist";
+      exec = "todoist %U";
+      icon = "todoist";
+      comment = "Todoist task manager";
+      categories = [ "Office" "ProjectManagement" ];
+      terminal = false;
+    };
 
     xdg.enable = true;
     xdg.userDirs = {

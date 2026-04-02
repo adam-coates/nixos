@@ -1,6 +1,12 @@
 { pkgs, ... }:
 
 let
+  # Python environment for printer.nvim (python-escpos + pyusb)
+  printer-python = pkgs.python3.withPackages (ps: [
+    ps.python-escpos
+    ps.pyusb
+  ]);
+
   # Custom plugin: printer.nvim
   printer-nvim = pkgs.vimUtils.buildVimPlugin {
     pname = "printer-nvim";
@@ -63,7 +69,7 @@ in
 
       -- Printer setup
       require("printer").setup({
-        python_cmd = "uv run",
+        python_cmd = "${printer-python}/bin/python",
         printer_vendor_id = "0x04B8",
         printer_product_id = "0x0E39",
         line_width = 48,

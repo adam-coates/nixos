@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 let
   # OpenConnect SSO — handles SAML/MFA via embedded Qt WebEngine browser
@@ -75,8 +75,19 @@ let
           exit 1
         fi
 
-        # Parse auth output (sets COOKIE, HOST, FINGERPRINT, etc.)
-        eval "$AUTH"
+        # Parse auth output safely — only extract known variable assignments
+        while IFS='=' read -r key value; do
+          # Strip any leading/trailing whitespace
+          key="$(echo "$key" | ${pkgs.coreutils}/bin/tr -d '[:space:]')"
+          # Only allow known safe variable names
+          case "$key" in
+            COOKIE|HOST|FINGERPRINT|RESOLVE|CONNECT_URL)
+              # Strip surrounding quotes if present
+              value="$(echo "$value" | ${pkgs.gnused}/bin/sed "s/^['\"]//;s/['\"]$//")"
+              printf -v "$key" '%s' "$value"
+              ;;
+          esac
+        done <<< "$AUTH"
 
         if [ -z "$COOKIE" ]; then
           echo "FAILED"
@@ -131,7 +142,6 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/fonts.nix
   ];
 
   # Bootloader
@@ -153,7 +163,7 @@ in
   users.users.adam = {
     isNormalUser = true;
     description = "adam";
-    extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "audio" "lp" ];
     shell = pkgs.bash;
   };
 
@@ -176,6 +186,9 @@ in
   security.pam.services.login.enableGnomeKeyring = true;
   security.pam.services.quickshell = {};
 
+  # Gnome keyring (provides org.freedesktop.secrets for udisks2 passphrase storage)
+  services.gnome.gnome-keyring.enable = true;
+
   # Display manager - ly
   services.displayManager.ly.enable = true;
 
@@ -193,6 +206,21 @@ in
     };
   };
 
+  # printing
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+  
+  services.printing = {
+    enable = true;
+    drivers = with pkgs; [
+      cups-filters
+      cups-browsed
+    ];
+  };
+  services.ipp-usb.enable = true;
   # Bluetooth
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
@@ -204,6 +232,10 @@ in
   # Thunar
   services.gvfs.enable = true;
   programs.xfconf.enable = true;
+
+  # Udisks2 + polkit - allow wheel users to mount/unlock drives
+  services.udisks2.enable = true;
+  security.polkit.enable = true;
 
   # logitech mouse
   hardware.logitech.wireless = {
@@ -259,6 +291,9 @@ in
     wireguard-tools
     vpnHelper
     networkmanagerapplet
+    hyprpolkitagent
+    libusb1
+    uv
     nodejs
     yarn
     # GTK theming
@@ -266,6 +301,11 @@ in
     gruvbox-dark-icons-gtk
     bibata-cursors
   ];
+
+  # Epson printer USB access (restricted to lp group)
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTR{idVendor}=="04b8", ATTR{idProduct}=="0e39", MODE="0660", GROUP="lp"
+  '';
 
   # GTK/dconf support on Wayland
   programs.dconf.enable = true;

@@ -85,8 +85,7 @@ in
       set -g detach-on-destroy off
 
       # Passthrough
-      set -gq allow-passthrough on
-      set-option -g allow-passthrough on
+      set -g allow-passthrough on
 
       # Resurrect & Continuum
       set -g @resurrect-capture-pane-contents 'on'

@@ -9,7 +9,7 @@
 
       # Autostart
       exec-once = [
-        "hypridle"
+        "systemctl --user start hyprpolkitagent"
         "nm-applet --indicator"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
