@@ -107,6 +107,7 @@ in
       nextcloud-client
       todoist
       libreoffice-qt6
+      zotero
 
       # Voice dictation
       voxtype-vulkan
