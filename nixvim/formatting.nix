@@ -19,7 +19,11 @@
         graphql = [ "prettier" ];
         liquid = [ "prettier" ];
         lua = [ "stylua" ];
-        python = [ "isort" "black" ];
+        python = [
+          "isort"
+          "black"
+        ];
+        nix = [ "nixfmt" ];
       };
 
       format_on_save = {
@@ -32,7 +36,10 @@
 
   programs.nixvim.keymaps = [
     {
-      mode = [ "n" "v" ];
+      mode = [
+        "n"
+        "v"
+      ];
       key = "<leader>mp";
       action.__raw = ''
         function()
@@ -53,5 +60,6 @@
     stylua
     black
     isort
+    nixfmt
   ];
 }

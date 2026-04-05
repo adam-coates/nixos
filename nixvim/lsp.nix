@@ -12,7 +12,11 @@
             Lua = {
               diagnostics = {
                 globals = [ "vim" ];
-                disable = [ "inject-field" "undefined-field" "missing-fields" ];
+                disable = [
+                  "inject-field"
+                  "undefined-field"
+                  "missing-fields"
+                ];
               };
               runtime.version = "LuaJIT";
               workspace.checkThirdParty = false;
@@ -35,7 +39,26 @@
                   "CONSECUTIVE_SPACES"
                 ];
               };
-              markdown.nodes = { Link = "dummy"; };
+              markdown.nodes = {
+                Link = "dummy";
+              };
+            };
+          };
+        };
+
+        nixd = {
+          enable = true;
+          rootMarkers = [
+            "flake.nix"
+            ".git"
+          ];
+          settings = {
+            nixd = {
+              formatting.command = [ "nixfmt" ];
+              nixpkgs.expr = "import <nixpkgs> { }";
+              options.nixos.expr = "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.YOUR_HOSTNAME.options";
+              # options.home-manager.expr =
+              #   "(builtins.getFlake (builtins.toString ./.)).homeConfigurations.\"YOUR_USER@YOUR_HOSTNAME\".options";
             };
           };
         };
@@ -56,21 +79,69 @@
 
       keymaps = {
         lspBuf = {
-          "K" = { action = "hover"; desc = "Hover"; };
-          "<leader>ca" = { action = "code_action"; desc = "Code Action"; };
-          "<leader>cr" = { action = "rename"; desc = "Rename Symbol"; };
+          "K" = {
+            action = "hover";
+            desc = "Hover";
+          };
+          "<leader>ca" = {
+            action = "code_action";
+            desc = "Code Action";
+          };
+          "<leader>cr" = {
+            action = "rename";
+            desc = "Rename Symbol";
+          };
         };
 
         extra = [
-          { mode = [ "n" "i" ]; key = "<C-k>"; action.__raw = "vim.lsp.buf.signature_help"; options.desc = "Signature Help"; }
-          { mode = "n"; key = "[d"; action.__raw = "function() vim.diagnostic.jump({ count = -1 }) end"; options.desc = "Prev Diagnostic"; }
-          { mode = "n"; key = "]d"; action.__raw = "function() vim.diagnostic.jump({ count = 1 }) end"; options.desc = "Next Diagnostic"; }
-          { mode = "n"; key = "<leader>cd"; action.__raw = "vim.diagnostic.open_float"; options.desc = "Line Diagnostic"; }
-          { mode = "n"; key = "<leader>cv"; action = "<cmd>vsplit | lua vim.lsp.buf.definition()<cr>"; options.desc = "Definition in Vsplit"; }
-          { mode = "n"; key = "<leader>li"; action = "<cmd>checkhealth vim.lsp<cr>"; options.desc = "LSP Info"; }
-          { mode = "n"; key = "<leader>lr"; action = "<cmd>lsp restart *<cr>"; options.desc = "LSP Restart"; }
           {
-            mode = "n"; key = "<leader>lh";
+            mode = [
+              "n"
+              "i"
+            ];
+            key = "<C-k>";
+            action.__raw = "vim.lsp.buf.signature_help";
+            options.desc = "Signature Help";
+          }
+          {
+            mode = "n";
+            key = "[d";
+            action.__raw = "function() vim.diagnostic.jump({ count = -1 }) end";
+            options.desc = "Prev Diagnostic";
+          }
+          {
+            mode = "n";
+            key = "]d";
+            action.__raw = "function() vim.diagnostic.jump({ count = 1 }) end";
+            options.desc = "Next Diagnostic";
+          }
+          {
+            mode = "n";
+            key = "<leader>cd";
+            action.__raw = "vim.diagnostic.open_float";
+            options.desc = "Line Diagnostic";
+          }
+          {
+            mode = "n";
+            key = "<leader>cv";
+            action = "<cmd>vsplit | lua vim.lsp.buf.definition()<cr>";
+            options.desc = "Definition in Vsplit";
+          }
+          {
+            mode = "n";
+            key = "<leader>li";
+            action = "<cmd>checkhealth vim.lsp<cr>";
+            options.desc = "LSP Info";
+          }
+          {
+            mode = "n";
+            key = "<leader>lr";
+            action = "<cmd>lsp restart *<cr>";
+            options.desc = "LSP Restart";
+          }
+          {
+            mode = "n";
+            key = "<leader>lh";
             action.__raw = ''
               function()
                 local bufnr = vim.api.nvim_get_current_buf()
