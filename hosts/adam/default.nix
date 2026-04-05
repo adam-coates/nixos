@@ -172,6 +172,18 @@ in
 
   # Nix settings
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.auto-optimise-store = true;
+
+  # Automatic system cleaning via nh
+  programs.nh = {
+    enable = true;
+    flake = "/home/adam/nixos";
+
+    clean = {
+      enable = true;
+      extraArgs = "--keep 3";
+    };
+  };
 
   # Hyprland
   programs.hyprland = {
