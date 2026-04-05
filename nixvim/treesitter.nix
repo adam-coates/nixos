@@ -22,6 +22,7 @@
         markdown_inline
         bash
         lua
+        nix
         vim
         dockerfile
         gitignore

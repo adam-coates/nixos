@@ -67,8 +67,8 @@
           { mode = "n"; key = "]d"; action.__raw = "function() vim.diagnostic.jump({ count = 1 }) end"; options.desc = "Next Diagnostic"; }
           { mode = "n"; key = "<leader>cd"; action.__raw = "vim.diagnostic.open_float"; options.desc = "Line Diagnostic"; }
           { mode = "n"; key = "<leader>cv"; action = "<cmd>vsplit | lua vim.lsp.buf.definition()<cr>"; options.desc = "Definition in Vsplit"; }
-          { mode = "n"; key = "<leader>li"; action = "<cmd>LspInfo<cr>"; options.desc = "LSP Info"; }
-          { mode = "n"; key = "<leader>lr"; action = "<cmd>LspRestart<cr>"; options.desc = "LSP Restart"; }
+          { mode = "n"; key = "<leader>li"; action = "<cmd>checkhealth vim.lsp<cr>"; options.desc = "LSP Info"; }
+          { mode = "n"; key = "<leader>lr"; action = "<cmd>lsp restart *<cr>"; options.desc = "LSP Restart"; }
           {
             mode = "n"; key = "<leader>lh";
             action.__raw = ''
@@ -83,47 +83,43 @@
       };
     };
 
-    # Diagnostic configuration
-    diagnostic = {
-      virtual_text = true;
-      underline = true;
-      update_in_insert = false;
-      severity_sort = true;
-      float = { border = "rounded"; source = true; header = ""; prefix = ""; };
-      signs = {
-        text.__raw = ''
-          {
-            [vim.diagnostic.severity.ERROR] = "󰅚 ",
-            [vim.diagnostic.severity.WARN] = "󰀪 ",
-            [vim.diagnostic.severity.INFO] = "󰋽 ",
-            [vim.diagnostic.severity.HINT] = "󰌶 ",
-          }
-        '';
-        numhl.__raw = ''
-          {
-            [vim.diagnostic.severity.ERROR] = "ErrorMsg",
-            [vim.diagnostic.severity.WARN] = "WarningMsg",
-          }
-        '';
-      };
-    };
-
     # LSP file operations
     plugins.lsp-file-operations.enable = true;
 
     # Lazydev for Neovim Lua development
     plugins.lazydev.enable = true;
 
-    # Document highlight on cursor hold
+    # Diagnostic configuration + document highlight on cursor hold
     extraConfigLuaPost = ''
+      -- Diagnostic configuration (vim.diagnostic.config)
+      vim.diagnostic.config({
+        virtual_text = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+        float = { border = "rounded", source = true, header = "", prefix = "" },
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = "󰅚 ",
+            [vim.diagnostic.severity.WARN] = "󰀪 ",
+            [vim.diagnostic.severity.INFO] = "󰋽 ",
+            [vim.diagnostic.severity.HINT] = "󰌶 ",
+          },
+          numhl = {
+            [vim.diagnostic.severity.ERROR] = "ErrorMsg",
+            [vim.diagnostic.severity.WARN] = "WarningMsg",
+          },
+        },
+      })
+
+      -- Document highlight on cursor hold
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspHighlight", { clear = true }),
         callback = function(args)
           local bufnr = args.buf
           local client = vim.lsp.get_client_by_id(args.data.client_id)
           if not client then return end
-          vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
-          if client.server_capabilities.documentHighlightProvider then
+          if client:supports_method("textDocument/documentHighlight") then
             local group = vim.api.nvim_create_augroup("LspDocumentHighlight_" .. bufnr, { clear = true })
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
               buffer = bufnr, group = group,

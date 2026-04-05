@@ -108,6 +108,14 @@ in
       todoist
       libreoffice-qt6
       zotero
+      (typora.overrideAttrs (old: {
+        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+        postFixup = (old.postFixup or "") + ''
+          wrapProgram $out/bin/typora \
+            --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
+            --prefix XDG_DATA_DIRS : "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}"
+        '';
+      }))
 
       # Voice dictation
       voxtype-vulkan

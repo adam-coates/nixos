@@ -23,7 +23,7 @@
       };
 
       format_on_save = {
-        lsp_fallback = true;
+        lsp_format = "fallback";
         async = false;
         timeout_ms = 3000;
       };
@@ -37,7 +37,7 @@
       action.__raw = ''
         function()
           require("conform").format({
-            lsp_fallback = true,
+            lsp_format = "fallback",
             async = false,
             timeout_ms = 1000,
           })
@@ -50,7 +50,6 @@
   # Make formatters available
   programs.nixvim.extraPackages = with pkgs; [
     prettierd
-    nodePackages.prettier
     stylua
     black
     isort
