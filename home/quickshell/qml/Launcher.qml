@@ -11,6 +11,12 @@ PanelWindow {
   property string query: ""
   property var fileResults: []
 
+  // Preview state
+  property int previewPdfStamp: 0
+  property string previewText: ""
+  property string previewHtml: ""
+  property bool previewIsHtml: false
+
   readonly property string mode: {
     const q = query
     if (q.startsWith("=")) return "calc"
@@ -135,6 +141,65 @@ PanelWindow {
     } catch(e) { return "" }
   }
 
+  // ── Preview helpers ──
+  function getExtension(path) {
+    if (!path) return ""
+    const name = path.split('/').pop()
+    const dot = name.lastIndexOf('.')
+    return (dot > 0) ? name.slice(dot + 1).toLowerCase() : ""
+  }
+
+  function previewFileKind(path) {
+    if (!path) return "none"
+    const ext = getExtension(path)
+    const basename = path.split('/').pop()
+    if (["png","jpg","jpeg","gif","webp","bmp","ico","avif","tiff","heic","svg"].includes(ext))
+      return "image"
+    if (ext === "pdf") return "pdf"
+    const textExts = [
+      "txt","md","markdown","rst","org","tex","adoc",
+      "js","ts","jsx","tsx","mjs","cjs","vue","svelte",
+      "py","rb","go","rs","c","cc","cpp","h","hpp","cs","java","kt","swift","scala",
+      "sh","bash","zsh","fish","ps1","bat",
+      "json","json5","yaml","yml","toml","xml","html","htm","css","scss","sass","less",
+      "sql","graphql","gql",
+      "nix","hcl","tf","dhall",
+      "conf","config","cfg","ini","env","properties","lock","sum",
+      "csv","tsv","log","out","diff","patch",
+      "r","m","pl","lua","vim","el","clj","hs","erl","ex","exs"
+    ]
+    if (textExts.includes(ext)) return "text"
+    if (!ext || basename.startsWith('.')) return "text"
+    return "other"
+  }
+
+  function loadPreview(path) {
+    previewPdfStamp = 0
+    previewText = ""
+    previewHtml = ""
+    previewIsHtml = false
+    if (!path) return
+    const kind = previewFileKind(path)
+    if (kind === "pdf") {
+      pdfPreviewProc.running = false
+      pdfPreviewProc.command = [
+        "pdftoppm", "-png", "-f", "1", "-l", "1", "-r", "150",
+        path, "/tmp/qs-preview"
+      ]
+      pdfPreviewProc.running = true
+    } else if (kind === "text") {
+      highlightProc.running = false
+      const ext = getExtension(path)
+      const style = Theme.isDark ? "gruvbox-dark" : "gruvbox-light"
+      highlightProc.command = [
+        "sh", "-c",
+        "head -n 300 \"$1\" | highlight --out-format=html --inline-css --fragment --style=\"$2\" --syntax=\"$3\" > /tmp/qs-preview-hl.html 2>/dev/null; true",
+        "--", path, style, ext || "txt"
+      ]
+      highlightProc.running = true
+    }
+  }
+
   // Selected file path in file mode
   readonly property string selectedPath: {
     if (mode !== "file" || fileResults.length === 0) return ""
@@ -142,7 +207,10 @@ PanelWindow {
     return (idx >= 0 && idx < fileResults.length) ? fileResults[idx] : ""
   }
 
-  onSelectedPathChanged: GlobalState.previewFile = selectedPath
+  onSelectedPathChanged: {
+    GlobalState.previewFile = selectedPath
+    loadPreview(selectedPath)
+  }
 
   // File search via fd
   Process {
@@ -174,6 +242,47 @@ PanelWindow {
     }
   }
 
+  // Preview: PDF renderer
+  Process {
+    id: pdfPreviewProc
+    running: false
+    onExited: launcher.previewPdfStamp = Date.now()
+  }
+
+  // Preview: syntax highlighter
+  Process {
+    id: highlightProc
+    running: false
+    onExited: hlFileView.reload()
+  }
+
+  // Preview: read highlighted HTML output
+  FileView {
+    id: hlFileView
+    path: "/tmp/qs-preview-hl.html"
+    watchChanges: false
+    onLoaded: {
+      const html = text().trim()
+      if (html.length > 10) {
+        launcher.previewHtml = html.slice(0, 30000)
+        launcher.previewIsHtml = true
+      }
+    }
+  }
+
+  // Preview: plain text fallback (loads reactively when selectedPath changes)
+  FileView {
+    id: plainTextView
+    path: (launcher.selectedPath && launcher.previewFileKind(launcher.selectedPath) === "text")
+          ? launcher.selectedPath : "/dev/null"
+    watchChanges: false
+    onLoaded: {
+      if (path !== "/dev/null") {
+        launcher.previewText = text().slice(0, 6000)
+      }
+    }
+  }
+
   onQueryChanged: {
     resultsList.currentIndex = 0
     if (mode === "file") {
@@ -189,6 +298,10 @@ PanelWindow {
     if (showing) {
       query = ""
       fileResults = []
+      previewText = ""
+      previewHtml = ""
+      previewIsHtml = false
+      previewPdfStamp = 0
       searchInput.forceActiveFocus()
     } else {
       GlobalState.previewFile = ""
@@ -215,6 +328,7 @@ PanelWindow {
   }
 
   Rectangle {
+    id: launcherBox
     anchors.centerIn: parent
     width: 620
     height: 480
@@ -415,6 +529,186 @@ PanelWindow {
             hoverEnabled: true
             onEntered: resultsList.currentIndex = index
             onClicked: { resultsList.currentIndex = index; launchCurrent() }
+          }
+        }
+      }
+    }
+  }
+
+  // ── File Preview (attached to launcher box) ──
+  Rectangle {
+    id: previewBox
+    visible: launcher.showing && launcher.selectedPath !== ""
+
+    anchors.left: launcherBox.right
+    anchors.leftMargin: 12
+    anchors.top: launcherBox.top
+    anchors.bottom: launcherBox.bottom
+    width: 460
+
+    color: Theme.bgAlpha(0.97)
+    border.color: Theme.accent
+    border.width: 1
+    radius: 12
+    clip: true
+
+    opacity: (launcher.showing && launcher.selectedPath !== "") ? 1 : 0
+    scale: (launcher.showing && launcher.selectedPath !== "") ? 1 : 0.95
+    Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+    MouseArea { anchors.fill: parent }
+
+    ColumnLayout {
+      anchors.fill: parent
+      anchors.margins: 12
+      spacing: 8
+
+      // Header: file icon + filename
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: 6
+
+        Text {
+          text: {
+            const k = launcher.previewFileKind(launcher.selectedPath)
+            return k === "image" ? "󰋩" : k === "pdf" ? "󰈦" : k === "text" ? "󰈙" : "󰈔"
+          }
+          font.family: Theme.fontFamily
+          font.pixelSize: 14
+          color: Theme.accent
+        }
+
+        Text {
+          Layout.fillWidth: true
+          text: launcher.selectedPath.split("/").pop()
+          font.family: Theme.fontFamily
+          font.pixelSize: 13
+          font.bold: true
+          color: Theme.fg
+          elide: Text.ElideMiddle
+        }
+      }
+
+      Rectangle { Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3) }
+
+      // Content area
+      Item {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+
+        // ── Image ──
+        Image {
+          anchors.fill: parent
+          visible: launcher.previewFileKind(launcher.selectedPath) === "image"
+          source: visible ? "file://" + launcher.selectedPath : ""
+          fillMode: Image.PreserveAspectFit
+          asynchronous: true
+          smooth: true
+        }
+
+        // ── PDF (first page rendered by pdftoppm) ──
+        Item {
+          anchors.fill: parent
+          visible: launcher.previewFileKind(launcher.selectedPath) === "pdf"
+
+          Text {
+            anchors.centerIn: parent
+            visible: launcher.previewPdfStamp === 0
+            text: "Rendering PDF…"
+            font.family: Theme.fontFamily
+            font.pixelSize: 12
+            color: Theme.gray
+          }
+
+          Image {
+            anchors.fill: parent
+            visible: launcher.previewPdfStamp !== 0
+            source: launcher.previewPdfStamp !== 0
+                    ? "file:///tmp/qs-preview-1.png#" + launcher.previewPdfStamp : ""
+            fillMode: Image.PreserveAspectFit
+            asynchronous: true
+            cache: false
+            smooth: true
+          }
+        }
+
+        // ── Text / code (with syntax highlighting) ──
+        Flickable {
+          anchors.fill: parent
+          visible: launcher.previewFileKind(launcher.selectedPath) === "text"
+          contentWidth: width
+          contentHeight: previewCodeText.implicitHeight + 8
+          clip: true
+
+          Text {
+            id: previewCodeText
+            width: parent.width
+            text: launcher.previewIsHtml
+                  ? "<pre style='white-space: pre-wrap; margin: 0;'>" + launcher.previewHtml + "</pre>"
+                  : (launcher.previewText || "Loading…")
+            textFormat: launcher.previewIsHtml ? Text.RichText : Text.PlainText
+            font.family: Theme.fontFamily
+            font.pixelSize: 11
+            color: Theme.fg
+            wrapMode: Text.WrapAnywhere
+            lineHeight: 1.3
+          }
+        }
+
+        // ── Other / unsupported ──
+        Column {
+          anchors.centerIn: parent
+          spacing: 10
+          visible: launcher.previewFileKind(launcher.selectedPath) === "other"
+
+          Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "󰈔"
+            font.family: Theme.fontFamily
+            font.pixelSize: 56
+            color: Theme.gray
+          }
+
+          Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: launcher.selectedPath.split('.').pop().toUpperCase()
+            font.family: Theme.fontFamily
+            font.pixelSize: 13
+            color: Theme.gray
+          }
+
+          Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "No preview available"
+            font.family: Theme.fontFamily
+            font.pixelSize: 11
+            color: Theme.gray
+          }
+        }
+      }
+
+      // Open button
+      Rectangle {
+        Layout.fillWidth: true
+        height: 28
+        color: Theme.accentAlpha(0.15)
+        radius: 4
+
+        Text {
+          anchors.centerIn: parent
+          text: "Open with default app"
+          font.family: Theme.fontFamily
+          font.pixelSize: 11
+          color: Theme.accent
+        }
+
+        MouseArea {
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            Qt.openUrlExternally("file://" + launcher.selectedPath)
+            GlobalState.closeAll()
           }
         }
       }

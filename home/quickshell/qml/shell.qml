@@ -62,8 +62,7 @@ ShellRoot {
   // ── Triggers / quick actions panel ──
   TriggersPanel {}
 
-  // ── File preview (companion to launcher file mode) ──
-  FilePreview {}
+  // File preview is now embedded in Launcher.qml
 
   // ── Lock screen ──
   LockScreen {}

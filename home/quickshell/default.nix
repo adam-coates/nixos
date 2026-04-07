@@ -54,6 +54,7 @@ in
   home.packages = [
     pkgs.quickshell
     magicpodscore
+    pkgs.highlight       # syntax highlighting for file preview
   ];
 
   # Deploy the entire qml directory as one unit so all files share
