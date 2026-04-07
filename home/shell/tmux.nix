@@ -38,8 +38,14 @@ in
       with pkgs.tmuxPlugins;
       [
         sensible
-        resurrect
-        continuum
+        {
+          plugin = resurrect;
+          extraConfig = "set -g @resurrect-capture-pane-contents 'on'";
+        }
+        {
+          plugin = continuum;
+          extraConfig = "set -g @continuum-restore 'on'";
+        }
         vim-tmux-navigator
       ]
       ++ [ tmux-pomodoro-plus ];
@@ -93,10 +99,6 @@ in
 
       # Passthrough
       set -g allow-passthrough on
-
-      # Resurrect & Continuum
-      set -g @resurrect-capture-pane-contents 'on'
-      set -g @continuum-restore 'on'
 
       # Pomodoro
       set -g @pomodoro_granularity 'on'
