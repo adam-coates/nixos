@@ -1,8 +1,12 @@
 { pkgs, ... }:
 
 let
-  git-status-script = pkgs.writeShellScript "git-status.sh" (builtins.readFile ../scripts/tmux/git-status.sh);
-  wb-git-status-script = pkgs.writeShellScript "wb-git-status.sh" (builtins.readFile ../scripts/tmux/wb-git-status.sh);
+  git-status-script = pkgs.writeShellScript "git-status.sh" (
+    builtins.readFile ../scripts/tmux/git-status.sh
+  );
+  wb-git-status-script = pkgs.writeShellScript "wb-git-status.sh" (
+    builtins.readFile ../scripts/tmux/wb-git-status.sh
+  );
 
   tmux-pomodoro-plus = pkgs.tmuxPlugins.mkTmuxPlugin {
     pluginName = "tmux-pomodoro-plus";
@@ -30,12 +34,15 @@ in
     terminal = "\${TERM}";
     sensibleOnTop = false;
 
-    plugins = with pkgs.tmuxPlugins; [
-      sensible
-      resurrect
-      continuum
-      vim-tmux-navigator
-    ] ++ [ tmux-pomodoro-plus ];
+    plugins =
+      with pkgs.tmuxPlugins;
+      [
+        sensible
+        resurrect
+        continuum
+        vim-tmux-navigator
+      ]
+      ++ [ tmux-pomodoro-plus ];
 
     extraConfig = ''
       # Pane base index
@@ -104,10 +111,10 @@ in
       set-option -g status "on"
 
       # Nerdfont characters
-      HALF_ROUND_OPEN=""
-      HALF_ROUND_CLOSE=""
-      TRIANGLE_OPEN=""
-      TRIANGLE_CLOSE=""
+      HALF_ROUND_OPEN=""
+      HALF_ROUND_CLOSE=""
+      TRIANGLE_OPEN=""
+      TRIANGLE_CLOSE="" 
 
       set-option -g status-style "fg=default,bg=default"
       set-option -g status-justify centre
