@@ -119,6 +119,9 @@ in
 
       # Voice dictation
       voxtype-vulkan
+
+      # Notes
+      obsidian
     ];
 
     # --- Wallpapers ---

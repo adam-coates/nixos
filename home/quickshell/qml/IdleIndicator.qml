@@ -5,7 +5,7 @@ Item {
   // Only occupies space when visible; when idle is ON (hypridle running) this is hidden
   property bool idleActive: true
 
-  width: idleActive ? 0 : (idleText.width + 8)
+  width: idleActive ? 0 : (idleText.width + 12)
   height: 26
   visible: !idleActive
 

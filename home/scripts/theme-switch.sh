@@ -28,6 +28,14 @@ reload_apps() {
 
   hyprctl reload 2>/dev/null || true
 
+  # Obsidian – toggle dark ("obsidian") / light ("moonstone") in appearance.json
+  local obsidian_cfg="$HOME/notes/.obsidian/appearance.json"
+  if [ -f "$obsidian_cfg" ]; then
+    local obs_theme
+    if [ "$nvim_bg" = "light" ]; then obs_theme="moonstone"; else obs_theme="obsidian"; fi
+    sed -i "s/\"theme\": *\"[^\"]*\"/\"theme\": \"${obs_theme}\"/" "$obsidian_cfg"
+  fi
+
   # Ghostty
   pkill -USR2 ghostty 2>/dev/null || true
 
