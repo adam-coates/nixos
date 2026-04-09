@@ -62,6 +62,9 @@ ShellRoot {
   // ── Triggers / quick actions panel ──
   TriggersPanel {}
 
+  // ── Inkscape stylinator ──
+  StylinatorPanel {}
+
   // File preview is now embedded in Launcher.qml
 
   // ── Lock screen ──
@@ -79,6 +82,7 @@ ShellRoot {
     function toggleTriggers(): void { GlobalState.toggle("triggers") }
     function toggleEmoji(): void { GlobalState.toggle("emoji") }
     function toggleClipboard(): void { GlobalState.toggle("clipboard") }
+    function toggleStylinator(): void { GlobalState.toggle("stylinator") }
     function lock(): void { GlobalState.requestLock() }
     function closeAll(): void { GlobalState.closeAll() }
   }

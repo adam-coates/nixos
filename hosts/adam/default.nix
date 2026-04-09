@@ -1,4 +1,10 @@
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 
 let
   # OpenConnect SSO — handles SAML/MFA via embedded Qt WebEngine browser
@@ -28,8 +34,20 @@ let
     '';
 
     propagatedBuildInputs = with pkgs.python3Packages; [
-      attrs colorama lxml keyring prompt-toolkit pyxdg requests
-      structlog toml setuptools pysocks pyqt6 pyqt6-webengine pyotp
+      attrs
+      colorama
+      lxml
+      keyring
+      prompt-toolkit
+      pyxdg
+      requests
+      structlog
+      toml
+      setuptools
+      pysocks
+      pyqt6
+      pyqt6-webengine
+      pyotp
     ];
 
     doCheck = false;
@@ -163,7 +181,13 @@ in
   users.users.adam = {
     isNormalUser = true;
     description = "adam";
-    extraGroups = [ "networkmanager" "wheel" "video" "audio" "lp" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "video"
+      "audio"
+      "lp"
+    ];
     shell = pkgs.bash;
   };
 
@@ -171,8 +195,16 @@ in
   nixpkgs.config.allowUnfree = true;
 
   # Nix settings
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   nix.settings.auto-optimise-store = true;
+
+  programs.java = {
+    enable = true;
+    package = pkgs.jdk;
+  };
 
   # Automatic system cleaning via nh
   programs.nh = {
@@ -196,7 +228,7 @@ in
 
   # PAM service for quickshell lock screen
   security.pam.services.login.enableGnomeKeyring = true;
-  security.pam.services.quickshell = {};
+  security.pam.services.quickshell = { };
 
   # Gnome keyring (provides org.freedesktop.secrets for udisks2 passphrase storage)
   services.gnome.gnome-keyring.enable = true;
@@ -224,7 +256,7 @@ in
     nssmdns4 = true;
     openFirewall = true;
   };
-  
+
   services.printing = {
     enable = true;
     drivers = with pkgs; [
@@ -254,7 +286,6 @@ in
     enable = true;
     enableGraphical = true;
   };
-
 
   # Make sleep work
   systemd.services.toggle-acpi-fix = {
@@ -308,6 +339,7 @@ in
     uv
     nodejs
     yarn
+    sqlite
     # GTK theming
     gruvbox-gtk-theme
     gruvbox-dark-icons-gtk
@@ -336,9 +368,18 @@ in
     {
       users = [ "adam" ];
       commands = [
-        { command = "${pkgs.openconnect}/bin/openconnect"; options = [ "NOPASSWD" ]; }
-        { command = "${openconnect-sso}/bin/openconnect-sso"; options = [ "NOPASSWD" ]; }
-        { command = "${vpnDisconnect}"; options = [ "NOPASSWD" ]; }
+        {
+          command = "${pkgs.openconnect}/bin/openconnect";
+          options = [ "NOPASSWD" ];
+        }
+        {
+          command = "${openconnect-sso}/bin/openconnect-sso";
+          options = [ "NOPASSWD" ];
+        }
+        {
+          command = "${vpnDisconnect}";
+          options = [ "NOPASSWD" ];
+        }
       ];
     }
   ];

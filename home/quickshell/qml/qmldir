@@ -26,4 +26,5 @@ EmojiPicker EmojiPicker.qml
 BatteryGauge BatteryGauge.qml
 BudsBattery BudsBattery.qml
 SysTray SysTray.qml
+StylinatorPanel StylinatorPanel.qml
 SysTrayPanel SysTrayPanel.qml

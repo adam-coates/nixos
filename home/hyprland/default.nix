@@ -160,6 +160,9 @@
 
         # Emoji picker
         "$mod, period, exec, qs ipc call shell toggleEmoji"
+
+        # Inkscape stylinator
+        "$mod, I, exec, qs ipc call shell toggleStylinator"
       ];
 
       bindd = [

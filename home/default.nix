@@ -11,6 +11,18 @@ let
       hash = "sha256-zzRUU/ZLwoBRILFEHShjy8GOpww/spDVQM/EehjRNwY=";
     };
   };
+
+  stylinator = pkgs.runCommand "stylinator" {} ''
+    mkdir -p $out/bin
+    cp ${./scripts/stylinator.py} $out/bin/stylinator
+    chmod +x $out/bin/stylinator
+    sed -i '1s|.*|#!${pkgs.python3}/bin/python3|' $out/bin/stylinator
+  '';
+
+  obsidian-inkscape = pkgs.writeShellScriptBin "obsidian-inkscape" ''
+    export PATH="${pkgs.inkscape}/bin:${pkgs.coreutils}/bin:${pkgs.gnused}/bin:$PATH"
+    ${builtins.readFile ./scripts/obsidian-inkscape.sh}
+  '';
 in
 
 {
@@ -122,6 +134,11 @@ in
 
       # Notes
       obsidian
+
+      # Vector graphics
+      inkscape
+      stylinator
+      obsidian-inkscape
     ];
 
     # --- Wallpapers ---
@@ -155,6 +172,7 @@ in
       source = ./scripts/mkflake.sh;
       executable = true;
     };
+
 
     # --- GTK ---
 

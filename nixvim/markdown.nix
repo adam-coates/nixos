@@ -5,12 +5,23 @@
     render-markdown = {
       enable = true;
       settings = {
-        file_types = [ "markdown" "quarto" "Avante" ];
+        file_types = [
+          "markdown"
+          "quarto"
+          "Avante"
+        ];
         heading = {
           enabled = true;
           sign = true;
           position = "overlay";
-          icons = [ "󰲡 " "󰲣 " "󰲥 " "󰲧 " "󰲩 " "󰲫 " ];
+          icons = [
+            "󰲡 "
+            "󰲣 "
+            "󰲥 "
+            "󰲧 "
+            "󰲩 "
+            "󰲫 "
+          ];
           signs = [ "󰫎 " ];
           width = "full";
           left_margin = 0;
@@ -51,7 +62,10 @@
       enable = true;
       settings = {
         workspaces = [
-          { name = "notes"; path = "~/notes"; }
+          {
+            name = "notes";
+            path = "~/notes";
+          }
         ];
         open_notes_in = "vsplit";
         ui.enable = false;
@@ -61,28 +75,53 @@
           min_chars = 2;
         };
         templates = {
+          enabled = true;
           folder = "999-extra/Templates";
           date_format = "%Y-%m-%d";
         };
+        note_id_func = {
+          __raw = ''
+            function(title)
+              if title then
+                return title
+              else
+                local suffix = ""
+                for _ = 1, 4 do
+                  suffix = suffix .. string.char(math.random(65, 90))
+                end
+                return "untitled_" .. suffix
+              end
+            end
+          '';
+        };
+        note = {
+          template = "note.md";
+          id_func = {
+            __raw = ''
+              function(title)
+                if title then
+                  return title
+                else
+                  local suffix = ""
+                  for _ = 1, 4 do
+                    suffix = suffix .. string.char(math.random(65, 90))
+                  end
+                  return "untitled_" .. suffix
+                end
+              end
+            '';
+
+          };
+        };
+
         legacy_commands = false;
         notes_subdir = "00 - Inbox";
         attachments.folder = "999-extra/images";
         new_notes_location = "notes_subdir";
         link.style = "markdown";
-        frontmatter.enabled = false;
-        note_id_func.__raw = ''
-          function(title)
-            if title then
-              return title
-            else
-              local suffix = ""
-              for _ = 1, 4 do
-                suffix = suffix .. string.char(math.random(65, 90))
-              end
-              return "untitled_" .. suffix
-            end
-          end
-        '';
+        frontmatter = {
+          enabled = true;
+        };
         footer = {
           enabled = true;
           separator = "";
@@ -101,6 +140,42 @@
   };
 
   programs.nixvim.keymaps = [
-    { mode = "n"; key = "<leader>os"; action = ":Obsidian search<cr>"; options.desc = "Obsidian Search"; }
+    {
+      mode = "n";
+      key = "<leader>os";
+      action = ":Obsidian search<cr>";
+      options.desc = "Obsidian Search";
+    }
   ];
+
+  programs.nixvim.extraConfigLuaPost = ''
+    local function create_obsidian_figure()
+      local line = vim.fn.trim(vim.api.nvim_get_current_line())
+      if line == "" then
+        vim.notify("Type figure name on current line first", vim.log.levels.WARN)
+        return
+      end
+      local result = vim.fn.system('obsidian-inkscape "' .. line .. '"')
+      if vim.v.shell_error ~= 0 then
+        vim.notify("Error creating figure: " .. result, vim.log.levels.ERROR)
+        return
+      end
+      local markdown_link = vim.fn.trim(result)
+      local row = vim.api.nvim_win_get_cursor(0)[1]
+      vim.api.nvim_buf_set_lines(0, row - 1, row, false, { markdown_link })
+      vim.notify("Figure created: " .. line, vim.log.levels.INFO)
+    end
+
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "markdown",
+      callback = function()
+        vim.keymap.set(
+          { "i", "n" },
+          "<C-f>",
+          create_obsidian_figure,
+          { buffer = true, desc = "Create Obsidian figure" }
+        )
+      end,
+    })
+  '';
 }
