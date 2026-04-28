@@ -166,6 +166,9 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # CIFS/SMB support
+  boot.supportedFilesystems = [ "cifs" ];
+
   networking.hostName = "adam";
   networking.networkmanager.enable = true;
 
@@ -345,6 +348,7 @@ in
     gruvbox-dark-icons-gtk
     bibata-cursors
     cifs-utils
+    keyutils
   ];
 
   # Epson printer USB access (restricted to lp group)
