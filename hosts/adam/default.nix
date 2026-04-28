@@ -344,6 +344,7 @@ in
     gruvbox-gtk-theme
     gruvbox-dark-icons-gtk
     bibata-cursors
+    cifs-utils
   ];
 
   # Epson printer USB access (restricted to lp group)
