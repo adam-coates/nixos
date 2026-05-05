@@ -60,7 +60,7 @@ if [[ $HAS_CHANGES -eq 1 ]]; then
 fi
 
 # Count untracked files
-UNTRACKED_COUNT=$(git ls-files --other --directory --exclude-standard 2>/dev/null | wc -l | bc)
+UNTRACKED_COUNT=$(git ls-files --other --directory --exclude-standard 2>/dev/null | wc -l)
 
 # Build status strings
 if [[ $CHANGED_COUNT -gt 0 ]]; then
@@ -76,12 +76,12 @@ if [[ $DELETIONS_COUNT -gt 0 ]]; then
 fi
 
 if [[ $UNTRACKED_COUNT -gt 0 ]]; then
-    STATUS_UNTRACKED="${RESET}#[fg=${BLACK},bg=default,bold] ${UNTRACKED_COUNT} "
+    STATUS_UNTRACKED="${RESET}#[fg=${BLUE},bg=default,bold] ${UNTRACKED_COUNT} "
 fi
 
 # Determine repository sync status
 if [[ $SYNC_MODE -eq 0 ]]; then
-    NEED_PUSH=$(git log @{push}.. 2>/dev/null | wc -l | bc)
+    NEED_PUSH=$(git log @{push}.. 2>/dev/null | wc -l)
     if [[ $NEED_PUSH -gt 0 ]]; then
         SYNC_MODE=2
     else

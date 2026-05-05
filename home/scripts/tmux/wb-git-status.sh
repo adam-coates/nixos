@@ -42,11 +42,11 @@ if [[ $PROVIDER == "github.com" ]]; then
     fi
 
     PROVIDER_ICON="$RESET#[fg=${FG}] "
-    PR_COUNT=$(gh pr list --json number --jq 'length' 2>/dev/null | bc)
-    REVIEW_COUNT=$(gh pr status --json reviewRequests --jq '.needsReview | length' 2>/dev/null | bc)
+    PR_COUNT=$(gh pr list --json number --jq 'length' 2>/dev/null)
+    REVIEW_COUNT=$(gh pr status --json reviewRequests --jq '.needsReview | length' 2>/dev/null)
     RES=$(gh issue list --json "assignees,labels" --assignee @me 2>/dev/null)
-    ISSUE_COUNT=$(echo "$RES" | jq 'length' | bc)
-    BUG_COUNT=$(echo "$RES" | jq 'map(select(.labels[].name == "bug")) | length' | bc)
+    ISSUE_COUNT=$(echo "$RES" | jq 'length')
+    BUG_COUNT=$(echo "$RES" | jq 'map(select(.labels[].name == "bug")) | length')
     ISSUE_COUNT=$((ISSUE_COUNT - BUG_COUNT))
 
 elif [[ $PROVIDER == "gitlab.com" ]]; then
