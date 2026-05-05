@@ -160,6 +160,7 @@ in
 {
   imports = [
     ./hardware-configuration.nix
+    ./gaming.nix
   ];
 
   # Bootloader
