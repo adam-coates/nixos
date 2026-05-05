@@ -202,6 +202,12 @@ in
         "print.print_headerleft" = "";
         "print.print_headerright" = "";
       };
+
+      userChrome = ''
+        * {
+          font-family: "TX02 Nerd Font", sans-serif !important;
+        }
+      '';
     };
   };
 }
