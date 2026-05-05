@@ -15,14 +15,30 @@ let
   };
 
   userChrome = ''
-    :root {
-      --gruvbox-bg:      #${c.bg};
-      --gruvbox-bg1:     #${c.bg1};
-      --gruvbox-bg2:     #${c.bg2};
-      --gruvbox-fg:      #${c.fg};
-      --gruvbox-accent:  #${c.accent};
-      --gruvbox-gray:    #${c.gray};
-      --gruvbox-blue:    #${c.blue};
+    /* Gruvbox Dark */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --gruvbox-bg:      #282828;
+        --gruvbox-bg1:     #3c3836;
+        --gruvbox-bg2:     #504945;
+        --gruvbox-fg:      #ebdbb2;
+        --gruvbox-accent:  #d79921;
+        --gruvbox-gray:    #928374;
+        --gruvbox-blue:    #458588;
+      }
+    }
+
+    /* Gruvbox Light */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --gruvbox-bg:      #fbf1c7;
+        --gruvbox-bg1:     #d5c4a1;
+        --gruvbox-bg2:     #d5c4a1;
+        --gruvbox-fg:      #3c3836;
+        --gruvbox-accent:  #b57614;
+        --gruvbox-gray:    #7c6f64;
+        --gruvbox-blue:    #076678;
+      }
     }
 
     /* Toolbar and tab bar */
