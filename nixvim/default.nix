@@ -49,6 +49,7 @@
     extraFiles = {
       "lua/globals.lua".source = ./lua/globals.lua;
       "lua/ui/statusline.lua".source = ./lua/statusline.lua;
+      "lua/zotero_annotations.lua".source = ./lua/zotero_annotations.lua;
     };
 
     # Load globals and statusline from init

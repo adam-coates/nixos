@@ -268,6 +268,9 @@ in
               open_in_zotero = true,
               key_type = "better-bibtex",
             })
+
+            -- Zotero annotations (color-based grouping)
+            require("zotero_annotations").setup()
     '';
   };
 }
