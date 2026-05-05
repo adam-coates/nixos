@@ -23,23 +23,19 @@
     extraPackages = with pkgs; [
       # mesa: OpenGL/Vulkan implementation (RADV for AMD)
       # - Provides libGL.so, libvulkan_radeon.so
-      # - RADV is often faster than AMDVLK for gaming
+      # - RADV is the default and best Vulkan driver for AMD
       mesa
 
       # vulkan-loader: Vulkan ICD loader
       # - Routes Vulkan calls to correct driver (mesa's RADV)
       # - Required for any Vulkan game
       vulkan-loader
-
-      # AMD-specific Vulkan tools (optional but recommended)
-      amdvlk  # Alternative AMD Vulkan driver (fallback, sometimes better for specific games)
     ];
 
     # 32-bit packages (Wine/Proton games are often 32-bit)
     extraPackages32 = with pkgs.pkgsi686Linux; [
       mesa
       vulkan-loader
-      amdvlk
     ];
   };
 
