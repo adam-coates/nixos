@@ -39,12 +39,8 @@ reload_apps() {
   # Ghostty
   pkill -USR2 ghostty 2>/dev/null || true
 
-  # Firefox
-  if pgrep firefox > /dev/null; then
-    pkill firefox
-    sleep 0.5
-    firefox &
-  fi
+  # Firefox + GTK apps (portal picks up gsettings change automatically)
+  gsettings set org.gnome.desktop.interface color-scheme "prefer-${nvim_bg}"
 
   # Zathura
   if pgrep -f zathura >/dev/null; then
