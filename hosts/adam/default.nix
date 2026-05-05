@@ -190,6 +190,7 @@ in
       "video"
       "audio"
       "lp"
+      "libvirtd"
     ];
     shell = pkgs.bash;
   };
@@ -289,6 +290,20 @@ in
     enable = true;
     enableGraphical = true;
   };
+
+  # Virtualization - virt-manager + libvirtd
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      swtpm.enable = true;
+      ovmf.enable = true;
+      ovmf.packages = [ pkgs.OVMFFull.fd ];
+      vhostUserPackages = [ pkgs.virtiofsd ];
+    };
+  };
+  programs.virt-manager.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+  networking.firewall.trustedInterfaces = [ "virbr0" ];
 
   # Make sleep work
   systemd.services.toggle-acpi-fix = {
