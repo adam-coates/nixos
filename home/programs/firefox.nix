@@ -1,8 +1,6 @@
 { config, pkgs, lib, ... }:
 
 let
-  c = config.theme.colors;
-
   lock-false = { Value = false; Status = "locked"; };
   lock-true  = { Value = true;  Status = "locked"; };
 
@@ -14,91 +12,6 @@ let
     };
   };
 
-  userChrome = ''
-    /* Gruvbox Dark */
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --gruvbox-bg:      #282828;
-        --gruvbox-bg1:     #3c3836;
-        --gruvbox-bg2:     #504945;
-        --gruvbox-fg:      #ebdbb2;
-        --gruvbox-accent:  #d79921;
-        --gruvbox-gray:    #928374;
-        --gruvbox-blue:    #458588;
-      }
-    }
-
-    /* Gruvbox Light */
-    @media (prefers-color-scheme: light) {
-      :root {
-        --gruvbox-bg:      #fbf1c7;
-        --gruvbox-bg1:     #d5c4a1;
-        --gruvbox-bg2:     #d5c4a1;
-        --gruvbox-fg:      #3c3836;
-        --gruvbox-accent:  #b57614;
-        --gruvbox-gray:    #7c6f64;
-        --gruvbox-blue:    #076678;
-      }
-    }
-
-    /* Toolbar and tab bar */
-    #navigator-toolbox {
-      background-color: var(--gruvbox-bg) !important;
-      border-bottom: 1px solid var(--gruvbox-bg1) !important;
-    }
-
-    /* Tabs */
-    .tab-background {
-      background-color: var(--gruvbox-bg) !important;
-    }
-
-    tab[selected] .tab-background {
-      background-color: var(--gruvbox-bg1) !important;
-    }
-
-    .tab-label {
-      color: var(--gruvbox-gray) !important;
-    }
-
-    tab[selected] .tab-label {
-      color: var(--gruvbox-fg) !important;
-    }
-
-    /* URL bar */
-    #urlbar {
-      background-color: var(--gruvbox-bg1) !important;
-      color: var(--gruvbox-fg) !important;
-      border-color: var(--gruvbox-bg2) !important;
-    }
-
-    #urlbar:focus-within {
-      border-color: var(--gruvbox-accent) !important;
-    }
-
-    #urlbar-input {
-      color: var(--gruvbox-fg) !important;
-    }
-
-    /* Toolbar buttons */
-    toolbar {
-      background-color: var(--gruvbox-bg) !important;
-    }
-
-    toolbarbutton {
-      color: var(--gruvbox-gray) !important;
-    }
-
-    toolbarbutton:hover {
-      background-color: var(--gruvbox-bg1) !important;
-      color: var(--gruvbox-fg) !important;
-    }
-
-    /* Sidebar */
-    #sidebar-box {
-      background-color: var(--gruvbox-bg) !important;
-      color: var(--gruvbox-fg) !important;
-    }
-  '';
 in
 {
   programs.firefox = {
@@ -289,8 +202,6 @@ in
         "print.print_headerleft" = "";
         "print.print_headerright" = "";
       };
-
-      userChrome = userChrome;
     };
   };
 }
