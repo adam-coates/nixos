@@ -75,6 +75,9 @@ in
       bind-key -T copy-mode-vi 'v' send -X begin-selection
       bind-key -T copy-mode-vi 'y' send -X copy-selection
 
+      # Git fetch (prefix+g) - manual refresh for status bar
+      bind g run-shell "cd #{pane_current_path} && git fetch origin 2>/dev/null; tmux refresh-client -S"
+
       # Window management
       set -g allow-rename on
       set -g renumber-windows on
@@ -130,7 +133,7 @@ in
 
       # Git status widgets
       git_status="#(${git-status-script} #{pane_current_path})"
-      wb_git_status="#(${wb-git-status-script} #{pane_current_path} &)"
+      wb_git_status="#(${wb-git-status-script} #{pane_current_path})"
 
       # Right section (inline pomodoro script — plugin interpolation runs before extraConfig)
       pomodoro_status="#(${tmux-pomodoro-plus}/share/tmux-plugins/tmux-pomodoro-plus/scripts/pomodoro.sh)"

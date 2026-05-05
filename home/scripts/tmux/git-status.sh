@@ -85,13 +85,14 @@ if [[ $SYNC_MODE -eq 0 ]]; then
     if [[ $NEED_PUSH -gt 0 ]]; then
         SYNC_MODE=2
     else
+        LAST_FETCH=0
         if [[ -f .git/FETCH_HEAD ]]; then
             LAST_FETCH=$(stat -c %Y .git/FETCH_HEAD 2>/dev/null || stat -f %m .git/FETCH_HEAD 2>/dev/null || echo 0)
-            NOW=$(date +%s | bc)
-            # if 5 minutes have passed since the last fetch
-            if [[ $((NOW - LAST_FETCH)) -gt 300 ]]; then
-                git fetch --atomic origin --negotiation-tip=HEAD 2>/dev/null &
-            fi
+        fi
+        NOW=$(date +%s)
+        # fetch if 5 minutes have passed or never fetched
+        if [[ $((NOW - LAST_FETCH)) -gt 300 ]]; then
+            git fetch --atomic origin --negotiation-tip=HEAD 2>/dev/null &
         fi
 
         # Check if the remote branch is ahead of the local branch
