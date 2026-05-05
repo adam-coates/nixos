@@ -76,7 +76,7 @@ in
       bind-key -T copy-mode-vi 'y' send -X copy-selection
 
       # Git fetch (prefix+g) - manual refresh for status bar
-      bind g run-shell "cd #{pane_current_path} && git fetch origin 2>/dev/null; tmux refresh-client -S"
+      bind g run-shell -b "cd '#{pane_current_path}' && git fetch origin && sleep 0.5 && tmux refresh-client -S"
 
       # Window management
       set -g allow-rename on
