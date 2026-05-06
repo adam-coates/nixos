@@ -20,7 +20,7 @@ The installer partitions the selected disk (GPT: 512 MB EFI, 4 GB swap, rest ext
 
 ```
 .
-├── flake.nix                         # Entry point (nixpkgs, home-manager, nixvim, claude-code)
+├── flake.nix                         # Entry point (nixpkgs, home-manager, nixvim)
 ├── install.sh                        # Automated disk partition + install
 ├── hosts/adam/
 │   ├── default.nix                   # System config (boot, users, services, fonts, VPN, printing)
@@ -37,7 +37,7 @@ The installer partitions the selected disk (GPT: 512 MB EFI, 4 GB swap, rest ext
 │   ├── quickshell/
 │   │   ├── default.nix               # Quickshell service + helper scripts
 │   │   ├── qml/                      # QML widgets (bar, launcher, panels, lock screen)
-│   │   └── easyeffects/              # Audio presets (Flat, BassBoost, Rock, etc.)
+│   │   └── easyeffects/              # Audio presets 
 │   ├── shell/
 │   │   ├── bash.nix                  # Aliases (eza, bat, zoxide)
 │   │   ├── ghostty.nix               # Terminal
@@ -112,7 +112,7 @@ Custom status bar and desktop shell built with QML:
 - **Bar:** Clock, workspaces, system tray, battery gauge, idle/dictation indicators
 - **Panels:** Audio, network, Bluetooth, clipboard, Todoist, stylinator (Inkscape)
 - **Overlays:** Launcher with file preview, emoji picker, notifications, lock screen, power menu
-- **Audio:** EasyEffects presets (Flat, BassBoost, Rock, Vocal, Treble, Enhanced)
+- **Audio:** EasyEffects presets 
 
 ## System Services
 
