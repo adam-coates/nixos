@@ -28,3 +28,4 @@ BudsBattery BudsBattery.qml
 SysTray SysTray.qml
 StylinatorPanel StylinatorPanel.qml
 SysTrayPanel SysTrayPanel.qml
+TodoistPanel TodoistPanel.qml

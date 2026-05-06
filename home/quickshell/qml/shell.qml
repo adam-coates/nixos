@@ -65,6 +65,9 @@ ShellRoot {
   // ── Inkscape stylinator ──
   StylinatorPanel {}
 
+  // ── Todoist quick add / task panel ──
+  TodoistPanel {}
+
   // File preview is now embedded in Launcher.qml
 
   // ── Lock screen ──
@@ -83,6 +86,7 @@ ShellRoot {
     function toggleEmoji(): void { GlobalState.toggle("emoji") }
     function toggleClipboard(): void { GlobalState.toggle("clipboard") }
     function toggleStylinator(): void { GlobalState.toggle("stylinator") }
+    function toggleTodoist(): void { GlobalState.toggle("todoist") }
     function lock(): void { GlobalState.requestLock() }
     function closeAll(): void { GlobalState.closeAll() }
   }

@@ -102,6 +102,7 @@
       "$powerMenu" = "qs ipc call shell togglePowermenu";
       "$lock" = "qs ipc call shell lock";
       "$triggers" = "qs ipc call shell toggleTriggers";
+      "$todoist" = "qs ipc call shell toggleTodoist";
 
       bind = [
         "$mod, Return, exec, $terminal"
@@ -117,6 +118,7 @@
         "$mod SHIFT, P, exec, $powerMenu"
         "$mod SHIFT, L, exec, $lock"
         "$mod, grave, exec, $triggers"
+        "$mod, T, exec, $todoist"
 
         # Move focus
         "$mod, left, movefocus, l"
