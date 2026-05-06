@@ -1,4 +1,4 @@
-#NixOS Config
+# NixOS Config
 
 Hyprland · Quickshell · Ghostty · Neovim
 
@@ -14,81 +14,121 @@ chmod +x install.sh
 ./install.sh
 ```
 
+The installer partitions the selected disk (GPT: 512 MB EFI, 4 GB swap, rest ext4), generates hardware config, runs `nixos-install`, and sets up user passwords.
+
 ## Structure
 
 ```
 .
-├── flake.nix                         # Entry point, pins dependencies
-├── install.sh                        # Automated install script
-├── hosts/
-│   └── adam/
-│       ├── default.nix               # System config (bootloader, users, services, fonts)
-│       └── hardware-configuration.nix
+├── flake.nix                         # Entry point (nixpkgs, home-manager, nixvim, claude-code)
+├── install.sh                        # Automated disk partition + install
+├── hosts/adam/
+│   ├── default.nix                   # System config (boot, users, services, fonts, VPN, printing)
+│   ├── hardware-configuration.nix
+│   └── gaming.nix                    # Gaming / virtualization
 ├── modules/
-│   ├── fonts.nix                     # Font configuration
 │   └── colorscheme/
 │       └── gruvbox.nix               # Gruvbox color palette (dark + light)
 ├── home/
-│   ├── default.nix                   # Home Manager entry point, theme options
-│   ├── hyprland/                     # Hyprland WM config + keybinds
-│   ├── quickshell/                   # Status bar, launcher, notifications, lock screen
-│   │   └── qml/                      # QML source (Theme.qml, widgets, etc.)
-│   ├── walker/                       # App launcher config + theme
+│   ├── default.nix                   # Home Manager entry, theme options, packages
+│   ├── hyprland/
+│   │   ├── default.nix               # Hyprland WM config + keybinds
+│   │   └── hypridle.conf             # Idle timeouts (lock, dpms, suspend)
+│   ├── quickshell/
+│   │   ├── default.nix               # Quickshell service + helper scripts
+│   │   ├── qml/                      # QML widgets (bar, launcher, panels, lock screen)
+│   │   └── easyeffects/              # Audio presets (Flat, BassBoost, Rock, etc.)
 │   ├── shell/
+│   │   ├── bash.nix                  # Aliases (eza, bat, zoxide)
 │   │   ├── ghostty.nix               # Terminal
-│   │   ├── tmux.nix                  # Multiplexer
-│   │   ├── bash.nix
+│   │   ├── tmux.nix                  # Multiplexer + pomodoro + git status
 │   │   └── starship.nix              # Prompt
 │   ├── programs/
-│   │   ├── firefox.nix
+│   │   ├── common.nix                # fzf, direnv, git
+│   │   ├── firefox.nix               # Hardened Firefox + extensions
 │   │   └── zathura.nix               # PDF viewer
-│   └── hardware/                     # Hardware-specific (Solaar, etc.)
+│   ├── hardware/
+│   │   └── solaar.nix                # Logitech wireless
+│   └── scripts/                      # Theme switch, lock, idle toggle, Inkscape integration
 └── nixvim/                           # Neovim config via nixvim
+    ├── keymaps.nix
+    ├── lsp.nix
+    ├── completion.nix
+    ├── treesitter.nix
+    ├── telescope.nix
+    ├── formatting.nix / linting.nix
+    ├── git.nix / dap.nix
+    ├── markdown.nix
+    └── lua/                          # Statusline, Zotero annotations
 ```
 
 ## Keybinds
 
 | Key                 | Action                                      |
 | ------------------- | ------------------------------------------- |
-| `SUPER + Return`    | Open terminal (ghostty)                     |
-| `SUPER + R`         | Open launcher (quickshell)                  |
-| `SUPER + E`         | File manager (thunar)                       |
-| `SUPER + Q`         | Kill window                                 |
-| `SUPER + F`         | Fullscreen                                  |
-| `SUPER + V`         | Toggle floating                             |
-| `SUPER + J`         | Toggle split                                |
-| `SUPER + C`         | Clipboard history                           |
-| `SUPER + .`         | Emoji picker                                |
-| `SUPER + \``        | Triggers panel                              |
-| `SUPER SHIFT + T`   | Toggle light/dark theme                     |
-| `SUPER SHIFT + P`   | Power menu                                  |
-| `SUPER SHIFT + L`   | Lock screen                                 |
-| `SUPER SHIFT + S`   | Screenshot (save to ~/Pictures/screenshots) |
-| `SUPER SHIFT + X`   | Toggle voice dictation                      |
+| `Super + Return`    | Terminal (ghostty)                          |
+| `Super + R`         | Launcher (quickshell)                       |
+| `Super + E`         | File manager (thunar)                       |
+| `Super + Q`         | Kill window                                 |
+| `Super + F`         | Fullscreen                                  |
+| `Super + V`         | Toggle floating                             |
+| `Super + J`         | Toggle split                                |
+| `Super + P`         | Pseudo                                      |
+| `Super + C`         | Clipboard history                           |
+| `Super + .`         | Emoji picker                                |
+| `Super + T`         | Todoist                                     |
+| `Super + I`         | Inkscape stylinator                         |
+| `` Super + ` ``     | Triggers panel                              |
+| `Super Shift + T`   | Toggle light/dark theme                     |
+| `Super Shift + P`   | Power menu                                  |
+| `Super Shift + L`   | Lock screen                                 |
+| `Super Shift + S`   | Screenshot (save to ~/Pictures/screenshots) |
+| `Super Shift + X`   | Toggle voice dictation                      |
 | `Print`             | Screenshot (select area → swappy editor)    |
-| `SUPER + 1-0`       | Switch workspace                            |
-| `SUPER SHIFT + 1-0` | Move window to workspace                    |
+| `Super + 1-0`       | Switch workspace                            |
+| `Super Shift + 1-0` | Move window to workspace                    |
+| Media keys          | Volume, brightness, play/pause, next/prev   |
 
 ## Theming
 
-Colors are defined in `modules/colorscheme/gruvbox.nix` and propagated via the `theme.colors` option in `home/default.nix`. A light specialisation is available.
+Colors defined in `modules/colorscheme/gruvbox.nix`, propagated via `theme.colors` in `home/default.nix`. Light specialisation available — toggle with `Super Shift + T`.
 
-The primary font is set via `theme.font` in `home/default.nix`:
+Primary font set via `theme.font` in `home/default.nix`:
 
 ```nix
-theme.font = "JetBrainsMono Nerd Font";
+theme.font = "TX02 Nerd Font";
 ```
+
+Cursor: Bibata-Modern-Classic · Icons: Gruvbox-Dark · GTK: adw-gtk3-dark
 
 ### Installing a custom/paid font
 
-After first boot, install font files to `~/.local/share/fonts/`, then update `theme.font` in `home/default.nix` and `fontFamily` in `home/quickshell/qml/Theme.qml` to match the font name, then rebuild.
+Install font files to `~/.local/share/fonts/`, update `theme.font` in `home/default.nix` and `fontFamily` in `home/quickshell/qml/Theme.qml`, then rebuild.
+
+## Quickshell
+
+Custom status bar and desktop shell built with QML:
+
+- **Bar:** Clock, workspaces, system tray, battery gauge, idle/dictation indicators
+- **Panels:** Audio, network, Bluetooth, clipboard, Todoist, stylinator (Inkscape)
+- **Overlays:** Launcher with file preview, emoji picker, notifications, lock screen, power menu
+- **Audio:** EasyEffects presets (Flat, BassBoost, Rock, Vocal, Treble, Enhanced)
+
+## System Services
+
+- **Display:** ly · **Audio:** PipeWire + PulseAudio + ALSA · **Bluetooth:** BlueZ + Blueman
+- **VPN:** OpenConnect (SSO) + WireGuard via NetworkManager
+- **Printing:** CUPS + Avahi mDNS + Epson USB
+- **Virtualization:** libvirtd + virt-manager + QEMU/SPICE
+- **Power:** power-profiles-daemon + upower · **Idle:** hypridle (5 min lock, 30 min suspend)
+- **Startup:** nm-applet, cliphist, solaar, voxtype, nextcloud
+
+## Neovim
+
+Configured via [nixvim](https://github.com/nix-community/nixvim) in `nixvim/`. LSP, Treesitter, Telescope, DAP, completion, formatting, linting, git integration, markdown support, and Zotero annotation import.
 
 ## Rebuilding
 
 ```bash
 sudo nixos-rebuild switch --flake ~/.config/nixos#adam
 ```
-
-## Neovim
-
-Configured via [nixvim](https://github.com/nix-community/nixvim) in the `nixvim/` directory.
