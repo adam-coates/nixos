@@ -1,4 +1,4 @@
-# Adam's NixOS Config
+#NixOS Config
 
 Hyprland · Quickshell · Ghostty · Neovim
 
