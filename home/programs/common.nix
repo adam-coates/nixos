@@ -16,7 +16,7 @@
     enable = true;
     settings.user = {
       name = "adam-coates";
-      email = ""; # add your email
+      email = "123807847+adam-coates@users.noreply.github.com";
     };
   };
 }
