@@ -8,7 +8,6 @@
         file_types = [
           "markdown"
           "quarto"
-          "Avante"
         ];
         heading = {
           enabled = true;
