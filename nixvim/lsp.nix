@@ -75,6 +75,14 @@
         html.enable = true;
         jsonls.enable = true;
         yamlls.enable = true;
+
+        tinymist = {
+          enable = true;
+          settings = {
+            exportPdf = "onSave";
+            formatterMode = "typstyle";
+          };
+        };
       };
 
       keymaps = {

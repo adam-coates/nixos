@@ -27,6 +27,7 @@
         dockerfile
         gitignore
         r
+        typst
       ];
     };
 

@@ -50,12 +50,14 @@
       "lua/globals.lua".source = ./lua/globals.lua;
       "lua/ui/statusline.lua".source = ./lua/statusline.lua;
       "lua/zotero_annotations.lua".source = ./lua/zotero_annotations.lua;
+      "lua/typst.lua".source = ./lua/typst.lua;
     };
 
     # Load globals and statusline from init
     extraConfigLuaPost = ''
       require("globals")
       require("ui.statusline")
+      require("typst")
     '';
 
     plugins.web-devicons.enable = true;

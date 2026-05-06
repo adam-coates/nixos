@@ -31,7 +31,7 @@
           { __unkeyed-1 = "<leader>e"; group = "File Explorer"; }
           { __unkeyed-1 = "<leader>f"; group = "Find Files"; }
           { __unkeyed-1 = "<leader>r"; group = "Smart Rename/ RestartLSP"; }
-          { __unkeyed-1 = "<leader>t"; group = "Tab"; }
+          { __unkeyed-1 = "<leader>t"; group = "Tab / Typst"; }
           { __unkeyed-1 = "z"; group = "Folding"; }
           { __unkeyed-1 = "["; group = "Jump backwards"; }
           { __unkeyed-1 = "]"; group = "Jump forwards"; }
@@ -77,6 +77,10 @@
     vim.keymap.set("n", "<Leader>;", dropbar_api.pick, { desc = "Pick symbols in winbar" })
     vim.keymap.set("n", "[;", dropbar_api.goto_context_start, { desc = "Go to start of current context" })
     vim.keymap.set("n", "];", dropbar_api.select_next_context, { desc = "Select next context" })
+
+    -- Undotree (built-in since Neovim 0.11+)
+    vim.cmd("packadd nvim.undotree")
+    vim.keymap.set("n", "<leader>u", require("undotree").open, { desc = "Open undotree" })
   '';
 
   # Nvim-tree keymaps
