@@ -170,8 +170,19 @@ in
   # CIFS/SMB support
   boot.supportedFilesystems = [ "cifs" ];
 
+  boot.kernel.sysctl = {
+    "net.ipv6.conf.all.disable_ipv6" = 1;
+    "net.ipv6.conf.default.disable_ipv6" = 1;
+  };
+
   networking.hostName = "adam";
   networking.networkmanager.enable = true;
+  networking.networkmanager.dns = "systemd-resolved";
+
+  services.resolved = {
+    enable = true;
+    fallbackDns = [ "1.1.1.1" "9.9.9.9" ];
+  };
 
   # VPN plugins for NetworkManager (WireGuard + OpenConnect)
   networking.networkmanager.plugins = [
