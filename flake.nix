@@ -19,13 +19,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-ttf-ms-win11 = {
-      url = "git+https://codeberg.org/kugland/nix-ttf-ms-win11.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, home-manager, nixvim, claude-code, nix-ttf-ms-win11, ... }@inputs: {
+  outputs = { self, nixpkgs, home-manager, nixvim, claude-code, ... }@inputs: {
     nixosConfigurations.adam = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };

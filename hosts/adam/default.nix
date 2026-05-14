@@ -361,7 +361,6 @@ in
     noto-fonts-color-emoji
     corefonts
     vista-fonts
-    inputs.nix-ttf-ms-win11.packages.x86_64-linux.ttf-ms-win11
   ];
 
   # Include user fonts from ~/.local/share/fonts
