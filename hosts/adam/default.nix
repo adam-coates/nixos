@@ -355,6 +355,9 @@ in
     font-awesome
     noto-fonts
     noto-fonts-color-emoji
+    corefonts
+    vistafonts
+    inputs.nix-ttf-ms-win11.packages.x86_64-linux.ttf-ms-win11
   ];
 
   # Include user fonts from ~/.local/share/fonts
