@@ -66,12 +66,13 @@ let
   # Arduino IDE wrapped in FHS env so ESP32 toolchain binaries work
   arduino-ide-fhs = pkgs.buildFHSEnv {
     name = "arduino-ide";
-    targetPkgs = pkgs: with pkgs; [
-      arduino-ide
-      zlib
-      python3
-      esptool
-    ];
+    targetPkgs =
+      pkgs: with pkgs; [
+        arduino-ide
+        zlib
+        python3
+        esptool
+      ];
     runScript = "arduino-ide";
   };
 
@@ -193,7 +194,10 @@ in
 
   services.resolved = {
     enable = true;
-    fallbackDns = [ "1.1.1.1" "9.9.9.9" ];
+    fallbackDns = [
+      "1.1.1.1"
+      "9.9.9.9"
+    ];
   };
 
   # VPN plugins for NetworkManager (WireGuard + OpenConnect)
@@ -356,7 +360,7 @@ in
     noto-fonts
     noto-fonts-color-emoji
     corefonts
-    vistafonts
+    vista-fonts
     inputs.nix-ttf-ms-win11.packages.x86_64-linux.ttf-ms-win11
   ];
 
