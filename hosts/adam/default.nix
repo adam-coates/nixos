@@ -63,18 +63,14 @@ let
     fi
   '';
 
-  # Arduino IDE wrapped in FHS env so ESP32 toolchain binaries work
-  arduino-ide-fhs = pkgs.buildFHSEnv {
-    name = "arduino-ide";
-    targetPkgs =
-      pkgs: with pkgs; [
-        arduino-ide
-        zlib
-        python3
-        esptool
-      ];
-    runScript = "arduino-ide";
-  };
+  # Arduino IDE with extra FHS packages for ESP32 toolchain
+  arduino-ide-with-extras = pkgs.buildFHSEnv (pkgs.arduino-ide.passthru.args // {
+    targetPkgs = p: (pkgs.arduino-ide.passthru.args.targetPkgs p) ++ (with p; [
+      python3
+      esptool
+      libxkbfile
+    ]);
+  });
 
   # Main VPN helper script called by QuickShell
   vpnHelper = pkgs.writeShellScriptBin "qs-vpn" ''
@@ -393,7 +389,7 @@ in
     bibata-cursors
     cifs-utils
     keyutils
-    arduino-ide-fhs
+    arduino-ide-with-extras
   ];
 
   # Epson printer USB access (restricted to lp group)
