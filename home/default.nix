@@ -102,6 +102,8 @@ in
       hyprpicker
       tesseract
       ffmpeg
+      jq
+      v4l-utils
       playerctl
       btop
       bat

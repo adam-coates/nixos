@@ -22,7 +22,7 @@ Item {
   Process { id: stopProc; running: false }
 
   Timer {
-    interval: 2000
+    interval: 500
     running: true
     repeat: true
     triggeredOnStart: true

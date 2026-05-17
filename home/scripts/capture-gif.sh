@@ -6,6 +6,8 @@ TEMP_VIDEO="/tmp/capture-gif-temp.mp4"
 
 mkdir -p "$OUTPUT_DIR"
 
+# ── Stop & convert ──
+
 if [[ -f "$PID_FILE" ]]; then
   pid=$(cat "$PID_FILE" 2>/dev/null)
   if [[ -n $pid ]] && kill -0 "$pid" 2>/dev/null; then
@@ -30,6 +32,8 @@ if [[ -f "$PID_FILE" ]]; then
   rm -f "$PID_FILE"
 fi
 
+# ── Region selection ──
+
 get_rectangles() {
   local active_workspace
   active_workspace=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .activeWorkspace.id')
@@ -41,47 +45,69 @@ get_rectangles() {
     "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'
 }
 
-rects=$(get_rectangles)
-hyprpicker -r -z >/dev/null 2>&1 &
-picker_pid=$!
-sleep .1
-selection=$(echo "$rects" | slurp 2>/dev/null)
-kill $picker_pid 2>/dev/null
+select_capture_target() {
+  local rects
+  rects=$(get_rectangles)
+  hyprpicker -r -z >/dev/null 2>&1 &
+  local picker_pid=$!
+  sleep .1
+  local selection
+  selection=$(echo "$rects" | slurp 2>/dev/null)
+  kill $picker_pid 2>/dev/null
 
-[[ ! $selection =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]] && exit 1
-sx=${BASH_REMATCH[1]} sy=${BASH_REMATCH[2]}
-sw=${BASH_REMATCH[3]} sh=${BASH_REMATCH[4]}
+  [[ $selection =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]] || return 1
+  local sx=${BASH_REMATCH[1]} sy=${BASH_REMATCH[2]}
+  local sw=${BASH_REMATCH[3]} sh=${BASH_REMATCH[4]}
 
-if ((sw * sh < 20)); then
-  while IFS= read -r rect; do
-    [[ $rect =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]] || continue
-    rx=${BASH_REMATCH[1]} ry=${BASH_REMATCH[2]}
-    rw=${BASH_REMATCH[3]} rh=${BASH_REMATCH[4]}
-    if ((sx >= rx && sx < rx + rw && sy >= ry && sy < ry + rh)); then
-      sx=$rx sy=$ry sw=$rw sh=$rh
-      break
-    fi
-  done <<<"$rects"
-fi
+  if ((sw * sh < 20)); then
+    while IFS= read -r rect; do
+      [[ $rect =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]] || continue
+      local rx=${BASH_REMATCH[1]} ry=${BASH_REMATCH[2]}
+      local rw=${BASH_REMATCH[3]} rh=${BASH_REMATCH[4]}
+      if ((sx >= rx && sx < rx + rw && sy >= ry && sy < ry + rh)); then
+        sx=$rx sy=$ry sw=$rw sh=$rh
+        break
+      fi
+    done <<<"$rects"
+  fi
 
-monitor=$(hyprctl monitors -j | jq -r --argjson x "$sx" --argjson y "$sy" --argjson w "$sw" --argjson h "$sh" '
-  .[] | select(.x == $x and .y == $y and (.width / .scale | floor) == $w and (.height / .scale | floor) == $h) | .name' | head -1)
+  local monitor
+  monitor=$(hyprctl monitors -j | jq -r --argjson x "$sx" --argjson y "$sy" --argjson w "$sw" --argjson h "$sh" '
+    .[] | select(.x == $x and .y == $y and (.width / .scale | floor) == $w and (.height / .scale | floor) == $h) | .name' | head -1)
+
+  if [[ -n $monitor ]]; then
+    echo "monitor:$monitor"
+  else
+    echo "region:${sw}x${sh}+${sx}+${sy}"
+  fi
+}
+
+# ── Start recording ──
+
+target=$(select_capture_target) || exit 1
 
 capture_args=()
-if [[ -n $monitor ]]; then
-  capture_args=(-w "$monitor")
-else
-  capture_args=(-w "${sw}x${sh}+${sx}+${sy}")
-fi
+case $target in
+monitor:*)
+  capture_args=(-w "${target#monitor:}")
+  ;;
+region:*)
+  capture_args=(-w "${target#region:}")
+  ;;
+esac
 
-gpu-screen-recorder "${capture_args[@]}" -k auto -f 15 -fm cfr -o "$TEMP_VIDEO" &
+rm -f "$TEMP_VIDEO"
+
+echo "starting" > "$PID_FILE"
+
+gpu-screen-recorder "${capture_args[@]}" -k auto -f 15 -fm cfr -fallback-cpu-encoding yes -o "$TEMP_VIDEO" &
 pid=$!
+echo "$pid" > "$PID_FILE"
 
-while kill -0 $pid 2>/dev/null && [[ ! -f $TEMP_VIDEO ]]; do
-  sleep 0.2
-done
-
+sleep 0.5
 if kill -0 $pid 2>/dev/null; then
-  echo "$pid" > "$PID_FILE"
-  notify-send "GIF recording started" "Run again to stop & convert" -t 2000
+  notify-send "GIF recording started" "Click ⏺ in bar to stop & convert" -t 2000
+else
+  rm -f "$PID_FILE" "$TEMP_VIDEO"
+  notify-send "GIF recording failed to start" -u critical -t 3000
 fi

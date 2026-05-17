@@ -11,13 +11,14 @@ PanelWindow {
   property string query: ""
 
   readonly property var allItems: [
-    { icon: "󰹑", label: "Screenshot",                cmd: "grim -g \"$(slurp)\" - | swappy -f -" },
-    { icon: "", label: "Screen Record",              cmd: "~/.config/scripts/capture-screenrecord.sh" },
-    { icon: "󰕾", label: "Screen Record (audio)",     cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio" },
-    { icon: "󰍬", label: "Screen Record (audio+mic)",  cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio --with-microphone-audio" },
-    { icon: "󰵐", label: "Record GIF",                cmd: "~/.config/scripts/capture-gif.sh" },
-    { icon: "󰴑", label: "Text Extraction",           cmd: "~/.config/scripts/capture-ocr.sh" },
-    { icon: "󰃉", label: "Color Picker",              cmd: "pkill hyprpicker || hyprpicker -a" }
+    { icon: "󰹑", label: "Screenshot",                       cmd: "grim -g \"$(slurp)\" - | swappy -f -" },
+    { icon: "", label: "Screen Record",                     cmd: "~/.config/scripts/capture-screenrecord.sh" },
+    { icon: "󰕾", label: "Screen Record (audio)",            cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio" },
+    { icon: "󰍬", label: "Screen Record (audio+mic)",         cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio --with-microphone-audio" },
+    { icon: "󰄀", label: "Screen Record (audio+mic+webcam)",  cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio --with-microphone-audio --with-webcam" },
+    { icon: "󰵐", label: "Record GIF",                       cmd: "~/.config/scripts/capture-gif.sh" },
+    { icon: "󰴑", label: "Text Extraction",                  cmd: "~/.config/scripts/capture-ocr.sh" },
+    { icon: "󰃉", label: "Color Picker",                     cmd: "pkill hyprpicker || hyprpicker -a" }
   ]
 
   readonly property var filteredItems: {
