@@ -18,7 +18,7 @@ NotifPanel NotifPanel.qml
 PopupBackdrop PopupBackdrop.qml
 NotifServer NotifServer.qml
 PowerMenu PowerMenu.qml
-TriggersPanel TriggersPanel.qml
+CapturePanel CapturePanel.qml
 Wallpaper Wallpaper.qml
 Workspaces Workspaces.qml
 DictationIndicator DictationIndicator.qml

@@ -101,7 +101,7 @@
       "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
       "$powerMenu" = "qs ipc call shell togglePowermenu";
       "$lock" = "qs ipc call shell lock";
-      "$triggers" = "qs ipc call shell toggleTriggers";
+      "$capture" = "qs ipc call shell toggleCapture";
       "$todoist" = "qs ipc call shell toggleTodoist";
 
       bind = [
@@ -117,7 +117,7 @@
         "$mod SHIFT, T, exec, $themeSwitcher"
         "$mod SHIFT, P, exec, $powerMenu"
         "$mod SHIFT, L, exec, $lock"
-        "$mod, grave, exec, $triggers"
+        "$mod, grave, exec, $capture"
         "$mod, T, exec, $todoist"
 
         # Move focus

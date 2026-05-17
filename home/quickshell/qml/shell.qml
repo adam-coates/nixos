@@ -59,8 +59,8 @@ ShellRoot {
   // ── Clipboard manager ──
   ClipboardPanel {}
 
-  // ── Triggers / quick actions panel ──
-  TriggersPanel {}
+  // ── Capture panel ──
+  CapturePanel {}
 
   // ── Inkscape stylinator ──
   StylinatorPanel {}
@@ -82,7 +82,7 @@ ShellRoot {
     function toggleAudio(): void { GlobalState.toggle("audio") }
     function toggleBluetooth(): void { GlobalState.toggle("bluetooth") }
     function toggleNetwork(): void { GlobalState.toggle("network") }
-    function toggleTriggers(): void { GlobalState.toggle("triggers") }
+    function toggleCapture(): void { GlobalState.toggle("capture") }
     function toggleEmoji(): void { GlobalState.toggle("emoji") }
     function toggleClipboard(): void { GlobalState.toggle("clipboard") }
     function toggleStylinator(): void { GlobalState.toggle("stylinator") }

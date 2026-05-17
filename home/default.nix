@@ -98,6 +98,10 @@ in
       grim
       slurp
       swappy
+      gpu-screen-recorder
+      hyprpicker
+      tesseract
+      ffmpeg
       playerctl
       btop
       bat
@@ -170,6 +174,21 @@ in
 
     home.file.".local/bin/mkflake" = {
       source = ./scripts/mkflake.sh;
+      executable = true;
+    };
+
+    home.file.".config/scripts/capture-screenrecord.sh" = {
+      source = ./scripts/capture-screenrecord.sh;
+      executable = true;
+    };
+
+    home.file.".config/scripts/capture-gif.sh" = {
+      source = ./scripts/capture-gif.sh;
+      executable = true;
+    };
+
+    home.file.".config/scripts/capture-ocr.sh" = {
+      source = ./scripts/capture-ocr.sh;
       executable = true;
     };
 
