@@ -42,9 +42,22 @@ PanelWindow {
   color: "transparent"
 
   readonly property string nixPath:
-    "export PATH=\"$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
+    "export PATH=\"/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
+
+  property string pendingCmd: ""
 
   Process { id: captureProc; running: false }
+
+  Timer {
+    id: launchDelay
+    interval: 200
+    repeat: false
+    onTriggered: {
+      captureProc.command = ["bash", "-c", capturePanel.nixPath + capturePanel.pendingCmd]
+      captureProc.running = false
+      captureProc.running = true
+    }
+  }
 
   Rectangle {
     anchors.fill: parent
@@ -196,9 +209,8 @@ PanelWindow {
     const idx = resultsList.currentIndex
     if (idx < 0 || idx >= items.length) return
     const item = items[idx]
+    pendingCmd = item.cmd
     GlobalState.closeAll()
-    captureProc.command = ["bash", "-c", nixPath + item.cmd]
-    captureProc.running = false
-    captureProc.running = true
+    launchDelay.start()
   }
 }

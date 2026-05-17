@@ -11,7 +11,7 @@ Item {
   visible: recording
 
   readonly property string nixPath:
-    "export PATH=\"$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
+    "export PATH=\"/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
 
   Process {
     id: recCheck
