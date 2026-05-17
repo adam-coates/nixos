@@ -27,7 +27,7 @@ PanelWindow {
     return allItems.filter(item => item.label.toLowerCase().includes(q))
   }
 
-  visible: showing
+  visible: showing || launchDelay.running
   onShowingChanged: {
     if (showing) {
       query = ""
@@ -43,7 +43,7 @@ PanelWindow {
   color: "transparent"
 
   readonly property string nixPath:
-    "export PATH=\"/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
+    "export PATH=\"/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
 
   property string pendingCmd: ""
 

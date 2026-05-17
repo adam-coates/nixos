@@ -246,6 +246,14 @@ in
     };
   };
 
+  # gpu-screen-recorder needs cap_sys_admin on gsr-kms-server for KMS capture
+  security.wrappers.gsr-kms-server = {
+    owner = "root";
+    group = "root";
+    capabilities = "cap_sys_admin+ep";
+    source = "${pkgs.gpu-screen-recorder}/bin/gsr-kms-server";
+  };
+
   # Hyprland
   programs.hyprland = {
     enable = true;
