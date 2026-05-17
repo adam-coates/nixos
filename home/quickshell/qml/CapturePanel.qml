@@ -194,8 +194,9 @@ PanelWindow {
     const idx = resultsList.currentIndex
     if (idx < 0 || idx >= items.length) return
     const item = items[idx]
+    const cmd = item.cmd
     GlobalState.closeAll()
-    captureProc.command = ["hyprctl", "dispatch", "exec", item.cmd]
+    captureProc.command = ["bash", "-c", "notify-send 'Capture' 'Launching: " + cmd + "' && sleep 0.3 && hyprctl dispatch exec " + cmd]
     captureProc.running = false
     captureProc.running = true
   }
