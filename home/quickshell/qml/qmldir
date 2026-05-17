@@ -19,6 +19,7 @@ PopupBackdrop PopupBackdrop.qml
 NotifServer NotifServer.qml
 PowerMenu PowerMenu.qml
 CapturePanel CapturePanel.qml
+RecordingIndicator RecordingIndicator.qml
 Wallpaper Wallpaper.qml
 Workspaces Workspaces.qml
 DictationIndicator DictationIndicator.qml

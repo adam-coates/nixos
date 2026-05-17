@@ -49,6 +49,7 @@ PanelWindow {
       spacing: 8
 
       Clock {}
+      RecordingIndicator {}
       IdleIndicator {}
       DictationIndicator {}
     }

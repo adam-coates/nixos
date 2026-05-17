@@ -8,22 +8,36 @@ PanelWindow {
   id: capturePanel
 
   property bool showing: GlobalState.activePopup === "capture"
-  property string view: "main"
+  property string query: ""
 
-  onShowingChanged: if (!showing) view = "main"
+  readonly property var allItems: [
+    { icon: "󰹑", label: "Screenshot",                cmd: "grim -g \"$(slurp)\" - | swappy -f -" },
+    { icon: "", label: "Screen Record",              cmd: "~/.config/scripts/capture-screenrecord.sh" },
+    { icon: "󰕾", label: "Screen Record (audio)",     cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio" },
+    { icon: "󰍬", label: "Screen Record (audio+mic)",  cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio --with-microphone-audio" },
+    { icon: "󰵐", label: "Record GIF",                cmd: "~/.config/scripts/capture-gif.sh" },
+    { icon: "󰴑", label: "Text Extraction",           cmd: "~/.config/scripts/capture-ocr.sh" },
+    { icon: "󰃉", label: "Color Picker",              cmd: "pkill hyprpicker || hyprpicker -a" }
+  ]
+
+  readonly property var filteredItems: {
+    const q = query.toLowerCase().trim()
+    if (!q) return allItems
+    return allItems.filter(item => item.label.toLowerCase().includes(q))
+  }
 
   visible: showing
+  onShowingChanged: {
+    if (showing) {
+      query = ""
+      searchInput.forceActiveFocus()
+    }
+  }
 
-  anchors.top: true
-  anchors.right: true
-  margins { top: 30; right: 4 }
-
-  width: 260
-  height: contentCol.implicitHeight + 16
-
+  anchors { top: true; left: true; right: true; bottom: true }
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.namespace: "quickshell-capture"
-  WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+  WlrLayershell.keyboardFocus: showing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
   exclusionMode: ExclusionMode.Ignore
   color: "transparent"
 
@@ -34,239 +48,157 @@ PanelWindow {
 
   Rectangle {
     anchors.fill: parent
+    color: Qt.rgba(0, 0, 0, showing ? 0.3 : 0)
+    Behavior on color { ColorAnimation { duration: 150 } }
+    MouseArea {
+      anchors.fill: parent
+      onClicked: GlobalState.closeAll()
+    }
+  }
+
+  Rectangle {
+    anchors.centerIn: parent
+    width: 460
+    height: col.implicitHeight + 40
     color: Theme.bgAlpha(0.97)
     border.color: Theme.accent
     border.width: 1
+    radius: 12
 
-    opacity: capturePanel.showing ? 1 : 0
-    scale: capturePanel.showing ? 1 : 0.96
-    transformOrigin: Item.TopRight
+    opacity: showing ? 1 : 0
+    scale: showing ? 1 : 0.95
     Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
     Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-    radius: 6
+
+    MouseArea { anchors.fill: parent }
 
     ColumnLayout {
-      id: contentCol
-      anchors { top: parent.top; left: parent.left; right: parent.right; margins: 8 }
-      spacing: 4
+      id: col
+      anchors.fill: parent
+      anchors.margins: 20
+      spacing: 10
 
-      // ── Main view ──
-      ColumnLayout {
-        visible: capturePanel.view === "main"
-        spacing: 4
-
-        Text {
-          text: "Capture"
-          font.family: Theme.fontFamily
-          font.pixelSize: 12
-          font.bold: true
-          color: Theme.fg
-          topPadding: 2
-          bottomPadding: 2
-        }
-
-        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3) }
-
-        CaptureButton {
-          icon: "󰹑"
-          label: "Screenshot"
-          onActivated: {
-            GlobalState.closeAll()
-            captureProc.command = [
-              "bash", "-c",
-              capturePanel.nixPath + "grim -g \"$(slurp)\" - | swappy -f -"
-            ]
-            captureProc.running = false
-            captureProc.running = true
-          }
-        }
-
-        CaptureButton {
-          icon: ""
-          label: "Screen Record"
-          showArrow: true
-          onActivated: capturePanel.view = "record"
-        }
-
-        CaptureButton {
-          icon: "󰵐"
-          label: "Record GIF"
-          onActivated: {
-            GlobalState.closeAll()
-            captureProc.command = [
-              "bash", "-c",
-              capturePanel.nixPath + "~/.config/scripts/capture-gif.sh"
-            ]
-            captureProc.running = false
-            captureProc.running = true
-          }
-        }
-
-        CaptureButton {
-          icon: "󰴑"
-          label: "Text Extraction"
-          onActivated: {
-            GlobalState.closeAll()
-            captureProc.command = [
-              "bash", "-c",
-              capturePanel.nixPath + "~/.config/scripts/capture-ocr.sh"
-            ]
-            captureProc.running = false
-            captureProc.running = true
-          }
-        }
-
-        CaptureButton {
-          icon: "󰃉"
-          label: "Color Picker"
-          onActivated: {
-            GlobalState.closeAll()
-            captureProc.command = [
-              "bash", "-c",
-              capturePanel.nixPath + "pkill hyprpicker || hyprpicker -a"
-            ]
-            captureProc.running = false
-            captureProc.running = true
-          }
-        }
-
-        Item { height: 2 }
-      }
-
-      // ── Screen record submenu ──
-      ColumnLayout {
-        visible: capturePanel.view === "record"
-        spacing: 4
+      Rectangle {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 40
+        color: Theme.bg1
+        radius: 6
 
         RowLayout {
-          spacing: 4
-
-          Rectangle {
-            width: 24; height: 24
-            color: backHover.containsMouse ? Theme.accentAlpha(0.15) : "transparent"
-            radius: 4
-
-            Text {
-              anchors.centerIn: parent
-              text: "󰁍"
-              font.family: Theme.fontFamily
-              font.pixelSize: 14
-              color: backHover.containsMouse ? Theme.accent : Theme.fg
-            }
-
-            HoverHandler { id: backHover }
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: capturePanel.view = "main"
-            }
-          }
+          anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+          spacing: 8
 
           Text {
-            text: "Screen Record"
+            text: "󰄀"
             font.family: Theme.fontFamily
-            font.pixelSize: 12
-            font.bold: true
+            font.pixelSize: 14
+            color: Theme.gray
+          }
+
+          TextInput {
+            id: searchInput
+            Layout.fillWidth: true
+            verticalAlignment: TextInput.AlignVCenter
+            font.family: Theme.fontFamily
+            font.pixelSize: 14
             color: Theme.fg
-            topPadding: 2
-            bottomPadding: 2
+            clip: true
+            text: capturePanel.query
+            onTextChanged: {
+              capturePanel.query = text
+              resultsList.currentIndex = 0
+            }
+
+            Keys.onEscapePressed: GlobalState.closeAll()
+            Keys.onReturnPressed: launchCurrent()
+            Keys.onDownPressed: {
+              if (resultsList.currentIndex < resultsList.count - 1)
+                resultsList.currentIndex++
+            }
+            Keys.onUpPressed: {
+              if (resultsList.currentIndex > 0)
+                resultsList.currentIndex--
+            }
+
+            Text {
+              anchors.fill: parent
+              verticalAlignment: Text.AlignVCenter
+              font.family: Theme.fontFamily
+              font.pixelSize: 14
+              color: Theme.gray
+              visible: searchInput.text === ""
+              text: "Capture..."
+            }
           }
         }
+      }
 
-        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.accentAlpha(0.3) }
+      ListView {
+        id: resultsList
+        Layout.fillWidth: true
+        Layout.preferredHeight: contentHeight
+        clip: true
+        currentIndex: 0
+        spacing: 2
+        interactive: false
 
-        CaptureButton {
-          icon: "󰕧"
-          label: "No audio"
-          onActivated: {
-            GlobalState.closeAll()
-            captureProc.command = [
-              "bash", "-c",
-              capturePanel.nixPath + "~/.config/scripts/capture-screenrecord.sh"
-            ]
-            captureProc.running = false
-            captureProc.running = true
+        model: ScriptModel { values: capturePanel.filteredItems }
+
+        delegate: Rectangle {
+          required property int index
+          required property var modelData
+
+          width: resultsList.width
+          height: 40
+          color: resultsList.currentIndex === index ? Theme.accentAlpha(0.2) : "transparent"
+          radius: 6
+
+          Behavior on color { ColorAnimation { duration: 80 } }
+
+          RowLayout {
+            anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
+            spacing: 10
+
+            Text {
+              text: modelData.icon
+              font.family: Theme.fontFamily
+              font.pixelSize: 16
+              color: resultsList.currentIndex === index ? Theme.accent : Theme.fg
+              Layout.preferredWidth: 24
+              horizontalAlignment: Text.AlignHCenter
+            }
+
+            Text {
+              Layout.fillWidth: true
+              text: modelData.label
+              font.family: Theme.fontFamily
+              font.pixelSize: 13
+              color: resultsList.currentIndex === index ? Theme.accent : Theme.fg
+              elide: Text.ElideRight
+            }
+          }
+
+          MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onEntered: resultsList.currentIndex = index
+            onClicked: { resultsList.currentIndex = index; launchCurrent() }
           }
         }
-
-        CaptureButton {
-          icon: "󰕾"
-          label: "Desktop audio"
-          onActivated: {
-            GlobalState.closeAll()
-            captureProc.command = [
-              "bash", "-c",
-              capturePanel.nixPath + "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio"
-            ]
-            captureProc.running = false
-            captureProc.running = true
-          }
-        }
-
-        CaptureButton {
-          icon: "󰍬"
-          label: "Desktop + microphone"
-          onActivated: {
-            GlobalState.closeAll()
-            captureProc.command = [
-              "bash", "-c",
-              capturePanel.nixPath + "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio --with-microphone-audio"
-            ]
-            captureProc.running = false
-            captureProc.running = true
-          }
-        }
-
-        Item { height: 2 }
       }
     }
   }
 
-  // ── Reusable button component ──
-  component CaptureButton: Rectangle {
-    Layout.fillWidth: true
-    height: 34
-    color: btnHover.containsMouse ? Theme.accentAlpha(0.15) : "transparent"
-    radius: 4
-
-    property string icon: ""
-    property string label: ""
-    property bool showArrow: false
-    signal activated()
-
-    RowLayout {
-      anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
-      spacing: 8
-
-      Text {
-        text: icon
-        font.family: Theme.fontFamily
-        font.pixelSize: 14
-        color: btnHover.containsMouse ? Theme.accent : Theme.fg
-      }
-
-      Text {
-        text: label
-        font.family: Theme.fontFamily
-        font.pixelSize: 12
-        color: btnHover.containsMouse ? Theme.accent : Theme.fg
-        Layout.fillWidth: true
-      }
-
-      Text {
-        visible: showArrow
-        text: "󰅂"
-        font.family: Theme.fontFamily
-        font.pixelSize: 12
-        color: btnHover.containsMouse ? Theme.accent : Theme.gray
-      }
-    }
-
-    HoverHandler { id: btnHover }
-    MouseArea {
-      anchors.fill: parent
-      cursorShape: Qt.PointingHandCursor
-      onClicked: activated()
-    }
+  function launchCurrent() {
+    if (resultsList.count === 0) return
+    const items = filteredItems
+    const idx = resultsList.currentIndex
+    if (idx < 0 || idx >= items.length) return
+    const item = items[idx]
+    GlobalState.closeAll()
+    captureProc.command = ["bash", "-c", nixPath + item.cmd]
+    captureProc.running = false
+    captureProc.running = true
   }
 }

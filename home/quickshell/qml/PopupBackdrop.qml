@@ -8,7 +8,7 @@ PanelWindow {
   // Visible for all small panel popups (not launcher/powermenu which have their own)
   readonly property bool active: {
     const p = GlobalState.activePopup
-    return p !== "" && p !== "launcher" && p !== "powermenu"
+    return p !== "" && p !== "launcher" && p !== "powermenu" && p !== "capture"
   }
 
   visible: active
