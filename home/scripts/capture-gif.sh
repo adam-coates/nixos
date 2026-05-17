@@ -17,19 +17,28 @@ if [[ -f "$PID_FILE" ]]; then
       sleep 0.1
       count=$((count + 1))
     done
-
-    filename="$OUTPUT_DIR/recording-$(date +'%Y-%m-%d_%H-%M-%S').gif"
-    notify-send "Converting to GIF..." "This may take a moment" -t 3000
-
-    ffmpeg -i "$TEMP_VIDEO" \
-      -vf "fps=15,scale='min(640,iw)':-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer" \
-      -loop 0 "$filename" -loglevel quiet 2>/dev/null
-
-    rm -f "$TEMP_VIDEO" "$PID_FILE"
-    notify-send "GIF saved" "$filename" -t 5000
-    exit 0
   fi
+
   rm -f "$PID_FILE"
+
+  if [[ ! -f "$TEMP_VIDEO" ]]; then
+    notify-send "GIF recording failed" "No video to convert" -u critical -t 3000
+    exit 1
+  fi
+
+  filename="$OUTPUT_DIR/recording-$(date +'%Y-%m-%d_%H-%M-%S').gif"
+  notify-send "Converting to GIF..." "This may take a moment" -t 3000
+
+  if ffmpeg -i "$TEMP_VIDEO" \
+    -vf "fps=15,scale='min(640,iw)':-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer" \
+    -loop 0 "$filename" -loglevel quiet 2>/dev/null; then
+    rm -f "$TEMP_VIDEO"
+    notify-send "GIF saved" "$filename" -t 5000
+  else
+    rm -f "$TEMP_VIDEO"
+    notify-send "GIF conversion failed" -u critical -t 3000
+  fi
+  exit 0
 fi
 
 # ── Region selection ──
@@ -104,9 +113,9 @@ gpu-screen-recorder "${capture_args[@]}" -k auto -f 15 -fm cfr -fallback-cpu-enc
 pid=$!
 echo "$pid" > "$PID_FILE"
 
-sleep 0.5
-if kill -0 $pid 2>/dev/null; then
-  notify-send "GIF recording started" "Click ⏺ in bar to stop & convert" -t 2000
+sleep 1
+if kill -0 "$pid" 2>/dev/null; then
+  notify-send "󰵐 GIF recording started" "Click ⏺ in bar to stop & convert" -t 2000
 else
   rm -f "$PID_FILE" "$TEMP_VIDEO"
   notify-send "GIF recording failed to start" -u critical -t 3000

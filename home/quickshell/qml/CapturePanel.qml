@@ -27,7 +27,7 @@ PanelWindow {
     return allItems.filter(item => item.label.toLowerCase().includes(q))
   }
 
-  visible: showing || launchDelay.running
+  visible: showing
   onShowingChanged: {
     if (showing) {
       query = ""
@@ -45,20 +45,7 @@ PanelWindow {
   readonly property string nixPath:
     "export PATH=\"/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
 
-  property string pendingCmd: ""
-
   Process { id: captureProc; running: false }
-
-  Timer {
-    id: launchDelay
-    interval: 200
-    repeat: false
-    onTriggered: {
-      captureProc.command = ["bash", "-c", capturePanel.nixPath + capturePanel.pendingCmd]
-      captureProc.running = false
-      captureProc.running = true
-    }
-  }
 
   Rectangle {
     anchors.fill: parent
@@ -210,8 +197,9 @@ PanelWindow {
     const idx = resultsList.currentIndex
     if (idx < 0 || idx >= items.length) return
     const item = items[idx]
-    pendingCmd = item.cmd
     GlobalState.closeAll()
-    launchDelay.start()
+    captureProc.command = ["bash", "-c", nixPath + "sleep 0.15; " + item.cmd]
+    captureProc.running = false
+    captureProc.running = true
   }
 }

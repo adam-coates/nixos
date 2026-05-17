@@ -20,32 +20,29 @@ for arg in "$@"; do
   esac
 done
 
-# ── Stop logic ──
+# ── Stop recording ──
 
-stop_recording() {
-  local pid
+if [[ -f "$PID_FILE" ]]; then
   pid=$(cat "$PID_FILE" 2>/dev/null)
-  [[ -z $pid ]] && return 1
-  kill -0 "$pid" 2>/dev/null || { rm -f "$PID_FILE" "$NAME_FILE"; return 1; }
-
-  kill -SIGINT "$pid"
-  local count=0
-  while kill -0 "$pid" 2>/dev/null && ((count < 50)); do
-    sleep 0.1
-    count=$((count + 1))
-  done
+  if [[ -n $pid ]] && kill -0 "$pid" 2>/dev/null; then
+    kill -SIGINT "$pid"
+    count=0
+    while kill -0 "$pid" 2>/dev/null && ((count < 50)); do
+      sleep 0.1
+      count=$((count + 1))
+    done
+  fi
 
   pkill -f "WebcamOverlay" 2>/dev/null
 
-  local filename
   filename=$(cat "$NAME_FILE" 2>/dev/null)
-  notify-send "Screen recording saved" "$filename" -t 5000
   rm -f "$PID_FILE" "$NAME_FILE"
-  return 0
-}
 
-if pgrep -f "^gpu-screen-recorder" >/dev/null || [[ -f "$PID_FILE" ]]; then
-  stop_recording
+  if [[ -f "$filename" ]]; then
+    notify-send "Screen recording saved" "$filename" -t 5000
+  else
+    notify-send "Screen recording failed" "No output file found" -u critical -t 3000
+  fi
   exit 0
 fi
 
@@ -115,7 +112,7 @@ start_webcam_overlay() {
   local scale
   scale=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .scale')
   local target_width
-  target_width=$(awk "BEGIN {printf \"%.0f\", 360 * $scale}")
+  target_width=$(awk "BEGIN {printf \"%.0f\", 360 * ${scale:-1}}")
 
   local preferred_resolutions=("640x360" "1280x720" "1920x1080")
   local video_size_arg=""
@@ -166,7 +163,7 @@ if [[ $MICROPHONE_AUDIO == "true" ]]; then
 fi
 [[ -n $audio_devices ]] && audio_args+=(-a "$audio_devices" -ac aac)
 
-# Write PID file before gpu-screen-recorder starts so bar indicator appears instantly
+# Write PID file immediately so bar indicator shows instantly
 echo "starting" > "$PID_FILE"
 echo "$filename" > "$NAME_FILE"
 
@@ -174,10 +171,11 @@ gpu-screen-recorder "${capture_args[@]}" -k auto -f 60 -fm cfr -fallback-cpu-enc
 pid=$!
 echo "$pid" > "$PID_FILE"
 
-sleep 0.5
-if kill -0 $pid 2>/dev/null; then
-  notify-send "Recording started" "Click ⏺ in bar to stop" -t 2000
+sleep 1
+if kill -0 "$pid" 2>/dev/null; then
+  notify-send " Recording started" "Click ⏺ in bar to stop" -t 2000
 else
   rm -f "$PID_FILE" "$NAME_FILE"
+  pkill -f "WebcamOverlay" 2>/dev/null
   notify-send "Screen recording failed to start" -u critical -t 3000
 fi
