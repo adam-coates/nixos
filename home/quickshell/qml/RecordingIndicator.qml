@@ -10,9 +10,6 @@ Item {
   height: 26
   visible: recording
 
-  readonly property string nixPath:
-    "export PATH=\"/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
-
   Process {
     id: recCheck
     command: ["bash", "-c", "test -f /tmp/capture-screenrecord-pid || test -f /tmp/capture-gif-pid"]
@@ -50,10 +47,9 @@ Item {
     cursorShape: Qt.PointingHandCursor
     onClicked: {
       stopProc.command = [
-        "bash", "-c",
-        indicator.nixPath +
-        "if [ -f /tmp/capture-screenrecord-pid ]; then ~/.config/scripts/capture-screenrecord.sh; " +
-        "elif [ -f /tmp/capture-gif-pid ]; then ~/.config/scripts/capture-gif.sh; fi"
+        "hyprctl", "dispatch", "exec",
+        "bash -c 'if [ -f /tmp/capture-screenrecord-pid ]; then ~/.config/scripts/capture-screenrecord.sh; " +
+        "elif [ -f /tmp/capture-gif-pid ]; then ~/.config/scripts/capture-gif.sh; fi'"
       ]
       stopProc.running = false
       stopProc.running = true

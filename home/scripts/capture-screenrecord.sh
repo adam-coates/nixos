@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH="/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH"
 
 OUTPUT_DIR="${HOME}/Videos"
 PID_FILE="/tmp/capture-screenrecord-pid"
@@ -163,17 +164,16 @@ if [[ $MICROPHONE_AUDIO == "true" ]]; then
 fi
 [[ -n $audio_devices ]] && audio_args+=(-a "$audio_devices" -ac aac)
 
-# Write PID file immediately so bar indicator shows instantly
-echo "starting" > "$PID_FILE"
 echo "$filename" > "$NAME_FILE"
 
 gpu-screen-recorder "${capture_args[@]}" -k auto -f 60 -fm cfr -fallback-cpu-encoding yes -o "$filename" "${audio_args[@]}" &
-pid=$!
-echo "$pid" > "$PID_FILE"
+rec_pid=$!
+echo "$rec_pid" > "$PID_FILE"
 
 sleep 1
-if kill -0 "$pid" 2>/dev/null; then
+if kill -0 "$rec_pid" 2>/dev/null; then
   notify-send " Recording started" "Click ⏺ in bar to stop" -t 2000
+  wait "$rec_pid"
 else
   rm -f "$PID_FILE" "$NAME_FILE"
   pkill -f "WebcamOverlay" 2>/dev/null

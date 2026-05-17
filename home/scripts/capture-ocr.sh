@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH="/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH"
 
 cleanup_freeze() {
   [[ -n $PID ]] && kill $PID 2>/dev/null

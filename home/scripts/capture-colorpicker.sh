@@ -1,0 +1,3 @@
+#!/bin/bash
+export PATH="/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH"
+pkill hyprpicker || hyprpicker -a

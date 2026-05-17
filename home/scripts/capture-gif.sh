@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH="/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH"
 
 OUTPUT_DIR="${HOME}/Videos"
 PID_FILE="/tmp/capture-gif-pid"
@@ -107,15 +108,14 @@ esac
 
 rm -f "$TEMP_VIDEO"
 
-echo "starting" > "$PID_FILE"
-
 gpu-screen-recorder "${capture_args[@]}" -k auto -f 15 -fm cfr -fallback-cpu-encoding yes -o "$TEMP_VIDEO" &
-pid=$!
-echo "$pid" > "$PID_FILE"
+rec_pid=$!
+echo "$rec_pid" > "$PID_FILE"
 
 sleep 1
-if kill -0 "$pid" 2>/dev/null; then
+if kill -0 "$rec_pid" 2>/dev/null; then
   notify-send "󰵐 GIF recording started" "Click ⏺ in bar to stop & convert" -t 2000
+  wait "$rec_pid"
 else
   rm -f "$PID_FILE" "$TEMP_VIDEO"
   notify-send "GIF recording failed to start" -u critical -t 3000

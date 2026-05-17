@@ -11,14 +11,14 @@ PanelWindow {
   property string query: ""
 
   readonly property var allItems: [
-    { icon: "󰹑", label: "Screenshot",                       cmd: "grim -g \"$(slurp)\" - | swappy -f -" },
+    { icon: "󰹑", label: "Screenshot",                       cmd: "~/.config/scripts/capture-screenshot.sh" },
     { icon: "", label: "Screen Record",                     cmd: "~/.config/scripts/capture-screenrecord.sh" },
     { icon: "󰕾", label: "Screen Record (audio)",            cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio" },
     { icon: "󰍬", label: "Screen Record (audio+mic)",         cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio --with-microphone-audio" },
     { icon: "󰄀", label: "Screen Record (audio+mic+webcam)",  cmd: "~/.config/scripts/capture-screenrecord.sh --with-desktop-audio --with-microphone-audio --with-webcam" },
     { icon: "󰵐", label: "Record GIF",                       cmd: "~/.config/scripts/capture-gif.sh" },
     { icon: "󰴑", label: "Text Extraction",                  cmd: "~/.config/scripts/capture-ocr.sh" },
-    { icon: "󰃉", label: "Color Picker",                     cmd: "pkill hyprpicker || hyprpicker -a" }
+    { icon: "󰃉", label: "Color Picker",                     cmd: "~/.config/scripts/capture-colorpicker.sh" }
   ]
 
   readonly property var filteredItems: {
@@ -41,9 +41,6 @@ PanelWindow {
   WlrLayershell.keyboardFocus: showing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
   exclusionMode: ExclusionMode.Ignore
   color: "transparent"
-
-  readonly property string nixPath:
-    "export PATH=\"/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH\"; "
 
   Process { id: captureProc; running: false }
 
@@ -198,7 +195,7 @@ PanelWindow {
     if (idx < 0 || idx >= items.length) return
     const item = items[idx]
     GlobalState.closeAll()
-    captureProc.command = ["bash", "-c", nixPath + "sleep 0.15; " + item.cmd]
+    captureProc.command = ["hyprctl", "dispatch", "exec", item.cmd]
     captureProc.running = false
     captureProc.running = true
   }

@@ -194,6 +194,16 @@ in
       executable = true;
     };
 
+    home.file.".config/scripts/capture-screenshot.sh" = {
+      source = ./scripts/capture-screenshot.sh;
+      executable = true;
+    };
+
+    home.file.".config/scripts/capture-colorpicker.sh" = {
+      source = ./scripts/capture-colorpicker.sh;
+      executable = true;
+    };
+
 
     # --- GTK ---
 
