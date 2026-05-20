@@ -64,13 +64,19 @@ let
   '';
 
   # Arduino IDE with extra FHS packages for ESP32 toolchain
-  arduino-ide-with-extras = pkgs.buildFHSEnv (pkgs.arduino-ide.passthru.args // {
-    targetPkgs = p: (pkgs.arduino-ide.passthru.args.targetPkgs p) ++ (with p; [
-      python3
-      esptool
-      libxkbfile
-    ]);
-  });
+  arduino-ide-with-extras = pkgs.buildFHSEnv (
+    pkgs.arduino-ide.passthru.args
+    // {
+      targetPkgs =
+        p:
+        (pkgs.arduino-ide.passthru.args.targetPkgs p)
+        ++ (with p; [
+          python3
+          esptool
+          libxkbfile
+        ]);
+    }
+  );
 
   # Main VPN helper script called by QuickShell
   vpnHelper = pkgs.writeShellScriptBin "qs-vpn" ''
