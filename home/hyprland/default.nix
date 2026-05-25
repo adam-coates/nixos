@@ -38,9 +38,13 @@ in
     configType = "lua";
 
     settings = {
-      config = {
-        monitor = ",preferred,auto,1";
+      monitor = {
+        mode = "preferred";
+        position = "auto";
+        scale = 1;
+      };
 
+      config = {
         input = {
           kb_layout = "us";
           follow_mouse = 1;
@@ -55,7 +59,10 @@ in
           gaps_out = 10;
           border_size = 1;
           col = {
-            active_border = "rgb(${c.accent}) rgb(${c.orange}) 45deg";
+            active_border = {
+              colors = [ "rgb(${c.accent})" "rgb(${c.orange})" ];
+              angle = 45;
+            };
             inactive_border = "rgb(${c.bg1})";
           };
           layout = "dwindle";
