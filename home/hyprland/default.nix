@@ -3,6 +3,7 @@
 {
   wayland.windowManager.hyprland = {
     enable = true;
+    configType = "lua";
     settings = {
       # Monitor - auto detect
       monitor = ",preferred,auto,1";
