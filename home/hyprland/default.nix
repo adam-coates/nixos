@@ -83,7 +83,6 @@
 
       # Layouts
       dwindle = {
-        pseudotile = true;
         preserve_split = true;
         force_split = 2;
       };
@@ -113,7 +112,7 @@
         "$mod, V, togglefloating,"
         "$mod, R, exec, $menu"
         "$mod, P, pseudo,"
-        "$mod, J, togglesplit,"
+        "$mod, J, layoutmsg, togglesplit"
         "$mod, F, fullscreen,"
         "$mod SHIFT, T, exec, $themeSwitcher"
         "$mod SHIFT, P, exec, $powerMenu"
