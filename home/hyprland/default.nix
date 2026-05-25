@@ -1,196 +1,198 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+
+let
+  lua = lib.generators.mkLuaInline;
+
+  dsp = {
+    exec = cmd: lua ''hl.dsp.exec_cmd("${cmd}")'';
+    close = lua "hl.dsp.window.close()";
+    exit = lua "hl.dsp.exit()";
+    float = lua ''hl.dsp.window.float({ action = "toggle" })'';
+    fullscreen = lua "hl.dsp.window.fullscreen()";
+    pseudo = lua "hl.dsp.window.pseudo()";
+    layout = msg: lua ''hl.dsp.layout("${msg}")'';
+    focus = dir: lua ''hl.dsp.focus({ direction = "${dir}" })'';
+    focusWorkspace = ws: lua ''hl.dsp.focus({ workspace = "${toString ws}" })'';
+    moveToWorkspace = ws: lua ''hl.dsp.window.move({ workspace = "${toString ws}" })'';
+    drag = lua "hl.dsp.window.drag()";
+    resize = lua "hl.dsp.window.resize()";
+  };
+
+  bind = keys: dispatcher: { _args = [ keys dispatcher ]; };
+  bindOpts = keys: dispatcher: opts: { _args = [ keys dispatcher opts ]; };
+
+  workspaceBinds = lib.concatMap (i:
+    let key = toString (lib.mod i 10);
+    in [
+      (bind "SUPER + ${key}" (dsp.focusWorkspace i))
+      (bind "SUPER + SHIFT + ${key}" (dsp.moveToWorkspace i))
+    ]
+  ) (lib.range 1 10);
+
+  c = config.theme.colors;
+in
 
 {
   wayland.windowManager.hyprland = {
     enable = true;
-    configType = "hyprlang";
+    configType = "lua";
+
     settings = {
-      # Monitor - auto detect
-      monitor = ",preferred,auto,1";
+      config = {
+        monitor = ",preferred,auto,1";
 
-      # Autostart
-      exec-once = [
-        "systemctl --user start hyprpolkitagent"
-        "nm-applet --indicator"
-        "wl-paste --type text --watch cliphist store"
-        "wl-paste --type image --watch cliphist store"
-        "solaar --window=hide"
-        "voxtype daemon"
-        "nextcloud --background"
-      ];
+        input = {
+          kb_layout = "us";
+          follow_mouse = 1;
+          touchpad = {
+            natural_scroll = true;
+          };
+          sensitivity = 0;
+        };
 
-      # Environment variables
+        general = {
+          gaps_in = 5;
+          gaps_out = 10;
+          border_size = 1;
+          col = {
+            active_border = "rgb(${c.accent}) rgb(${c.orange}) 45deg";
+            inactive_border = "rgb(${c.bg1})";
+          };
+          layout = "dwindle";
+          allow_tearing = false;
+        };
+
+        decoration = {
+          rounding = 0;
+          blur = {
+            enabled = true;
+            size = 3;
+            passes = 1;
+          };
+          shadow = {
+            enabled = true;
+            range = 4;
+            render_power = 3;
+            color = "rgba(1a1a1aee)";
+          };
+        };
+
+        animations = {
+          enabled = true;
+        };
+
+        dwindle = {
+          preserve_split = true;
+          force_split = 2;
+        };
+
+        misc = {
+          force_default_wallpaper = 0;
+          disable_hyprland_logo = true;
+        };
+      };
+
       env = [
-        "XCURSOR_SIZE,24"
-        "XCURSOR_THEME,Bibata-Modern-Classic"
-        "HYPRCURSOR_SIZE,24"
-        "QT_QPA_PLATFORM,wayland"
-        "XDG_CURRENT_DESKTOP,Hyprland"
-        "XDG_SESSION_TYPE,wayland"
-        "XDG_SESSION_DESKTOP,Hyprland"
+        { _args = [ "XCURSOR_SIZE" "24" ]; }
+        { _args = [ "XCURSOR_THEME" "Bibata-Modern-Classic" ]; }
+        { _args = [ "HYPRCURSOR_SIZE" "24" ]; }
+        { _args = [ "QT_QPA_PLATFORM" "wayland" ]; }
+        { _args = [ "XDG_CURRENT_DESKTOP" "Hyprland" ]; }
+        { _args = [ "XDG_SESSION_TYPE" "wayland" ]; }
+        { _args = [ "XDG_SESSION_DESKTOP" "Hyprland" ]; }
       ];
 
-      # Input
-      input = {
-        kb_layout = "us";
-        follow_mouse = 1;
-        touchpad = {
-          natural_scroll = true;
-        };
-        sensitivity = 0;
-      };
+      curve = [{
+        _args = [
+          "myBezier"
+          {
+            type = "bezier";
+            points = lua "{ {0.05, 0.9}, {0.1, 1.05} }";
+          }
+        ];
+      }];
 
-      # General — border colors come from theme.colors
-      general = {
-        gaps_in = 5;
-        gaps_out = 10;
-        border_size = 1;
-        "col.active_border" = "rgb(${config.theme.colors.accent}) rgb(${config.theme.colors.orange}) 45deg";
-        "col.inactive_border" = "rgb(${config.theme.colors.bg1})";
-        layout = "dwindle";
-        allow_tearing = false;
-      };
+      animation = [
+        { leaf = "windows"; enabled = true; speed = 7; bezier = "myBezier"; }
+        { leaf = "windowsOut"; enabled = true; speed = 7; bezier = "default"; style = "popin 80%"; }
+        { leaf = "border"; enabled = true; speed = 10; bezier = "default"; }
+        { leaf = "borderangle"; enabled = true; speed = 8; bezier = "default"; }
+        { leaf = "fade"; enabled = true; speed = 7; bezier = "default"; }
+        { leaf = "workspaces"; enabled = true; speed = 6; bezier = "default"; }
+      ];
 
-      # Decoration
-      decoration = {
-        rounding = 0;
-        blur = {
-          enabled = true;
-          size = 3;
-          passes = 1;
-        };
-        shadow = {
-          enabled = true;
-          range = 4;
-          render_power = 3;
-          color = "rgba(1a1a1aee)";
-        };
-      };
-
-      # Animations
-      animations = {
-        enabled = true;
-        bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
-        animation = [
-          "windows, 1, 7, myBezier"
-          "windowsOut, 1, 7, default, popin 80%"
-          "border, 1, 10, default"
-          "borderangle, 1, 8, default"
-          "fade, 1, 7, default"
-          "workspaces, 1, 6, default"
+      on = {
+        _args = [
+          "hyprland.start"
+          (lua ''
+            function()
+              hl.exec_cmd("systemctl --user start hyprpolkitagent")
+              hl.exec_cmd("nm-applet --indicator")
+              hl.exec_cmd("wl-paste --type text --watch cliphist store")
+              hl.exec_cmd("wl-paste --type image --watch cliphist store")
+              hl.exec_cmd("solaar --window=hide")
+              hl.exec_cmd("voxtype daemon")
+              hl.exec_cmd("nextcloud --background")
+            end'')
         ];
       };
 
-      # Layouts
-      dwindle = {
-        preserve_split = true;
-        force_split = 2;
-      };
-
-      # Misc
-      misc = {
-        force_default_wallpaper = 0;
-        disable_hyprland_logo = true;
-      };
-
-      # Keybindings
-      "$mod" = "SUPER";
-      "$terminal" = "ghostty";
-      "$fileManager" = "thunar";
-      "$menu" = "qs ipc call shell toggleLauncher";
-      "$themeSwitcher" = "bash ~/.config/scripts/theme-switch.sh";
-      "$powerMenu" = "qs ipc call shell togglePowermenu";
-      "$lock" = "qs ipc call shell lock";
-      "$capture" = "qs ipc call shell toggleCapture";
-      "$todoist" = "qs ipc call shell toggleTodoist";
-
       bind = [
-        "$mod, Return, exec, $terminal"
-        "$mod, Q, killactive,"
-        "$mod, M, exit,"
-        "$mod, E, exec, $fileManager"
-        "$mod, V, togglefloating,"
-        "$mod, R, exec, $menu"
-        "$mod, P, pseudo,"
-        "$mod, J, layoutmsg, togglesplit"
-        "$mod, F, fullscreen,"
-        "$mod SHIFT, T, exec, $themeSwitcher"
-        "$mod SHIFT, P, exec, $powerMenu"
-        "$mod SHIFT, L, exec, $lock"
-        "$mod, grave, exec, $capture"
-        "$mod, T, exec, $todoist"
+        (bind "SUPER + Return" (dsp.exec "ghostty"))
+        (bind "SUPER + Q" dsp.close)
+        (bind "SUPER + M" dsp.exit)
+        (bind "SUPER + E" (dsp.exec "thunar"))
+        (bind "SUPER + V" dsp.float)
+        (bind "SUPER + R" (dsp.exec "qs ipc call shell toggleLauncher"))
+        (bind "SUPER + P" dsp.pseudo)
+        (bind "SUPER + J" (dsp.layout "togglesplit"))
+        (bind "SUPER + F" dsp.fullscreen)
+        (bind "SUPER + SHIFT + T" (dsp.exec "bash ~/.config/scripts/theme-switch.sh"))
+        (bind "SUPER + SHIFT + P" (dsp.exec "qs ipc call shell togglePowermenu"))
+        (bind "SUPER + SHIFT + L" (dsp.exec "qs ipc call shell lock"))
+        (bind "SUPER + grave" (dsp.exec "qs ipc call shell toggleCapture"))
+        (bind "SUPER + T" (dsp.exec "qs ipc call shell toggleTodoist"))
 
-        # Move focus
-        "$mod, left, movefocus, l"
-        "$mod, right, movefocus, r"
-        "$mod, up, movefocus, u"
-        "$mod, down, movefocus, d"
+        # Focus
+        (bind "SUPER + left" (dsp.focus "left"))
+        (bind "SUPER + right" (dsp.focus "right"))
+        (bind "SUPER + up" (dsp.focus "up"))
+        (bind "SUPER + down" (dsp.focus "down"))
 
-        # Switch workspaces
-        "$mod, 1, workspace, 1"
-        "$mod, 2, workspace, 2"
-        "$mod, 3, workspace, 3"
-        "$mod, 4, workspace, 4"
-        "$mod, 5, workspace, 5"
-        "$mod, 6, workspace, 6"
-        "$mod, 7, workspace, 7"
-        "$mod, 8, workspace, 8"
-        "$mod, 9, workspace, 9"
-        "$mod, 0, workspace, 10"
-
-        # Move window to workspace
-        "$mod SHIFT, 1, movetoworkspace, 1"
-        "$mod SHIFT, 2, movetoworkspace, 2"
-        "$mod SHIFT, 3, movetoworkspace, 3"
-        "$mod SHIFT, 4, movetoworkspace, 4"
-        "$mod SHIFT, 5, movetoworkspace, 5"
-        "$mod SHIFT, 6, movetoworkspace, 6"
-        "$mod SHIFT, 7, movetoworkspace, 7"
-        "$mod SHIFT, 8, movetoworkspace, 8"
-        "$mod SHIFT, 9, movetoworkspace, 9"
-        "$mod SHIFT, 0, movetoworkspace, 10"
-
-        "$mod, mouse_down, workspace, e+1"
-        "$mod, mouse_up, workspace, e-1"
+        # Scroll workspaces
+        (bind "SUPER + mouse_down" (dsp.focusWorkspace "e+1"))
+        (bind "SUPER + mouse_up" (dsp.focusWorkspace "e-1"))
 
         # Screenshot
-        ", Print, exec, grim -g \"$(slurp)\" - | swappy -f -"
-        "$mod SHIFT, S, exec, mkdir -p ~/Pictures/screenshots && grim -g \"$(slurp)\" ~/Pictures/screenshots/screenshot_$(date +%Y%m%d_%H%M%S).png && notify-send \"Screenshot saved\" \"~/Pictures/screenshots\" -t 2000"
+        (bind "Print" (lua ''hl.dsp.exec_cmd([[grim -g "$(slurp)" - | swappy -f -]])''))
+        (bind "SUPER + SHIFT + S" (lua ''hl.dsp.exec_cmd([[mkdir -p ~/Pictures/screenshots && grim -g "$(slurp)" ~/Pictures/screenshots/screenshot_$(date +%Y%m%d_%H%M%S).png && notify-send "Screenshot saved" "~/Pictures/screenshots" -t 2000]])''))
 
         # Clipboard
-        "$mod, C, exec, qs ipc call shell toggleClipboard"
+        (bind "SUPER + C" (dsp.exec "qs ipc call shell toggleClipboard"))
 
         # Emoji picker
-        "$mod, period, exec, qs ipc call shell toggleEmoji"
+        (bind "SUPER + period" (dsp.exec "qs ipc call shell toggleEmoji"))
 
         # Inkscape stylinator
-        "$mod, I, exec, qs ipc call shell toggleStylinator"
-      ];
+        (bind "SUPER + I" (dsp.exec "qs ipc call shell toggleStylinator"))
 
-      bindd = [
         # Dictation toggle
-        "$mod SHIFT, X, Toggle dictation, exec, voxtype record toggle"
-      ];
+        (bind "SUPER + SHIFT + X" (dsp.exec "voxtype record toggle"))
 
-      bindm = [
-        "$mod, mouse:272, movewindow"
-        "$mod, mouse:273, resizewindow"
-      ];
+        # Media keys
+        (bindOpts "XF86AudioRaiseVolume" (dsp.exec "pamixer -i 5") { locked = true; repeating = true; })
+        (bindOpts "XF86AudioLowerVolume" (dsp.exec "pamixer -d 5") { locked = true; repeating = true; })
+        (bindOpts "XF86MonBrightnessUp" (dsp.exec "brightnessctl s 10%+") { locked = true; repeating = true; })
+        (bindOpts "XF86MonBrightnessDown" (dsp.exec "brightnessctl s 10%-") { locked = true; repeating = true; })
+        (bindOpts "XF86AudioMute" (dsp.exec "pamixer -t") { locked = true; })
+        (bindOpts "XF86AudioPlay" (dsp.exec "playerctl play-pause") { locked = true; })
+        (bindOpts "XF86AudioNext" (dsp.exec "playerctl next") { locked = true; })
+        (bindOpts "XF86AudioPrev" (dsp.exec "playerctl previous") { locked = true; })
 
-      # Media keys
-      bindel = [
-        ", XF86AudioRaiseVolume, exec, pamixer -i 5"
-        ", XF86AudioLowerVolume, exec, pamixer -d 5"
-        ", XF86MonBrightnessUp, exec, brightnessctl s 10%+"
-        ", XF86MonBrightnessDown, exec, brightnessctl s 10%-"
-      ];
-
-      bindl = [
-        ", XF86AudioMute, exec, pamixer -t"
-        ", XF86AudioPlay, exec, playerctl play-pause"
-        ", XF86AudioNext, exec, playerctl next"
-        ", XF86AudioPrev, exec, playerctl previous"
-      ];
+        # Mouse move/resize
+        (bindOpts "SUPER + mouse:272" dsp.drag { mouse = true; })
+        (bindOpts "SUPER + mouse:273" dsp.resize { mouse = true; })
+      ] ++ workspaceBinds;
     };
   };
 
