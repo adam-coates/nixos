@@ -341,6 +341,9 @@ in
   programs.virt-manager.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
   networking.firewall.trustedInterfaces = [ "virbr0" ];
+  networking.extraHosts = ''
+    192.168.122.195  jellyfin.nixflix sonarr.nixflix radarr.nixflix lidarr.nixflix prowlarr.nixflix seerr.nixflix qbittorrent.nixflix
+  '';
 
   # Make sleep work
   systemd.services.toggle-acpi-fix = {
