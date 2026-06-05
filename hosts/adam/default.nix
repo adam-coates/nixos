@@ -185,10 +185,10 @@ in
   # CIFS/SMB support
   boot.supportedFilesystems = [ "cifs" ];
 
-  boot.kernelPatches = [{
-    name = "btmtk-wmt-func-ctrl-fix";
-    patch = ./btmtk-wmt-func-ctrl-fix.patch;
-  }];
+  # boot.kernelPatches = [{
+  #   name = "btmtk-wmt-func-ctrl-fix";
+  #   patch = ./btmtk-wmt-func-ctrl-fix.patch;
+  # }];
 
   boot.kernel.sysctl = {
     "net.ipv6.conf.all.disable_ipv6" = 1;
