@@ -196,7 +196,7 @@ PanelWindow {
     const item = items[idx]
     const cmd = item.cmd
     GlobalState.closeAll()
-    captureProc.command = ["bash", "-c", cmd]
+    captureProc.command = ["bash", "-c", "sleep 0.3 && " + cmd]
     captureProc.running = false
     captureProc.running = true
   }
