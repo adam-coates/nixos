@@ -179,6 +179,16 @@ in
       executable = true;
     };
 
+    home.file.".local/bin/on" = {
+      source = ./scripts/on.sh;
+      executable = true;
+    };
+
+    home.file.".local/bin/sort-inbox" = {
+      source = ./scripts/sort-inbox.sh;
+      executable = true;
+    };
+
     home.file.".config/scripts/capture-screenrecord.sh" = {
       source = ./scripts/capture-screenrecord.sh;
       executable = true;
