@@ -69,14 +69,20 @@
         open_notes_in = "vsplit";
         ui.enable = false;
         completion = {
-          nvim_cmp = true;
-          blink = false;
           min_chars = 2;
         };
         templates = {
-          enabled = true;
           folder = "999-extra/Templates";
-          date_format = "%Y-%m-%d";
+          date_format = "%d-%m-%Y";
+          substitutions = {
+            citation_title = {
+              __raw = ''
+                function()
+                  vim.cmd("FindCitation")
+                end
+              '';
+            };
+          };
         };
         note_id_func = {
           __raw = ''
@@ -93,33 +99,13 @@
             end
           '';
         };
-        note = {
-          template = "note.md";
-          id_func = {
-            __raw = ''
-              function(title)
-                if title then
-                  return title
-                else
-                  local suffix = ""
-                  for _ = 1, 4 do
-                    suffix = suffix .. string.char(math.random(65, 90))
-                  end
-                  return "untitled_" .. suffix
-                end
-              end
-            '';
-
-          };
-        };
-
         legacy_commands = false;
         notes_subdir = "00 - Inbox";
         attachments.folder = "999-extra/images";
         new_notes_location = "notes_subdir";
         link.style = "markdown";
         frontmatter = {
-          enabled = true;
+          enabled = false;
         };
         footer = {
           enabled = true;
