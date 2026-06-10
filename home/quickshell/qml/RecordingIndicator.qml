@@ -47,9 +47,9 @@ Item {
     cursorShape: Qt.PointingHandCursor
     onClicked: {
       stopProc.command = [
-        "hyprctl", "dispatch", "exec",
-        "bash -c 'if [ -f /tmp/capture-screenrecord-pid ]; then ~/.config/scripts/capture-screenrecord.sh; " +
-        "elif [ -f /tmp/capture-gif-pid ]; then ~/.config/scripts/capture-gif.sh; fi'"
+        "bash", "-c",
+        "if [ -f /tmp/capture-screenrecord-pid ]; then ~/.config/scripts/capture-screenrecord.sh; " +
+        "elif [ -f /tmp/capture-gif-pid ]; then ~/.config/scripts/capture-gif.sh; fi"
       ]
       stopProc.running = false
       stopProc.running = true
