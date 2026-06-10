@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 export PATH="/run/wrappers/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH"
 
+cleanup_freeze() {
+  [[ -n $PID ]] && kill $PID 2>/dev/null
+}
+trap cleanup_freeze EXIT
+
+hyprpicker -r -z >/dev/null 2>&1 &
+PID=$!
+sleep .1
+
 SELECTION=$(slurp 2>/dev/null)
 [[ -z $SELECTION ]] && exit 0
 
 IMG=$(mktemp /tmp/ocr-XXXXXX.png)
-trap 'rm -f "$IMG"' EXIT
+trap 'rm -f "$IMG"; [[ -n $PID ]] && kill $PID 2>/dev/null' EXIT
 
 if ! grim -g "$SELECTION" "$IMG" 2>/dev/null; then
   notify-send "OCR failed" "Could not capture region" -u critical -t 3000

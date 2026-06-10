@@ -59,6 +59,15 @@
 
     obsidian = {
       enable = true;
+      package = pkgs.vimPlugins.obsidian-nvim.overrideAttrs {
+        version = "3.16.4";
+        src = pkgs.fetchFromGitHub {
+          owner = "obsidian-nvim";
+          repo = "obsidian.nvim";
+          rev = "v3.16.4";
+          hash = "sha256-9Su5t8cJAHlXV+EE4GLa1+BhezfHZIZgl2P6kBrkX8E=";
+        };
+      };
       settings = {
         workspaces = [
           {
