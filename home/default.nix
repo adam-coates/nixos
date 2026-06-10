@@ -125,6 +125,7 @@ in
       nextcloud-client
       todoist
       libreoffice-qt6
+      onlyoffice-desktopeditors
       zotero
       (typora.overrideAttrs (old: {
         nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
