@@ -198,6 +198,7 @@ in
   networking.hostName = "adam";
   networking.networkmanager.enable = true;
   networking.networkmanager.dns = "systemd-resolved";
+  networking.networkmanager.wifi.powersave = false;
 
   services.resolved = {
     enable = true;
