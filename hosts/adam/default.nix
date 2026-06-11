@@ -227,6 +227,7 @@ in
       "lp"
       "libvirtd"
       "dialout"
+      "psychopy"
     ];
     shell = pkgs.bash;
   };
@@ -277,6 +278,14 @@ in
   # PAM service for quickshell lock screen
   security.pam.services.login.enableGnomeKeyring = true;
   security.pam.services.quickshell = { };
+
+  # PsychoPy real-time scheduling privileges
+  users.groups.psychopy = { };
+  security.pam.loginLimits = [
+    { domain = "@psychopy"; type = "-"; item = "nice";    value = "-20"; }
+    { domain = "@psychopy"; type = "-"; item = "rtprio";  value = "50"; }
+    { domain = "@psychopy"; type = "-"; item = "memlock"; value = "unlimited"; }
+  ];
 
   # Gnome keyring (provides org.freedesktop.secrets for udisks2 passphrase storage)
   services.gnome.gnome-keyring.enable = true;
