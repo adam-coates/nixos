@@ -5,6 +5,18 @@
     plugins.lsp = {
       enable = true;
 
+      # Advertise file-operation capabilities to every language server so that
+      # renames/moves/deletes made in nvim-tree are sent as
+      # workspace/willRenameFiles requests. Replaces the capability wiring that
+      # the removed `plugins.lsp-file-operations` module used to provide.
+      capabilities = ''
+        capabilities = vim.tbl_deep_extend(
+          "force",
+          capabilities,
+          require("lsp-file-operations").default_capabilities()
+        )
+      '';
+
       servers = {
         lua_ls = {
           enable = true;
@@ -162,14 +174,21 @@
       };
     };
 
-    # LSP file operations
-    plugins.lsp-file-operations.enable = true;
+    # LSP file operations: nixvim dropped its `plugins.lsp-file-operations`
+    # module wrapper, so pull the upstream plugin in directly. plenary-nvim comes
+    # along as a declared dependency. Capabilities are merged above in
+    # `plugins.lsp.capabilities`; setup() is called in extraConfigLuaPost below.
+    extraPlugins = [ pkgs.vimPlugins.nvim-lsp-file-operations ];
 
     # Lazydev for Neovim Lua development
     plugins.lazydev.enable = true;
 
     # Diagnostic configuration + document highlight on cursor hold
     extraConfigLuaPost = ''
+      -- LSP-aware file operations: subscribe to nvim-tree events so file
+      -- renames/moves/deletes are propagated to the language servers.
+      require("lsp-file-operations").setup()
+
       -- Diagnostic configuration (vim.diagnostic.config)
       vim.diagnostic.config({
         virtual_text = true,
