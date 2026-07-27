@@ -16,8 +16,8 @@
   # GRAPHICS / OPENGL (NEW API — hardware.opengl is DEPRECATED)
   # =============================================================================
   hardware.graphics = {
-    enable = true;       # OpenGL support
-    enable32Bit = true;  # 32-bit libs for Wine/Proton games
+    enable = true; # OpenGL support
+    enable32Bit = true; # 32-bit libs for Wine/Proton games
 
     # 64-bit graphics packages
     extraPackages = with pkgs; [
@@ -81,7 +81,7 @@
     # Recommendation: Leave DISABLED. Use gamescope manually per-game instead.
     # Enable only if building a dedicated gaming/TV setup.
     # -------------------------------------------------------------------------
-    gamescopeSession.enable = false;  # Set true only if you want SteamDeck-like session
+    gamescopeSession.enable = false; # Set true only if you want SteamDeck-like session
   };
 
   # =============================================================================
@@ -116,7 +116,7 @@
   #   - Wayland-only (you're on Hyprland, so fine)
   programs.gamescope = {
     enable = true;
-    capSysNice = true;  # Allow gamescope to set higher process priority
+    capSysNice = true; # Allow gamescope to set higher process priority
   };
 
   # =============================================================================
@@ -155,11 +155,11 @@
     enable = true;
     settings = {
       general = {
-        renice = 10;  # Give game higher priority (-10 nice value)
+        renice = 10; # Give game higher priority (-10 nice value)
       };
       gpu = {
         apply_gpu_optimisations = "accept-responsibility";
-        gpu_device = 0;  # First GPU (your RX 6800/6900)
+        gpu_device = 0; # First GPU (your RX 6800/6900)
       };
       custom = {
         # Optional: run commands on game start/stop
@@ -209,7 +209,7 @@
     protonup-qt
 
     # Vulkan tools — debugging/info
-    vulkan-tools        # vulkaninfo, vkcube
+    vulkan-tools # vulkaninfo, vkcube
     vulkan-validation-layers
 
     # DXVK/VKD3D for Wine (Proton includes these, but useful for Lutris)
@@ -222,8 +222,8 @@
     # bottles           # Wine prefix manager
 
     # Monitoring
-    radeontop           # AMD GPU monitoring (like nvidia-smi)
-    lact                # AMD GPU control panel (clocks, fan curves)
+    radeontop # AMD GPU monitoring (like nvidia-smi)
+    #lact                # AMD GPU control panel (clocks, fan curves) temporary. Remove comment once upstream is updated.
   ];
 
   # =============================================================================
