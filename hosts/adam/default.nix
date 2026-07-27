@@ -216,6 +216,9 @@ in
   time.timeZone = "Europe/Vienna";
   i18n.defaultLocale = "en_US.UTF-8";
 
+  # Default editor system-wide (overrides NixOS's mkDefault "nano")
+  environment.variables.EDITOR = "nvim";
+
   # User
   users.users.adam = {
     isNormalUser = true;
