@@ -83,7 +83,7 @@ in
     home.homeDirectory = "/home/adam";
     home.stateVersion = "25.11";
     home.sessionPath = [ "$HOME/.local/bin" ];
-    environment.variables.EDITOR = "nvim";
+    home.environment.variables.EDITOR = "nvim";
 
     programs.home-manager.enable = true;
 
