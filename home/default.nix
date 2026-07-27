@@ -1,4 +1,10 @@
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 
 let
   gruvbox = import ../modules/colorscheme/gruvbox.nix;
@@ -12,7 +18,7 @@ let
     };
   };
 
-  stylinator = pkgs.runCommand "stylinator" {} ''
+  stylinator = pkgs.runCommand "stylinator" { } ''
     mkdir -p $out/bin
     cp ${./scripts/stylinator.py} $out/bin/stylinator
     chmod +x $out/bin/stylinator
@@ -65,7 +71,7 @@ in
     # the specialisation packages do not — so we use that to distinguish them.
     # This runs on every nixos-rebuild and keeps hm-generation pointing at
     # the base, even after the user has activated the light specialisation.
-    home.activation.saveThemeProfile = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    home.activation.saveThemeProfile = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       SCRIPT_DIR="$(dirname "$(realpath "''${BASH_SOURCE[0]}")")"
       if [ -d "$SCRIPT_DIR/specialisation" ]; then
         $DRY_RUN_CMD mkdir -p "$HOME/.local/state"
@@ -77,6 +83,9 @@ in
     home.homeDirectory = "/home/adam";
     home.stateVersion = "25.11";
     home.sessionPath = [ "$HOME/.local/bin" ];
+    home.sessionVariables = {
+      EDITOR = "nvim";
+    };
 
     programs.home-manager.enable = true;
 
@@ -215,7 +224,6 @@ in
       executable = true;
     };
 
-
     # --- GTK ---
 
     gtk = {
@@ -292,7 +300,10 @@ in
       exec = "todoist %U";
       icon = "todoist";
       comment = "Todoist task manager";
-      categories = [ "Office" "ProjectManagement" ];
+      categories = [
+        "Office"
+        "ProjectManagement"
+      ];
       terminal = false;
     };
 
