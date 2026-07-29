@@ -36,6 +36,11 @@ let
       substituteInPlace openconnect_sso/browser/webengine_process.py \
         --replace-fail 'import pkg_resources' 'from importlib.resources import files as _resource_files' \
         --replace-fail 'pkg_resources.resource_string(__name__, "user.js").decode()' '(_resource_files("openconnect_sso.browser") / "user.js").read_text()'
+
+      # Python 3.14 removed the implicit loop creation in asyncio.get_event_loop();
+      # create and install one explicitly before the first use.
+      substituteInPlace openconnect_sso/app.py \
+        --replace-fail 'asyncio.get_event_loop().run_until_complete(' '(asyncio.set_event_loop(asyncio.new_event_loop()) or asyncio.get_event_loop()).run_until_complete('
     '';
 
     propagatedBuildInputs = with pkgs.python3Packages; [
