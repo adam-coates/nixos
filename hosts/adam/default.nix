@@ -31,6 +31,11 @@ let
         --replace-fail 'keyring = ">=21.1, <24.0.0"' 'keyring = ">=21.1"' \
         --replace-fail 'colorama = "^0.4"' 'colorama = ">=0.4"' \
         --replace-fail 'pyxdg = ">=0.26, <0.29"' 'pyxdg = ">=0.26"'
+
+      # setuptools >= 81 no longer ships pkg_resources; use importlib.resources
+      substituteInPlace openconnect_sso/browser/webengine_process.py \
+        --replace-fail 'import pkg_resources' 'from importlib.resources import files as _resource_files' \
+        --replace-fail 'pkg_resources.resource_string(__name__, "user.js").decode()' '(_resource_files("openconnect_sso.browser") / "user.js").read_text()'
     '';
 
     propagatedBuildInputs = with pkgs.python3Packages; [
