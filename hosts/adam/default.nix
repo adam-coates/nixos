@@ -207,11 +207,31 @@ let
           echo "            prompt below, or press Enter and instead run"
           echo "            nix run ~/auto-vpn -- save <qr.png> --user $VPN_USER"
         fi
+        SETUP_LOG="$(${pkgs.coreutils}/bin/mktemp)"
         ${openconnect-sso}/bin/openconnect-sso \
           --server ${vpn.gateway} \
           --authgroup ${vpn.authgroup} \
           --user "$VPN_USER" \
-          --authenticate shell > /dev/null
+          --authenticate shell > /dev/null 2>"$SETUP_LOG"
+        SETUP_STATUS=$?
+
+        # openconnect-sso rewrites config.toml after every successful login, but
+        # Home Manager owns that file read-only -- which is exactly what keeps
+        # the auto-fill rules from drifting. The write fails, openconnect-sso
+        # logs it and carries on. Drop that one traceback so it does not read
+        # like a failure; everything else goes through untouched.
+        ${pkgs.gawk}/bin/awk '
+          /Could not save configuration file/ { drop = 1; next }
+          drop && /^PermissionError/          { drop = 0; next }
+          !drop
+        ' "$SETUP_LOG" >&2
+        ${pkgs.coreutils}/bin/rm -f "$SETUP_LOG"
+
+        if [ $SETUP_STATUS -ne 0 ]; then
+          echo "Setup failed (exit $SETUP_STATUS)." >&2
+          exit $SETUP_STATUS
+        fi
+
         echo "Setup done. The panel button should now connect without prompting."
         ;;
 
