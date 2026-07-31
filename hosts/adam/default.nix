@@ -7,6 +7,8 @@
 }:
 
 let
+  vpn = import ../../modules/vpn.nix;
+
   # OpenConnect SSO — handles SAML/MFA via embedded Qt WebEngine browser
   openconnect-sso = pkgs.python3Packages.buildPythonApplication rec {
     pname = "openconnect-sso";
@@ -41,6 +43,13 @@ let
       # create and install one explicitly before the first use.
       substituteInPlace openconnect_sso/app.py \
         --replace-fail 'asyncio.get_event_loop().run_until_complete(' '(asyncio.set_event_loop(asyncio.new_event_loop()) or asyncio.get_event_loop()).run_until_complete('
+
+      # The univpn.uni-graz.at ASA now asks for a TLS client certificate and
+      # replies <client-cert-request/> instead of the SAML form. Declare that we
+      # have no certificate, the same way openconnect does on its retry.
+      substituteInPlace openconnect_sso/authenticator.py \
+        --replace-fail 'AuthMethod = getattr(E, "auth-method")' 'AuthMethod = getattr(E, "auth-method"); ClientCertFail = getattr(E, "client-cert-fail")' \
+        --replace-fail 'Capabilities(AuthMethod("single-sign-on-v2")),' 'Capabilities(AuthMethod("single-sign-on-v2")), ClientCertFail(),'
     '';
 
     propagatedBuildInputs = with pkgs.python3Packages; [
@@ -95,6 +104,16 @@ let
     export WAYLAND_DISPLAY="''${WAYLAND_DISPLAY:-wayland-1}"
     export DISPLAY="''${DISPLAY:-:0}"
 
+    # Uni Graz login. Also the keyring account holding the password and, under
+    # "totp/$VPN_USER", the 2FA seed that `qr-totp save` writes.
+    VPN_USER="${vpn.user}"
+
+    # True when the keyring holds a secret for the given account.
+    have_secret() {
+      ${pkgs.libsecret}/bin/secret-tool lookup \
+        service openconnect-sso username "$1" > /dev/null 2>&1
+    }
+
     case "$1" in
       oc-connect)
         GATEWAY="$2"
@@ -105,12 +124,28 @@ let
           GROUPFLAG="--authgroup=$AUTHGROUP"
         fi
 
-        # Step 1: Authenticate via SAML (opens Qt WebEngine browser window)
+        # Launched from QuickShell there is no terminal, so a missing secret
+        # would leave openconnect-sso blocked on an invisible getpass prompt.
+        # Fail loudly instead and point at the one-time setup.
+        if ! have_secret "$VPN_USER"; then
+          echo "NO_PASSWORD: run 'qs-vpn oc-setup' in a terminal once"
+          exit 1
+        fi
+        if ! have_secret "totp/$VPN_USER"; then
+          echo "NO_TOTP: run 'nix run ~/auto-vpn -- save <qr.png> --user $VPN_USER'"
+          exit 1
+        fi
+
+        # Step 1: Authenticate via SAML. The Qt WebEngine window still opens,
+        # but the auto-fill rules in ~/.config/openconnect-sso/config.toml drive
+        # it: username, password, then a TOTP code derived from the stored seed.
         # --authenticate shell outputs COOKIE, HOST, FINGERPRINT as shell vars
         AUTH=$(${openconnect-sso}/bin/openconnect-sso \
           --server "$GATEWAY" \
           $GROUPFLAG \
+          --user "$VPN_USER" \
           --authenticate shell \
+          < /dev/null \
           2>/tmp/openconnect-auth.log)
 
         if [ $? -ne 0 ] || [ -z "$AUTH" ]; then
@@ -153,6 +188,37 @@ let
           echo "FAILED"
           exit 1
         fi
+        ;;
+
+      oc-setup)
+        # One-time, from a terminal: openconnect-sso prompts for whatever is
+        # missing and saves it to the keyring itself, so the password never
+        # passes through this script or the Nix config.
+        echo "Seeding the keyring for $VPN_USER."
+        if have_secret "$VPN_USER"; then
+          echo "  password: already stored"
+        else
+          echo "  password: prompting (openconnect-sso stores it)"
+        fi
+        if have_secret "totp/$VPN_USER"; then
+          echo "  totp:     already stored"
+        else
+          echo "  totp:     not stored -- either paste the base32 seed at the"
+          echo "            prompt below, or press Enter and instead run"
+          echo "            nix run ~/auto-vpn -- save <qr.png> --user $VPN_USER"
+        fi
+        ${openconnect-sso}/bin/openconnect-sso \
+          --server ${vpn.gateway} \
+          --authgroup ${vpn.authgroup} \
+          --user "$VPN_USER" \
+          --authenticate shell > /dev/null
+        echo "Setup done. The panel button should now connect without prompting."
+        ;;
+
+      oc-status-secrets)
+        # What the panel would find before attempting a connection.
+        have_secret "$VPN_USER" && echo "password: stored" || echo "password: missing"
+        have_secret "totp/$VPN_USER" && echo "totp: stored" || echo "totp: missing"
         ;;
 
       oc-disconnect)
