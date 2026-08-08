@@ -19,7 +19,7 @@
     sync.target = "joplin-server";
 
     extraConfig = {
-      "sync.9.path" = "http://localhost:8080";
+      "sync.9.path" = "https://joplin.home.adamcoates.at";
       "sync.9.username" = "admin@localhost";
 
       "locale" = "en_US";
