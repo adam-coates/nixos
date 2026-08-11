@@ -79,6 +79,10 @@ in
       "theme" = 2;
       "themeAutoDetect" = false;
 
+      # External editor. Joplin appends the note's temp file path to this
+      # command, so it must end with something that takes a file argument.
+      "editor" = "ghostty -e nvim";
+
       "editor.codeView" = true;
       "markdown.plugin.softbreaks" = false;
       "markdown.plugin.typographer" = false;
