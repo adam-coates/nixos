@@ -18,27 +18,33 @@
       '';
 
       servers = {
+        # NOTE: nixvim already wraps `settings` in the server's own settings root
+        # (lua_ls -> `Lua`, nixd -> `nixd`, ltex -> `ltex`). Do NOT repeat that key
+        # here or the whole block lands one level too deep and is silently ignored.
         lua_ls = {
           enable = true;
           settings = {
-            Lua = {
-              diagnostics = {
-                globals = [ "vim" ];
-                disable = [
-                  "inject-field"
-                  "undefined-field"
-                  "missing-fields"
-                ];
-              };
-              runtime.version = "LuaJIT";
-              workspace.checkThirdParty = false;
-              telemetry.enable = false;
+            diagnostics = {
+              globals = [ "vim" ];
+              disable = [
+                "inject-field"
+                "undefined-field"
+                "missing-fields"
+              ];
             };
+            runtime.version = "LuaJIT";
+            workspace.checkThirdParty = false;
+            telemetry.enable = false;
           };
         };
 
-        ltex = {
+        # ltex-ls-plus: maintained fork of the abandoned valentjn/ltex-ls.
+        # nixvim lists `ltex_plus` as unpackaged, so point at the nixpkgs
+        # derivation explicitly. Unlike `ltex`, nixvim does not wrap its
+        # settings, so the `ltex` root key is spelled out below.
+        ltex_plus = {
           enable = true;
+          package = pkgs.ltex-ls-plus;
           settings = {
             ltex = {
               language = "en-US";
@@ -65,13 +71,10 @@
             ".git"
           ];
           settings = {
-            nixd = {
-              formatting.command = [ "nixfmt" ];
-              nixpkgs.expr = "import <nixpkgs> { }";
-              options.nixos.expr = "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.YOUR_HOSTNAME.options";
-              # options.home-manager.expr =
-              #   "(builtins.getFlake (builtins.toString ./.)).homeConfigurations.\"YOUR_USER@YOUR_HOSTNAME\".options";
-            };
+            formatting.command = [ "nixfmt" ];
+            nixpkgs.expr = "import <nixpkgs> { }";
+            options.nixos.expr = "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.adam.options";
+            options.home-manager.expr = "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.adam.options.home-manager.users.type.getSubOptions []";
           };
         };
 
