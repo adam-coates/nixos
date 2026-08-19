@@ -21,8 +21,8 @@
       callback.__raw = ''
         function()
           vim.keymap.set({ "i", "n" }, "<C-f>", function()
-            local line = vim.api.nvim_get_current_line():match("^%%s*(.-)%%s*$")
-            if line == "" then
+            local line = vim.api.nvim_get_current_line():match("^%s*(.-)%s*$")
+            if line == nil or line == "" then
               vim.notify("Type figure name on current line first", vim.log.levels.WARN)
               return
             end
@@ -31,7 +31,7 @@
               vim.notify("Error creating figure: " .. result, vim.log.levels.ERROR)
               return
             end
-            local markdown_link = result:gsub("%%s+$", "")
+            local markdown_link = result:gsub("%s+$", "")
             local row = vim.api.nvim_win_get_cursor(0)[1]
             vim.api.nvim_buf_set_lines(0, row - 1, row, false, { markdown_link })
             vim.notify("Figure created: " .. line, vim.log.levels.INFO)
