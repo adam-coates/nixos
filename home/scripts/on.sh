@@ -118,14 +118,48 @@ fi
 # --- edit ------------------------------------------------------------------
 slug=$(printf '%s' "$TITLE" | tr -cs '[:alnum:]' '-' | sed 's/^-//;s/-$//')
 TMP=$(mktemp --tmpdir "on-${slug:-note}-XXXXXX.md") || die "mktemp failed"
-trap 'rm -f "$TMP"' EXIT
 
 # -j, not -r: an empty body must stay an empty file, not a stray newline.
 api GET "/notes/$NOTE_ID?token=$TOKEN&fields=body" | jq -j '.body' >"$TMP" \
   || die "could not read note body"
 before=$(sha256sum <"$TMP")
 
+MAIN_PID=$$
+
+push_body() {
+  api PUT "/notes/$NOTE_ID?token=$TOKEN" \
+    -d "$(jq -n --rawfile b "$TMP" '{body: $b}')" >/dev/null
+}
+
+# Push on every :w, not just on exit — otherwise a long editing session is
+# invisible to Joplin (and to sync) until nvim closes. Polled rather than
+# inotify-driven to keep this dependency-free; a second of lag is fine.
+watch_saves() {
+  local last="$before" cur
+  while sleep 1; do
+    # Belt and braces: if the script itself is gone (terminal closed hard, kill
+    # -9), stop polling instead of looping forever against a dead note.
+    kill -0 "$MAIN_PID" 2>/dev/null || return
+    # nvim may briefly replace the file rather than rewrite it in place; a
+    # failed read is a blink, not a reason to stop watching.
+    cur=$(sha256sum <"$TMP" 2>/dev/null) || continue
+    if [ "$cur" != "$last" ]; then
+      push_body && last="$cur"
+    fi
+  done
+}
+
+watch_saves &
+WATCHER=$!
+trap 'kill "$WATCHER" 2>/dev/null; rm -f "$TMP"' EXIT
+# Without this a killed terminal skips the EXIT trap and orphans the watcher.
+trap 'exit 130' INT TERM HUP
+
 nvim "$TMP"
+
+kill "$WATCHER" 2>/dev/null
+wait "$WATCHER" 2>/dev/null
+trap 'rm -f "$TMP"' EXIT
 
 after=$(sha256sum <"$TMP")
 if [ "$before" = "$after" ]; then
@@ -137,6 +171,15 @@ if [ "$before" = "$after" ]; then
   exit 0
 fi
 
-api PUT "/notes/$NOTE_ID?token=$TOKEN" \
-  -d "$(jq -n --rawfile b "$TMP" '{body: $b}')" >/dev/null \
-  || die "could not save note back to Joplin"
+# Unconditional final push: the watcher may have missed the last save, and a
+# repeat PUT of identical text is harmless.
+push_body || die "could not save note back to Joplin"
+
+# The desktop app keeps its own buffer for whichever note is selected and will
+# not reload it just because the database changed under it, so a note edited
+# here can look stale in an open Joplin window. Re-opening it by URL forces the
+# editor to re-read from the database. Set ON_NO_FOCUS=1 to skip (this raises
+# the Joplin window).
+if [ "${ON_NO_FOCUS:-0}" != "1" ] && command -v xdg-open >/dev/null; then
+  xdg-open "joplin://x-callback-url/openNote?id=$NOTE_ID" >/dev/null 2>&1 &
+fi
