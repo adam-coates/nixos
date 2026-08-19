@@ -12,6 +12,7 @@
 
       grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
         python
+        matlab
         json
         javascript
         typescript

@@ -44,6 +44,12 @@ in
       zotcite
     ];
 
+    # NOTE: deliberately no python/R/quarto here. programs.nixvim.extraPackages
+    # is *prepended* to nvim's PATH, which would shadow the per-project flake
+    # devshell those tools come from. start_repl() forwards nvim's PATH into the
+    # tmux pane, so launching nvim from inside the devshell is what makes
+    # <leader>cip / <leader>cir / <leader>qp resolve.
+
     extraConfigLuaPost = ''
             -- Printer setup
             require("printer").setup({

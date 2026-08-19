@@ -142,34 +142,7 @@
     }
   ];
 
-  programs.nixvim.extraConfigLuaPost = ''
-    local function create_obsidian_figure()
-      local line = vim.fn.trim(vim.api.nvim_get_current_line())
-      if line == "" then
-        vim.notify("Type figure name on current line first", vim.log.levels.WARN)
-        return
-      end
-      local result = vim.fn.system('obsidian-inkscape "' .. line .. '"')
-      if vim.v.shell_error ~= 0 then
-        vim.notify("Error creating figure: " .. result, vim.log.levels.ERROR)
-        return
-      end
-      local markdown_link = vim.fn.trim(result)
-      local row = vim.api.nvim_win_get_cursor(0)[1]
-      vim.api.nvim_buf_set_lines(0, row - 1, row, false, { markdown_link })
-      vim.notify("Figure created: " .. line, vim.log.levels.INFO)
-    end
-
-    vim.api.nvim_create_autocmd("FileType", {
-      pattern = "markdown",
-      callback = function()
-        vim.keymap.set(
-          { "i", "n" },
-          "<C-f>",
-          create_obsidian_figure,
-          { buffer = true, desc = "Create Obsidian figure" }
-        )
-      end,
-    })
-  '';
+  # NOTE: the <C-f> "create Obsidian figure" mapping lives in autocmds.nix --
+  # it used to be defined here as well, registering the same FileType autocmd
+  # twice.
 }

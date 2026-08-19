@@ -6,7 +6,8 @@
 
     extensions = {
       fzf-native.enable = true;
-      ui-select.enable = true;
+      # telescope-ui-select takes the theme as a positional entry
+      ui-select = { enable = true; settings.__unkeyed-1.__raw = "require('telescope.themes').get_dropdown()"; };
     };
 
     settings = {

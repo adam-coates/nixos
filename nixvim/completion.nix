@@ -18,15 +18,24 @@
           "<C-Space>" = "cmp.mapping.complete()";
           "<C-e>" = "cmp.mapping.abort()";
           "<CR>" = "cmp.mapping.confirm({ select = false })";
+          # Tab: confirm -> jump snippet -> plain Tab on leading whitespace ->
+          # otherwise open the completion menu (matches check_back_space in the
+          # upstream dotfiles config).
           "<Tab>" = ''
             cmp.mapping(function(fallback)
               local luasnip = require('luasnip')
+              local function check_back_space()
+                local col = vim.fn.col(".") - 1
+                return col == 0 or vim.fn.getline("."):sub(col, col):match("%s") ~= nil
+              end
               if cmp.visible() then
                 cmp.confirm({ select = true })
               elseif luasnip.jumpable(1) then
                 luasnip.jump(1)
-              else
+              elseif check_back_space() then
                 fallback()
+              else
+                cmp.complete()
               end
             end, { "i", "s" })
           '';
@@ -55,11 +64,14 @@
     };
 
     friendly-snippets.enable = true;
+    # `cmp` is an extraOption (the cmp integration switch); everything under
+    # `settings` is passed verbatim to `lspkind.cmp_format`, so the option is
+    # spelled `maxwidth` and must NOT be nested under `cmp`.
     lspkind = {
       enable = true;
-      settings.cmp = {
-        enable = true;
-        max_width = 50;
+      cmp.enable = true;
+      settings = {
+        maxwidth = 50;
         ellipsis_char = "...";
       };
     };

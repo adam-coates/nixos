@@ -31,14 +31,18 @@
     }
   ];
 
-  # Linter packages
+  # Linter packages.
+  #
+  # `extraPackages` is *prefixed* onto nvim's PATH, so anything listed here wins
+  # over a project devshell. ruff and mypy are deliberately absent: they are
+  # pinned per project via that project's flake, and nvim should use whichever
+  # version the devshell provides. (`extraPackagesAfter` would suffix instead,
+  # if a global fallback is ever wanted.)
   programs.nixvim.extraPackages = with pkgs; [
     eslint_d
     shellcheck
     markdownlint-cli
     yamllint
     htmlhint
-    ruff
-    mypy
   ];
 }

@@ -93,6 +93,10 @@
 
         tinymist = {
           enable = true;
+          # Suffix rather than prefix the nixpkgs tinymist onto PATH, so a
+          # project flake's pinned version wins while typst files still work
+          # outside a devshell. (`package = null` would drop it entirely.)
+          packageFallback = true;
           settings = {
             exportPdf = "onSave";
             formatterMode = "typstyle";

@@ -17,10 +17,11 @@
       enable = true;
       settings.commented = true;
     };
-    dap-python = {
-      enable = true;
-      adapterPythonPath = "python3";
-    };
+    # No adapterPythonPath override: nixvim's default is already
+    # `python3.withPackages (ps: [ ps.debugpy ])`. A bare "python3" pointed at
+    # an interpreter that is neither on nvim's PATH nor has debugpy, so the
+    # adapter could never start.
+    dap-python.enable = true;
   };
 
   programs.nixvim.extraConfigLuaPost = ''
