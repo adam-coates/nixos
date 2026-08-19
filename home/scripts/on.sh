@@ -66,7 +66,15 @@ find_port() {
 PORT=$(find_port) || {
   command -v joplin-desktop >/dev/null || die "Joplin is not running and joplin-desktop is not on PATH"
   echo "on: starting Joplin..." >&2
-  setsid joplin-desktop </dev/null >/dev/null 2>&1 &
+  LAUNCHED=1
+  # Launched through the compositor, not from this shell. Backgrounding it here
+  # leaves Joplin tied to the terminal that ran `on` — it then dies with that
+  # pane, taking the external editor it spawned down with it.
+  if command -v hyprctl >/dev/null; then
+    hyprctl dispatch 'hl.dsp.exec_cmd("joplin-desktop")' >/dev/null 2>&1
+  else
+    setsid joplin-desktop </dev/null >/dev/null 2>&1 &
+  fi
   for _ in $(seq 1 30); do
     sleep 1
     PORT=$(find_port) && break
@@ -127,6 +135,10 @@ for _ in $(seq 1 20); do
   hyprctl clients -j 2>/dev/null | jq -e --arg c "$JOPLIN_CLASS" 'any(.[]; .class == $c)' >/dev/null && break
   sleep 0.5
 done
+
+# The clipper answers well before the UI has finished loading plugins, and a
+# Ctrl+E that arrives mid-load lands nowhere. Only costs anything on a cold start.
+[ "${LAUNCHED:-0}" = 1 ] && sleep 3
 
 # --- hand editing to Joplin -------------------------------------------------
 # Joplin names the watched file after the note id, so its presence means this
