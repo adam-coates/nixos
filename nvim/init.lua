@@ -1,7 +1,1 @@
-require("core.keymaps")
-require("core.options")
-require("core.autocmds")
-require("core.lazy")
-require("globals")
-require("ui.statusline")
-require("typst")
+/nix/store/m8xw89nzs91gam91nkasdrx21d4cba1r-home-manager-files/.config/nvim/init.lua
