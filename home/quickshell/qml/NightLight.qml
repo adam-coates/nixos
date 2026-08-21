@@ -28,10 +28,12 @@ Item {
     id: toggle
     running: false
     // Launch through the compositor so hyprsunset outlives the shell process.
+    // Hyprland 0.56 dispatches via Lua, so the old `dispatch exec <cmd>` form
+    // fails to parse — hl.dsp.exec_cmd() is the working idiom (cf. on.sh:74).
     command: ["bash", "-c",
       "if pgrep -x hyprsunset >/dev/null; then pkill -x hyprsunset; " +
       "notify-send -u low '\u{f0594}    Night light off'; " +
-      "else hyprctl dispatch exec 'hyprsunset -t " + night.temperature + "'; " +
+      "else hyprctl dispatch 'hl.dsp.exec_cmd(\"hyprsunset -t " + night.temperature + "\")'; " +
       "notify-send -u low '\u{f0599}    Night light on'; fi"]
     onExited: { check.running = false; check.running = true }
   }

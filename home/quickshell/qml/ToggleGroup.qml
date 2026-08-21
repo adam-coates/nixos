@@ -55,7 +55,9 @@ Item {
       Behavior on color { ColorAnimation { duration: 150 } }
     }
 
-    NightLight { revealed: group.expanded }
-    DndToggle  { revealed: group.expanded }
+    Weather       { revealed: group.expanded }
+    IdleIndicator { revealed: group.expanded }
+    NightLight    { revealed: group.expanded }
+    DndToggle     { revealed: group.expanded }
   }
 }

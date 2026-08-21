@@ -69,10 +69,12 @@ PanelWindow {
       spacing: 5
 
       Clock {}
-      Weather {}
+      // Transient alerts stay unconditionally visible — they already show
+      // only while active, and hiding a live recording would be wrong.
       RecordingIndicator {}
-      IdleIndicator {}
       DictationIndicator {}
+      // Weather, idle lock, night light and DND live behind the chevron.
+      ToggleGroup {}
     }
 
     Item { Layout.fillWidth: true }
@@ -133,7 +135,6 @@ PanelWindow {
       Network {}
       Audio {}
       Cpu {}
-      ToggleGroup {}
     }
   }
 }

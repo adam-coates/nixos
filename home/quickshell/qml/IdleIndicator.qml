@@ -11,10 +11,16 @@ Item {
   // True when hypridle is running, i.e. the screen will lock when idle.
   property bool idleActive: true
 
-  // A little padding: this is a permanent control now, not a transient
-  // indicator, so it needs a clickable target.
-  implicitWidth: idleText.width + 6
+  // Set by ToggleGroup while the cluster is expanded. Stays pinned while the
+  // machine is being held awake, so that state is never invisible.
+  property bool revealed: false
+  readonly property bool shown: revealed || !idleActive
+
+  implicitWidth: shown ? idleText.width + 6 : 0
   implicitHeight: Theme.barHeight
+  clip: true
+
+  Behavior on implicitWidth { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
 
   Process {
     id: idleCheck
@@ -33,6 +39,7 @@ Item {
 
   MouseArea {
     anchors.fill: parent
+    enabled: indicator.shown
     cursorShape: Qt.PointingHandCursor
     onClicked: { idleToggle.running = false; idleToggle.running = true }
   }
@@ -53,7 +60,9 @@ Item {
     // Red coffee cup while the machine is being held awake (omarchy's alarm
     // colour); a dim moon while normal idle locking is armed.
     color: indicator.idleActive ? Theme.gray : Theme.indicator
+    opacity: indicator.shown ? 1 : 0
     text: indicator.idleActive ? "\u{f04b2}" : "\u{f0176}"  // 󰒲 sleep / 󰅶 coffee
     Behavior on color { ColorAnimation { duration: 150 } }
+    Behavior on opacity { NumberAnimation { duration: 160 } }
   }
 }

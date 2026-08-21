@@ -40,6 +40,6 @@ Item {
   Process {
     id: btop
     running: false
-    command: ["hyprctl", "dispatch", "exec", "ghostty -e btop"]
+    command: ["hyprctl", "dispatch", "hl.dsp.exec_cmd(\"ghostty -e btop\")"]
   }
 }
