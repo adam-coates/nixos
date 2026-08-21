@@ -10,8 +10,12 @@ PanelWindow {
   visible: showing
 
   anchors.top: true
-  anchors.right: true
-  margins { top: 30; right: 4 }
+  anchors.left: true
+  // Centred under the clock/weather group in the middle of the bar.
+  margins {
+    top: 30
+    left: Math.max(4, ((panel.screen ? panel.screen.width : 1920) - panel.width) / 2)
+  }
   implicitWidth: 260
   implicitHeight: content.height + 24
 

@@ -2,13 +2,19 @@ import QtQuick 6.0
 import Quickshell
 import Quickshell.Io
 
+// Always on screen so idle locking can be turned *off* from the bar too.
+// Omarchy only shows this while locking is disabled, which means its bar can
+// re-enable locking but never disable it.
 Item {
-  // Only occupies space when visible; when idle is ON (hypridle running) this is hidden
+  id: indicator
+
+  // True when hypridle is running, i.e. the screen will lock when idle.
   property bool idleActive: true
 
-  implicitWidth: idleActive ? 0 : idleText.width
+  // A little padding: this is a permanent control now, not a transient
+  // indicator, so it needs a clickable target.
+  implicitWidth: idleText.width + 6
   implicitHeight: Theme.barHeight
-  visible: !idleActive
 
   Process {
     id: idleCheck
@@ -18,8 +24,6 @@ Item {
     }
   }
 
-  // Same behaviour as omarchy-toggle-idle: the indicator is only on screen
-  // while idle locking is OFF, so clicking it turns locking back on.
   Process {
     id: idleToggle
     running: false
@@ -45,8 +49,11 @@ Item {
     id: idleText
     anchors.centerIn: parent
     font.family: Theme.fontFamily
-    font.pixelSize: Theme.indicatorSize
-    color: Theme.indicator
-    text: "󱫖"
+    font.pixelSize: Theme.fontSize
+    // Red coffee cup while the machine is being held awake (omarchy's alarm
+    // colour); a dim moon while normal idle locking is armed.
+    color: indicator.idleActive ? Theme.gray : Theme.indicator
+    text: indicator.idleActive ? "\u{f04b2}" : "\u{f0176}"  // 󰒲 sleep / 󰅶 coffee
+    Behavior on color { ColorAnimation { duration: 150 } }
   }
 }

@@ -16,13 +16,17 @@ Scope {
     keepOnReload: true
 
     onNotification: notification => {
-      popupModel.insert(0, {
-        "appName":       notification.appName  || "",
-        "appIcon":       notification.appIcon  || "",
-        "summary":       notification.summary  || "",
-        "body":          notification.body     || "",
-        "expireTimeout": notification.expireTimeout
-      })
+      // While silenced, skip the popup but still record it, so nothing is
+      // lost — the history panel shows what arrived during DND.
+      if (!NotifState.silenced) {
+        popupModel.insert(0, {
+          "appName":       notification.appName  || "",
+          "appIcon":       notification.appIcon  || "",
+          "summary":       notification.summary  || "",
+          "body":          notification.body     || "",
+          "expireTimeout": notification.expireTimeout
+        })
+      }
 
       NotifState.addToHistory(
         notification.appName,

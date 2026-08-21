@@ -133,6 +133,7 @@ PanelWindow {
       Network {}
       Audio {}
       Cpu {}
+      ToggleGroup {}
     }
   }
 }

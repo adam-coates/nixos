@@ -503,6 +503,7 @@ in
     fd
     fzf
     brightnessctl
+    hyprsunset # night light toggle in the quickshell bar
     pamixer
     openconnect
     wireguard-tools

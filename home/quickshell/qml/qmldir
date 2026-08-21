@@ -37,3 +37,6 @@ WeatherPanel WeatherPanel.qml
 Cpu Cpu.qml
 MonitorPanel MonitorPanel.qml
 CalendarPanel CalendarPanel.qml
+NightLight NightLight.qml
+DndToggle DndToggle.qml
+ToggleGroup ToggleGroup.qml

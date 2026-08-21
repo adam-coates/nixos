@@ -1,11 +1,39 @@
 pragma Singleton
 import QtQuick 6.0
 import Quickshell
+import Quickshell.Io
 
 Singleton {
   id: root
 
   property int unreadCount: 0
+
+  // ── Do-not-disturb ──
+  // Suppresses popups only; notifications still land in history so nothing
+  // is lost while silenced. Persisted so it survives a shell restart.
+  property bool silenced: false
+  property string silenceFile: Quickshell.env("HOME") + "/.local/state/notif-silenced"
+
+  FileView {
+    id: silenceFileView
+    path: root.silenceFile
+    watchChanges: true
+    // Absent on first run, which is not an error — DND just defaults to off.
+    printErrors: false
+    onFileChanged: reload()
+    onLoaded: root.silenced = (text().trim() === "1")
+  }
+
+  Process { id: persist; running: false }
+
+  function toggleSilenced() {
+    root.silenced = !root.silenced
+    persist.command = ["sh", "-c",
+      "mkdir -p \"$(dirname '" + root.silenceFile + "')\" && echo " +
+      (root.silenced ? "1" : "0") + " > '" + root.silenceFile + "'"]
+    persist.running = false
+    persist.running = true
+  }
 
   property list<QtObject> _historyItems: []
 
