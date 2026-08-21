@@ -16,7 +16,8 @@ PanelWindow {
 
   anchors.top: true
   anchors.right: true
-  margins { top: 30; right: 144 }
+  // Centre the panel under the tray icon, wherever bar spacing puts it.
+  margins { top: 30; right: Math.max(4, GlobalState.trayIconFromRight - trayPanel.width / 2) }
   width: cellSize + 32
   height: trayColumn.height + 32
 

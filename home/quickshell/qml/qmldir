@@ -30,3 +30,10 @@ SysTray SysTray.qml
 StylinatorPanel StylinatorPanel.qml
 SysTrayPanel SysTrayPanel.qml
 TodoistPanel TodoistPanel.qml
+singleton WeatherState WeatherState.qml
+singleton SysMonState SysMonState.qml
+Weather Weather.qml
+WeatherPanel WeatherPanel.qml
+Cpu Cpu.qml
+MonitorPanel MonitorPanel.qml
+CalendarPanel CalendarPanel.qml

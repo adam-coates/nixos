@@ -1,4 +1,5 @@
 import QtQuick 6.0
+import Quickshell
 import Quickshell.Io
 
 Item {
@@ -15,6 +16,21 @@ Item {
     onExited: (code) => {
       idleActive = (code === 0)
     }
+  }
+
+  // Same behaviour as omarchy-toggle-idle: the indicator is only on screen
+  // while idle locking is OFF, so clicking it turns locking back on.
+  Process {
+    id: idleToggle
+    running: false
+    command: [Quickshell.env("HOME") + "/.config/scripts/idle-toggle.sh"]
+    onExited: { idleCheck.running = false; idleCheck.running = true }
+  }
+
+  MouseArea {
+    anchors.fill: parent
+    cursorShape: Qt.PointingHandCursor
+    onClicked: { idleToggle.running = false; idleToggle.running = true }
   }
 
   Timer {

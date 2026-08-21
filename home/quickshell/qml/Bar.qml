@@ -8,6 +8,16 @@ PanelWindow {
 
   property var screen
 
+  // Maps the tray icon's centre into screen coordinates for SysTrayPanel.
+  // The bar spans the full width, so bar-local x is already screen x.
+  function publishTrayPos() {
+    if (!trayItem || bar.width <= 0) return
+    var p = trayItem.mapToItem(null, trayItem.width / 2, 0)
+    GlobalState.trayIconFromRight = bar.width - p.x
+  }
+
+  onWidthChanged: publishTrayPos()
+
   anchors {
     top: true
     left: true
@@ -15,13 +25,30 @@ PanelWindow {
   }
 
   exclusiveZone: Theme.barHeight
-  height: Theme.barHeight
+  implicitHeight: Theme.barHeight
 
   WlrLayershell.layer: WlrLayer.Top
   WlrLayershell.namespace: "quickshell-bar"
 
+  // Painted by the Rectangle below so the background can animate; the window
+  // itself stays transparent.
+  color: "transparent"
+
   // Omarchy's waybar is flat and opaque with no border of any kind.
-  color: Theme.bg
+  Rectangle {
+    anchors.fill: parent
+    color: GlobalState.barTransparent ? Theme.bgAlpha(0) : Theme.bg
+    Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutCubic } }
+  }
+
+  // Double-click any empty stretch of the bar to fade the background out.
+  // Sits behind the widgets, so their own MouseAreas still win.
+  MouseArea {
+    anchors.fill: parent
+    z: -1
+    acceptedButtons: Qt.LeftButton
+    onDoubleClicked: GlobalState.barTransparent = !GlobalState.barTransparent
+  }
 
   RowLayout {
     anchors.fill: parent
@@ -42,6 +69,7 @@ PanelWindow {
       spacing: 5
 
       Clock {}
+      Weather {}
       RecordingIndicator {}
       IdleIndicator {}
       DictationIndicator {}
@@ -55,7 +83,12 @@ PanelWindow {
       spacing: Theme.moduleGap
 
       // System tray (collapsed by default, expands on hover)
-      SysTray {}
+      SysTray {
+        id: trayItem
+        // Publish where the icon sits so SysTrayPanel can anchor under it.
+        onXChanged: bar.publishTrayPos()
+        onWidthChanged: bar.publishTrayPos()
+      }
 
       // Clipboard
       Item {
@@ -99,6 +132,7 @@ PanelWindow {
       Bluetooth {}
       Network {}
       Audio {}
+      Cpu {}
     }
   }
 }

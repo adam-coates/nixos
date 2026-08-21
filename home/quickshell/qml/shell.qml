@@ -47,6 +47,15 @@ ShellRoot {
   // ── Network panel ──
   NetworkPanel {}
 
+  // ── Weather panel ──
+  WeatherPanel {}
+
+  // ── System monitor panel ──
+  MonitorPanel {}
+
+  // ── Calendar panel ──
+  CalendarPanel {}
+
   // ── Notification history panel ──
   NotifPanel {}
 
