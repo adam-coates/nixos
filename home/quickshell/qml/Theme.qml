@@ -68,10 +68,22 @@ Singleton {
   readonly property color bg1:    colors.bg1
   readonly property color bg2:    colors.bg2
 
+  // Omarchy uses one muted red for every "something is active" bar indicator
+  // (recording, idle inhibit, notifications silenced) regardless of palette.
+  readonly property color indicator: "#a55555"
+
   // ── Helpers ──
   function bgAlpha(a) { return Qt.rgba(bg.r, bg.g, bg.b, a) }
   function accentAlpha(a) { return Qt.rgba(accent.r, accent.g, accent.b, a) }
 
   readonly property string fontFamily: "TX02 Nerd Font"
-  readonly property int fontSize: 13
+  readonly property int fontSize: 12
+
+  // ── Bar metrics (mirrors omarchy's waybar style.css) ──
+  readonly property int barHeight: 26
+  readonly property int barMargin: 8      // .modules-left / .modules-right
+  readonly property int moduleGap: 15     // gap between right-hand modules
+  readonly property int wsSlot: 21        // padding 0 6px + margin 0 1.5px + min-width 9px
+  readonly property real emptyOpacity: 0.5
+  readonly property int indicatorSize: 10
 }

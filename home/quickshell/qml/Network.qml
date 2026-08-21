@@ -2,43 +2,38 @@ import QtQuick 6.0
 import Quickshell.Io
 
 Item {
-  implicitWidth: netText.width + (vpnActive ? 14 : 0) + 16
-  implicitHeight: 26
+  implicitWidth: netText.width + (vpnActive ? 10 : 0)
+  implicitHeight: Theme.barHeight
 
-  property string status: ""
-  property bool connected: false
+  property bool ethernet: false
+  property bool wifi: false
+  property int signalStrength: 0
   property bool vpnActive: false
+  property bool connected: ethernet || wifi
 
   Process {
     id: nmcliCheck
-    command: ["nmcli", "-t", "-f", "TYPE,STATE,CONNECTION", "device"]
+    // Emits a single "eth|wifi|signal|vpn" summary line.
+    command: ["bash", "-c",
+      "d=$(nmcli -t -f TYPE,STATE device 2>/dev/null); " +
+      "eth=$(grep -c '^ethernet:connected' <<< \"$d\"); " +
+      "wif=$(grep -c '^wifi:connected' <<< \"$d\"); " +
+      "vpn=$(grep -c '^tun:connected' <<< \"$d\"); " +
+      "sig=$(nmcli -t -f ACTIVE,SIGNAL device wifi 2>/dev/null | awk -F: '$1==\"yes\"{print $2; exit}'); " +
+      "echo \"${eth}|${wif}|${sig:-0}|${vpn}\""]
     running: true
-    property var _lines: []
+    property string _output: ""
     stdout: SplitParser {
-      onRead: line => nmcliCheck._lines.push(line)
+      onRead: line => { if (line.indexOf("|") >= 0) nmcliCheck._output = line.trim() }
     }
     onExited: {
-      var lines = nmcliCheck._lines
-      nmcliCheck._lines = []
-      var wifiLine = ""
-      var ethLine = ""
-      var hasVpn = false
-      for (var i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith("wifi:")) wifiLine = lines[i]
-        if (lines[i].startsWith("ethernet:")) ethLine = lines[i]
-        if (lines[i].startsWith("tun:") && lines[i].indexOf("connected") >= 0) hasVpn = true
-      }
-      vpnActive = hasVpn
-      if (ethLine.indexOf("connected") >= 0) {
-        status = "\u{f0200}" // 󰀂 ethernet
-        connected = true
-      } else if (wifiLine.indexOf("connected") >= 0) {
-        status = "\u{f05a9}" // 󰖩 wifi
-        connected = true
-      } else {
-        status = "\u{f092e}" // 󰤮 disconnected
-        connected = false
-      }
+      var parts = nmcliCheck._output.split("|")
+      nmcliCheck._output = ""
+      if (parts.length < 4) return
+      ethernet = parseInt(parts[0]) > 0
+      wifi = parseInt(parts[1]) > 0
+      signalStrength = parseInt(parts[2]) || 0
+      vpnActive = parseInt(parts[3]) > 0
     }
   }
 
@@ -52,12 +47,18 @@ Item {
   Text {
     id: netText
     anchors.centerIn: parent
-    anchors.horizontalCenterOffset: vpnActive ? -6 : 0
+    anchors.horizontalCenterOffset: vpnActive ? -5 : 0
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: connected ? Theme.green : Theme.red
+    color: GlobalState.activePopup === "network" ? Theme.accent : Theme.fg
     Behavior on color { ColorAnimation { duration: 120 } }
-    text: status || "\u{f092e}"
+    text: {
+      if (ethernet) return "\u{f0200}"                      // 󰀂 ethernet
+      if (!wifi) return "\u{f092e}"                         // 󰤮 disconnected
+      // Omarchy's five-step wifi ramp: 󰤯 󰤟 󰤢 󰤥 󰤨
+      var icons = ["\u{f092f}", "\u{f091f}", "\u{f0922}", "\u{f0925}", "\u{f0928}"]
+      return icons[Math.min(4, Math.floor(signalStrength / 20))]
+    }
   }
 
   Text {
@@ -73,6 +74,7 @@ Item {
 
   MouseArea {
     anchors.fill: parent
+    cursorShape: Qt.PointingHandCursor
     onClicked: GlobalState.toggle("network")
     hoverEnabled: true
   }

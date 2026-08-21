@@ -2,21 +2,27 @@ import QtQuick 6.0
 import Quickshell.Io
 
 Item {
-  implicitWidth: btText.width + 16
-  implicitHeight: 26
+  implicitWidth: btText.width
+  implicitHeight: Theme.barHeight
 
+  property bool powered: true
   property bool connected: false
 
   Process {
     id: btCheck
-    command: ["bluetoothctl", "info"]
+    // Emits one of: off / on / connected
+    command: ["bash", "-c",
+      "if ! bluetoothctl show 2>/dev/null | grep -q 'Powered: yes'; then echo off; " +
+      "elif bluetoothctl info 2>/dev/null | grep -q 'Connected: yes'; then echo connected; " +
+      "else echo on; fi"]
     running: true
     property string _output: ""
     stdout: SplitParser {
-      onRead: line => btCheck._output += line + "\n"
+      onRead: line => btCheck._output = line.trim()
     }
     onExited: {
-      connected = btCheck._output.indexOf("Connected: yes") >= 0
+      powered = btCheck._output !== "off"
+      connected = btCheck._output === "connected"
       btCheck._output = ""
     }
   }
@@ -33,13 +39,17 @@ Item {
     anchors.centerIn: parent
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: connected ? Theme.green : Theme.red
+    // Omarchy carries state in the glyph, not the colour.
+    color: GlobalState.activePopup === "bluetooth" ? Theme.accent : Theme.fg
     Behavior on color { ColorAnimation { duration: 120 } }
-    text: "\u{f00af}" // 󰂯
+    text: !powered ? "\u{f00b2}"        // 󰂲 off
+        : connected ? "\u{f00b1}"       // 󰂱 connected
+        : "\u{f294}"                    //  on, nothing paired
   }
 
   MouseArea {
     anchors.fill: parent
+    cursorShape: Qt.PointingHandCursor
     onClicked: GlobalState.toggle("bluetooth")
     hoverEnabled: true
   }

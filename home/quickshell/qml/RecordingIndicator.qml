@@ -6,8 +6,8 @@ Item {
 
   property bool recording: false
 
-  width: recording ? (recIcon.width + 12) : 0
-  height: 26
+  implicitWidth: recording ? recIcon.width : 0
+  implicitHeight: Theme.barHeight
   visible: recording
 
   Process {
@@ -30,8 +30,8 @@ Item {
     id: recIcon
     anchors.centerIn: parent
     font.family: Theme.fontFamily
-    font.pixelSize: 12
-    color: Theme.red
+    font.pixelSize: Theme.indicatorSize
+    color: Theme.indicator
     text: "⏺"
 
     SequentialAnimation on opacity {

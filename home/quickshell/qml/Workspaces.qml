@@ -3,24 +3,29 @@ import QtQuick.Layouts 6.0
 import Quickshell.Hyprland
 
 RowLayout {
+  id: root
   spacing: 0
+
+  // Hyprland destroys empty workspaces, so "exists in the model" == "has windows".
+  function occupied(id) {
+    var ws = Hyprland.workspaces.values
+    for (var i = 0; i < ws.length; i++) {
+      if (ws[i].id === id) return true
+    }
+    return false
+  }
 
   Repeater {
     model: 5
 
-    Rectangle {
+    Item {
       required property int index
       property int wsId: index + 1
       property bool active: Hyprland.focusedMonitor?.activeWorkspace?.id == wsId
-      property bool hovered: false
+      property bool hasWindows: root.occupied(wsId)
 
-      Layout.preferredWidth: 28
-      Layout.preferredHeight: 26
-      color: "transparent"
-
-      HoverHandler {
-        onHoveredChanged: parent.hovered = hovered
-      }
+      Layout.preferredWidth: Theme.wsSlot
+      Layout.preferredHeight: Theme.barHeight
 
       MouseArea {
         anchors.fill: parent
@@ -28,22 +33,16 @@ RowLayout {
         onClicked: Hyprland.dispatch("workspace " + parent.wsId)
       }
 
-      // Bottom indicator
-      Rectangle {
-        anchors.bottom: parent.bottom
-        width: parent.width
-        height: 2
-        color: parent.active ? Theme.accent : "transparent"
-        Behavior on color { ColorAnimation { duration: 80 } }
-      }
-
       Text {
         anchors.centerIn: parent
-        text: parent.wsId.toString()
+        // Active workspace collapses to a filled dot; the rest stay numbered.
+        text: parent.active ? "\u{f14fb}" : parent.wsId.toString()
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSize
-        color: parent.active ? Theme.accent : (parent.hovered ? Theme.fg : Theme.gray)
+        color: parent.active ? Theme.accent : Theme.fg
+        opacity: (parent.active || parent.hasWindows) ? 1.0 : Theme.emptyOpacity
         Behavior on color { ColorAnimation { duration: 80 } }
+        Behavior on opacity { NumberAnimation { duration: 80 } }
       }
     }
   }

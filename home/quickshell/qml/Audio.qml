@@ -2,8 +2,8 @@ import QtQuick 6.0
 import Quickshell.Io
 
 Item {
-  implicitWidth: audioText.width + 16
-  implicitHeight: 26
+  implicitWidth: audioText.width
+  implicitHeight: Theme.barHeight
 
   property real volume: 0
   property bool muted: false
@@ -48,13 +48,14 @@ Item {
     anchors.centerIn: parent
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
-    color: muted ? Theme.gray : Theme.fg
+    color: GlobalState.activePopup === "audio" ? Theme.accent : Theme.fg
     Behavior on color { ColorAnimation { duration: 120 } }
+    // Omarchy's exact pulseaudio glyphs (Font Awesome range, not Material).
     text: {
-      if (muted) return "\u{f0581}" // 󰖁 muted
-      if (volume > 0.66) return "\u{f057e}" // 󰕾 high
-      if (volume > 0.33) return "\u{f0580}" // 󰖀 medium
-      return "\u{f057f}" // 󰕿 low
+      if (muted) return "\u{eee8}"          //  format-muted
+      if (volume > 0.66) return "\u{f028}"  //  high
+      if (volume > 0.33) return "\u{f027}"  //  medium
+      return "\u{f026}"                     //  low
     }
   }
 

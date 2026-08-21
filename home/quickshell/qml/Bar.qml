@@ -14,26 +14,19 @@ PanelWindow {
     right: true
   }
 
-  exclusiveZone: 26
-  height: 26
+  exclusiveZone: Theme.barHeight
+  height: Theme.barHeight
 
   WlrLayershell.layer: WlrLayer.Top
   WlrLayershell.namespace: "quickshell-bar"
 
-  color: Theme.bgAlpha(0.9)
-
-  // Bottom border
-  Rectangle {
-    anchors.bottom: parent.bottom
-    width: parent.width
-    height: 1
-    color: Theme.accentAlpha(0.5)
-  }
+  // Omarchy's waybar is flat and opaque with no border of any kind.
+  color: Theme.bg
 
   RowLayout {
     anchors.fill: parent
-    anchors.leftMargin: 4
-    anchors.rightMargin: 4
+    anchors.leftMargin: Theme.barMargin
+    anchors.rightMargin: Theme.barMargin
     spacing: 0
 
     // ── Left: Workspaces ──
@@ -46,7 +39,7 @@ PanelWindow {
     // ── Center: Clock + status indicators ──
     RowLayout {
       Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-      spacing: 8
+      spacing: 5
 
       Clock {}
       RecordingIndicator {}
@@ -56,23 +49,24 @@ PanelWindow {
 
     Item { Layout.fillWidth: true }
 
-    // ── Right: System widgets (even spacing) ──
+    // ── Right: System widgets ──
     RowLayout {
       Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-      spacing: 0
+      spacing: Theme.moduleGap
 
       // System tray (collapsed by default, expands on hover)
       SysTray {}
 
       // Clipboard
       Item {
-        width: 28; height: 26
+        implicitWidth: clipIcon.width; implicitHeight: Theme.barHeight
         Text {
+          id: clipIcon
           anchors.centerIn: parent
           text: "󰅎"
           font.family: Theme.fontFamily
-          font.pixelSize: 14
-          color: GlobalState.activePopup === "clipboard" ? Theme.accent : Theme.gray
+          font.pixelSize: Theme.fontSize
+          color: GlobalState.activePopup === "clipboard" ? Theme.accent : Theme.fg
           Behavior on color { ColorAnimation { duration: 120 } }
         }
         MouseArea {
@@ -84,13 +78,15 @@ PanelWindow {
 
       // Notification bell
       Item {
-        width: 28; height: 26
+        implicitWidth: bellIcon.width; implicitHeight: Theme.barHeight
         Text {
+          id: bellIcon
           anchors.centerIn: parent
           text: NotifState.unreadCount > 0 ? "󰂚" : "󰂜"
           font.family: Theme.fontFamily
-          font.pixelSize: 14
-          color: NotifState.unreadCount > 0 ? Theme.accent : Theme.gray
+          font.pixelSize: Theme.fontSize
+          color: GlobalState.activePopup === "notifications" ? Theme.accent
+               : (NotifState.unreadCount > 0 ? Theme.accent : Theme.fg)
           Behavior on color { ColorAnimation { duration: 120 } }
         }
         MouseArea {
@@ -100,23 +96,9 @@ PanelWindow {
         }
       }
 
-      // Bluetooth
-      Item {
-        width: 28; height: 26
-        Bluetooth { anchors.fill: parent }
-      }
-
-      // Network
-      Item {
-        width: 28; height: 26
-        Network { anchors.fill: parent }
-      }
-
-      // Audio
-      Item {
-        width: 28; height: 26
-        Audio { anchors.fill: parent }
-      }
+      Bluetooth {}
+      Network {}
+      Audio {}
     }
   }
 }
