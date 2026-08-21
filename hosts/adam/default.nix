@@ -347,6 +347,12 @@ in
     package = pkgs.jdk;
   };
 
+  # Run unpatched dynamically-linked binaries. Needed by mason.nvim, which
+  # downloads prebuilt language servers that expect /lib64/ld-linux-x86-64.so.2.
+  # Only relevant while the Lua neovim config is active (see home/nvim-lua.nix);
+  # harmless otherwise.
+  programs.nix-ld.enable = true;
+
   # Automatic system cleaning via nh
   programs.nh = {
     enable = true;

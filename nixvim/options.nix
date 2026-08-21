@@ -5,6 +5,17 @@
     # Spelling
     spelllang = "en_gb";
     spell = true;
+
+    # Personal dictionary. Without this, nixvim has no writable `spell/` on the
+    # runtimepath (~/.config/nvim is a read-only store symlink), so `zg` fails
+    # and every previously-added word is flagged again. Pointing 'spellfile' at
+    # the file in the repo both loads it and keeps `zg` working -- new words are
+    # written straight into the checkout, no rebuild needed.
+    #
+    # Deliberately the same file the Lua config in ../nvim picks up from its
+    # runtimepath, so one dictionary serves both. Hardcodes the clone location,
+    # like programs.nh.flake in hosts/adam.
+    spellfile = "/home/adam/nixos/nvim/spell/en.utf-8.add";
     encoding = "utf-8";
     fileencoding = "utf-8";
 

@@ -140,6 +140,36 @@
       action = ":Obsidian search<cr>";
       options.desc = "Obsidian Search";
     }
+    {
+      mode = "n";
+      key = "<leader>on";
+      action.__raw = ''
+        function()
+          -- On an empty unnamed buffer, prompt for a title and create the note
+          -- in the inbox first; otherwise template the current buffer.
+          if vim.fn.bufname("%") == "" and vim.fn.line("$") == 1 and vim.fn.getline(1) == "" then
+            local title = vim.fn.input("Enter note title: ")
+            if title == "" then
+              vim.notify("Title cannot be empty!", vim.log.levels.WARN)
+              return
+            end
+
+            local dir = vim.fn.expand("~/notes/00 - Inbox/")
+            vim.fn.mkdir(dir, "p")
+            vim.cmd("edit " .. vim.fn.fnameescape(dir .. title .. ".md"))
+            vim.cmd("write")
+          end
+
+          -- :Obsidian template resolves the workspace from the cwd, so hop into
+          -- the vault for the duration of the call and hop back.
+          local original_cwd = vim.fn.getcwd()
+          vim.cmd("cd ~/notes")
+          vim.cmd(":Obsidian template note")
+          vim.cmd("cd " .. vim.fn.fnameescape(original_cwd))
+        end
+      '';
+      options.desc = "Create Obsidian note with template";
+    }
   ];
 
   # NOTE: the <C-f> "create Obsidian figure" mapping lives in autocmds.nix --

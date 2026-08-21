@@ -1,0 +1,7 @@
+require("core.keymaps")
+require("core.options")
+require("core.autocmds")
+require("core.lazy")
+require("globals")
+require("ui.statusline")
+require("typst")

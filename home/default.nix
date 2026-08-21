@@ -7,6 +7,13 @@
 }:
 
 let
+  # Editor toggle.
+  #   true  -> the declarative nixvim config in ../nixvim
+  #   false -> plain neovim + a hand-written Lua config, out-of-store symlinked
+  #            from ../nvim to ~/.config/nvim (see ./nvim-lua.nix)
+  # Nothing else needs touching to switch back and forth.
+  useNixvim = true;
+
   gruvbox = import ../modules/colorscheme/gruvbox.nix;
 
   todoist = pkgs.appimageTools.wrapType2 {
@@ -37,10 +44,17 @@ in
     ./quickshell
     ./programs
     ./shell
-    inputs.nixvim.homeModules.nixvim
-    ../nixvim
     ./hardware
-  ];
+  ]
+  ++ (
+    if useNixvim then
+      [
+        inputs.nixvim.homeModules.nixvim
+        ../nixvim
+      ]
+    else
+      [ ./nvim-lua.nix ]
+  );
 
   options.theme = {
     colors = lib.mkOption {
